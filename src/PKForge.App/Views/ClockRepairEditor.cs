@@ -12,9 +12,9 @@ namespace PKForge.App.Views;
 /// </summary>
 public static class ClockRepairEditor
 {
-    private const string Reset = "Reset both clocks (recommended)";
+    private const string Reset = "Сбросить оба счётчика (рекомендуется)";
     private const string BerryFix = "Berry fix (move past the 1-year bug)";
-    private const string ArmReset = "Let the game ask for the time again";
+    private const string ArmReset = "Запросить настройку времени в игре";
     private const string Explain = "What do these do?";
 
     private const SaveAction Action = SaveAction.RepairRtc;
@@ -29,9 +29,9 @@ public static class ClockRepairEditor
                 $"Last berry/event update: {state.Elapsed}{Environment.NewLine}" +
                 (state.ResetArmed ? "The in-game clock reset is armed." : "The in-game clock reset is not armed.") +
                 Environment.NewLine + "Your emulator's own clock (mGBA's RTC data) is not changed.";
-            if (await WorldEventsMenu.BlockedAsync(host, "Clock repair", detail, Action)) return;
+            if (await WorldEventsMenu.BlockedAsync(host, "Исправление часов", detail, Action)) return;
 
-            var choice = await EditorMenu.ShowAsync(host, "Clock repair", detail,
+            var choice = await EditorMenu.ShowAsync(host, "Исправление часов", detail,
                 new PadOption(Reset, Accent: UiTokens.Green, IconPath: "restore",
                     Detail: "Berries and daily events restart from now; use after a dead battery."),
                 new PadOption(BerryFix, IconPath: "fix", Accent: WorldEventsMenu.Good(state.BerryFixApplied),
@@ -60,7 +60,7 @@ public static class ClockRepairEditor
                         }, Action)) return;
                     break;
                 case Explain:
-                    await EditorMenu.ShowAsync(host, "About the clock",
+                    await EditorMenu.ShowAsync(host, "О часах",
                         "The game stores two times: when the clock started, and when berries and daily events last updated. " +
                         "Time only moves forward in the game when the cartridge clock runs past that last update." +
                         Environment.NewLine + Environment.NewLine +

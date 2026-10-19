@@ -66,7 +66,7 @@ public sealed class DexEditorPage : IPadPagingHandler
         _sprites = sprites;
         _router = IPlatformApplication.Current?.Services.GetService<GamepadRouter>();
 
-        _title = new Label { Text = "Pokédex", TextColor = UiTokens.Ink0, FontFamily = DsChrome.PixelFont, FontSize = 15 };
+        _title = new Label { Text = "Покедекс", TextColor = UiTokens.Ink0, FontFamily = DsChrome.PixelFont, FontSize = 15 };
         _progress = new Label { TextColor = UiTokens.Ink1, FontFamily = DsChrome.PixelFont, FontSize = UiTokens.TextBody, HorizontalTextAlignment = TextAlignment.End, HorizontalOptions = LayoutOptions.End };
         _cursorInfo = new Label { TextColor = UiTokens.Ink1, FontFamily = DsChrome.PixelFont, FontSize = UiTokens.TextBody };
 
@@ -83,14 +83,14 @@ public sealed class DexEditorPage : IPadPagingHandler
 
         View hints = Kit.WindowHints(
             ("A", "Cycle", () => OnPadButton(PadButton.A)),
-            ("B", "Done", () => _ = CloseAsync()),
-            ("LR", "Generation", () => OnPadButton(PadButton.R)),
-            ("Y", "Select all (gaps)", SelectAllGaps),
-            ("X", "Actions", () => _ = ShowActionsAsync()));
+            ("B", "Готово", () => _ = CloseAsync()),
+            ("LR", "Поколение", () => OnPadButton(PadButton.R)),
+            ("Y", "Выбрать всех недостающих", SelectAllGaps),
+            ("X", "Действия", () => _ = ShowActionsAsync()));
 
         var search = new Entry
         {
-            Placeholder = "Search a Pokémon…",
+            Placeholder = "Поиск покемона…",
             FontSize = 14,
             TextColor = UiTokens.Ink0,
             PlaceholderColor = UiTokens.Ink1,
@@ -144,7 +144,7 @@ public sealed class DexEditorPage : IPadPagingHandler
         Grid.SetColumnSpan(_overlay, Math.Max(1, _host.ColumnDefinitions.Count));
         Kit.AnimateIn(window);
 
-        var loader = LoadingOverlay.Show(_host, "OPENING THE POKéDEX…", "Reading every dex cell and storage slot.");
+        var loader = LoadingOverlay.Show(_host, "ОТКРЫТИЕ ПОКЕДЕКСА…", "Reading every dex cell and storage slot.");
         _ = Task.Run(async () =>
         {
             try
@@ -189,10 +189,10 @@ public sealed class DexEditorPage : IPadPagingHandler
     {
         if (_staged.Count > 0)
         {
-            var choice = await PadMenu.ShowAsync(_host, "Save dex changes?",
-                $"{_staged.Count} species changed.", "Save changes", "Discard changes", "Keep editing");
-            if (choice == "Save changes") { await ApplyAndCloseAsync(); return; }
-            if (choice == "Keep editing" || choice is null) return;
+            var choice = await PadMenu.ShowAsync(_host, "Сохранить изменения покедекса?",
+                $"{_staged.Count} species changed.", "Сохранить изменения", "Отменить изменения", "Продолжить редактирование");
+            if (choice == "Сохранить изменения") { await ApplyAndCloseAsync(); return; }
+            if (choice == "Продолжить редактирование" || choice is null) return;
         }
         TearDown();
         _result.TrySetResult(false);
@@ -207,7 +207,7 @@ public sealed class DexEditorPage : IPadPagingHandler
             {
                 foreach (var (species, state) in staged)
                     s.SetDexEntry(species, state.Seen, state.Caught);
-                return new GenerationOutcome(true, $"Dex updated for {staged.Count} species.");
+                return new GenerationOutcome(true, $"Покедекс обновлён для видов: {staged.Count}.");
             }, Math.Max(0, _viewModel.SelectedSlot), refreshSlot: false, action: SaveAction.EditDex);
             if (!saved)
             {
@@ -246,21 +246,21 @@ public sealed class DexEditorPage : IPadPagingHandler
     {
         if (_gapsMode)
         {
-            var gapChoice = await PadMenu.ShowAsync(_host, "Living dex gaps",
+            var gapChoice = await PadMenu.ShowAsync(_host, "Недостающие покемоны",
                 $"{_missing.Count} species missing from storage. {_fillSelection.Count} selected.",
-                new PadOption($"Generate selected ({_fillSelection.Count})", IconPath: "create",
-                    Detail: "Creates a legal Pokémon of each selected species in your boxes."),
-                new PadOption("Switch to dex editor", IconPath: "pokedex", Detail: "Back to marking species seen and caught."),
-                new PadOption("Close", IconPath: "close"));
-            if (gapChoice == "Switch to dex editor")
+                new PadOption($"Создать выбранных ({_fillSelection.Count})", IconPath: "create",
+                    Detail: "Создать в боксах легального покемона каждого выбранного вида."),
+                new PadOption("Перейти к редактору покедекса", IconPath: "pokedex", Detail: "Back to marking species seen and caught."),
+                new PadOption("Закрыть", IconPath: "close"));
+            if (gapChoice == "Перейти к редактору покедекса")
             {
                 _gapsMode = false;
                 RefreshView();
                 return;
             }
-            if (gapChoice != $"Generate selected ({_fillSelection.Count})" || _fillSelection.Count == 0) return;
+            if (gapChoice != $"Создать выбранных ({_fillSelection.Count})" || _fillSelection.Count == 0) return;
             var species = _fillSelection.OrderBy(x => x).ToList();
-            var overlay = LoadingOverlay.Show(_host, "Generating…", "The legalizer is building each mon offline.");
+            var overlay = LoadingOverlay.Show(_host, "Создание…", "The legalizer is building each mon offline.");
             try
             {
                 await _viewModel.RunMutationAsync(s => _legalizer.FillSpecies(s, species,
@@ -275,31 +275,31 @@ public sealed class DexEditorPage : IPadPagingHandler
             return;
         }
 
-        var choice = await PadMenu.ShowAsync(_host, "Dex actions", null,
-            new PadOption("How to get this one", IconPath: "map", Detail: "Where and how to find the species under the cursor."),
-            new PadOption("Mark everything seen", IconPath: "selectall", Detail: "Every species becomes seen; caught ones stay caught."),
-            new PadOption("Complete the Pokédex", IconPath: "pokedex", Detail: "Every species becomes seen and caught; you choose to save when you leave."),
-            new PadOption("Switch to living dex gaps", IconPath: "storage", Detail: "Species missing from your boxes, ready to create."),
-            new PadOption("Discard staged changes", IconPath: "clear", Detail: "Undoes the changes made since you opened the dex."));
+        var choice = await PadMenu.ShowAsync(_host, "Действия покедекса", null,
+            new PadOption("Как получить этого покемона", IconPath: "map", Detail: "Where and how to find the species under the cursor."),
+            new PadOption("Отметить всех увиденными", IconPath: "selectall", Detail: "Все виды отмечаются увиденными; пойманные остаются пойманными."),
+            new PadOption("Заполнить покедекс", IconPath: "pokedex", Detail: "Все виды отмечаются увиденными и пойманными. Сохранение — при выходе."),
+            new PadOption("Показать недостающих покемонов", IconPath: "storage", Detail: "Виды, отсутствующие в боксах и доступные для создания."),
+            new PadOption("Отменить отложенные изменения", IconPath: "clear", Detail: "Undoes the changes made since you opened the dex."));
         switch (choice)
         {
-            case "How to get this one":
+            case "Как получить этого покемона":
                 if (_grid.Cursor < _viewIds.Count)
                     await EncounterGallery.ShowForSpeciesAsync(_host, _viewModel, _session, _viewIds[_grid.Cursor], 0, _grid.Refresh);
                 return;
-            case "Mark everything seen":
+            case "Отметить всех увиденными":
                 foreach (var id in _orderedIds)
                     _staged[id] = (true, StateOf(id).Caught); // caught species stay caught
                 break;
-            case "Complete the Pokédex":
+            case "Заполнить покедекс":
                 foreach (var id in _orderedIds)
                     _staged[id] = (true, true);
                 break;
-            case "Switch to living dex gaps":
+            case "Показать недостающих покемонов":
                 _gapsMode = true;
                 RefreshView();
                 return;
-            case "Discard staged changes":
+            case "Отменить отложенные изменения":
                 _staged.Clear();
                 break;
         }
@@ -334,7 +334,7 @@ public sealed class DexEditorPage : IPadPagingHandler
 
     private void RefreshChrome()
     {
-        _title.Text = _gapsMode ? $"Living dex gaps · {_missing.Count} missing" : "Pokédex";
+        _title.Text = _gapsMode ? $"Живой покедекс · не хватает: {_missing.Count}" : "Покедекс";
         var seen = 0;
         var caught = 0;
         foreach (var id in _orderedIds)
@@ -345,7 +345,7 @@ public sealed class DexEditorPage : IPadPagingHandler
         }
         _progress.Text = _gapsMode
             ? $"{_fillSelection.Count} selected"
-            : $"Seen {seen}/{_states.Count} · caught {caught}/{_states.Count} · {_staged.Count} staged";
+            : $"Увидено {seen}/{_states.Count} · поймано {caught}/{_states.Count} · изменений {_staged.Count}";
         RefreshInfo();
         _grid.Refresh();
     }

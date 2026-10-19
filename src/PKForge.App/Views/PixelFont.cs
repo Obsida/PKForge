@@ -37,10 +37,10 @@ public static class PixelFont
         SKTypeface face;
         try
         {
-            using var stream = FileSystem.OpenAppPackageFileAsync("NDS12.ttf").GetAwaiter().GetResult();
+            using var stream = FileSystem.OpenAppPackageFileAsync("NotoSans.ttf").GetAwaiter().GetResult();
             using var bytes = new MemoryStream();
             stream.CopyTo(bytes);
-            var cache = System.IO.Path.Combine(FileSystem.CacheDirectory, "NDS12.ttf");
+            var cache = System.IO.Path.Combine(FileSystem.CacheDirectory, "NotoSans.ttf");
             File.WriteAllBytes(cache, bytes.ToArray());
             face = SKTypeface.FromFile(cache) ?? SKTypeface.Default;
         }

@@ -33,9 +33,9 @@ public static class TextPopup
         }
         void Save() => Close(entry.Text?.Trim());
 
-        var save = Kit.Capsule("Save", UiTokens.Green);
+        var save = Kit.Capsule("Сохранить", UiTokens.Green);
         save.Clicked += (_, _) => Save();
-        var cancel = Kit.Capsule("Cancel", UiTokens.Ink1);
+        var cancel = Kit.Capsule("Отмена", UiTokens.Ink1);
         cancel.Clicked += (_, _) => Close(null);
         var content = new VerticalStackLayout
         {
@@ -76,9 +76,9 @@ public static class TextPopup
             result.TrySetResult(text);
         }
 
-        var ok = Kit.Capsule("Use this set", UiTokens.Green);
+        var ok = Kit.Capsule("Использовать этот набор", UiTokens.Green);
         ok.Clicked += (_, _) => Close(editor.Text);
-        var cancel = Kit.Capsule("Cancel", UiTokens.Ink1);
+        var cancel = Kit.Capsule("Отмена", UiTokens.Ink1);
         cancel.Clicked += (_, _) => Close(null);
 
         var content = new VerticalStackLayout

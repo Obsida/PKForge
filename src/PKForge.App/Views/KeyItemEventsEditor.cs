@@ -13,7 +13,7 @@ namespace PKForge.App.Views;
 /// </summary>
 public static class KeyItemEventsEditor
 {
-    private const string Title = "Key item events";
+    private const string Title = "События ключевых предметов";
 
     public static async Task ShowAsync(Grid host, ISaveEngineSession session, BoxBrowserViewModel viewModel)
     {
@@ -58,26 +58,26 @@ public static class KeyItemEventsEditor
         if (status.Prerequisite is { } prerequisite)
             lines.Add($"Note: {prerequisite}");
 
-        var enable = status.State is KeyItemEventState.Enabled ? null : "Enable event";
-        var disable = status.HasItem || status.EventArmed ? "Disable event" : null;
-        var options = new[] { enable, disable, "Back" }.OfType<string>()
+        var enable = status.State is KeyItemEventState.Enabled ? null : "Включить событие";
+        var disable = status.HasItem || status.EventArmed ? "Выключить событие" : null;
+        var options = new[] { enable, disable, "Назад" }.OfType<string>()
             .Select(label => new PadOption(label, Accent: label switch
             {
-                "Enable event" => UiTokens.Green,
-                "Disable event" => UiTokens.GiftRed,
+                "Включить событие" => UiTokens.Green,
+                "Выключить событие" => UiTokens.GiftRed,
                 _ => null,
             })).ToArray();
         var choice = await EditorMenu.ShowAsync(host, status.Title, string.Join("\n", lines), options);
-        if (choice is not ("Enable event" or "Disable event")) return true;
+        if (choice is not ("Включить событие" or "Выключить событие")) return true;
 
         if (HardcoreMode.Blocks(SaveAction.InjectEvent, out var blocked))
         {
-            await EditorMenu.ShowAsync(host, "Hardcore mode", blocked, "OK");
+            await EditorMenu.ShowAsync(host, "Режим Hardcore", blocked, "OK");
             return true;
         }
 
-        var enabling = choice == "Enable event";
-        var confirmed = await PadMenu.ConfirmAsync(host, enabling ? "Enable event?" : "Disable event?",
+        var enabling = choice == "Включить событие";
+        var confirmed = await PadMenu.ConfirmAsync(host, enabling ? "Включить событие?" : "Выключить событие?",
             (enabling, status.NeedsItem) switch
             {
                 (true, true) => $"Adds the {status.ItemName} and sets the event flags. A restore point is created first.",
@@ -85,7 +85,7 @@ public static class KeyItemEventsEditor
                 (false, true) => $"Removes the {status.ItemName} and clears the event flags. Shown/caught history is kept. A restore point is created first.",
                 (false, false) => "Clears the event flags. Received/caught history is kept. A restore point is created first.",
             },
-            enabling ? "Enable" : "Disable");
+            enabling ? "Включить" : "Выключить");
         if (!confirmed) return true;
 
         var id = status.Id;
@@ -98,19 +98,19 @@ public static class KeyItemEventsEditor
 
     private static string StateLabel(KeyItemEventState state) => state switch
     {
-        KeyItemEventState.Enabled => "Ready",
-        KeyItemEventState.Partial => "Incomplete",
-        KeyItemEventState.Used => "Used",
-        KeyItemEventState.Completed => "Completed",
-        _ => "Off",
+        KeyItemEventState.Enabled => "Готово",
+        KeyItemEventState.Partial => "Не завершено",
+        KeyItemEventState.Used => "Использован",
+        KeyItemEventState.Completed => "Завершено",
+        _ => "Выкл",
     };
 
     private static string StateDetail(KeyItemEventState state) => state switch
     {
-        KeyItemEventState.Enabled => "Ready: the event will trigger in game.",
+        KeyItemEventState.Enabled => "Готово: событие сработает в игре.",
         KeyItemEventState.Partial => "Incomplete: item and flags disagree, so the game ignores it. Enable to fix.",
         KeyItemEventState.Used => "Already used in game: the ticket was shown to the sailor, or the GS Ball was received.",
         KeyItemEventState.Completed => "The event Pokémon was already caught or defeated.",
-        _ => "Not enabled.",
+        _ => "Не включено.",
     };
 }

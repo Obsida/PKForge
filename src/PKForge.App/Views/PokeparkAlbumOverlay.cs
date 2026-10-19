@@ -78,7 +78,7 @@ public sealed class PokeparkAlbumOverlay : IPadHandler
             // The Share button, bottom right, for a finger.
             _shareButton = SKRect.Create(w - 280 * unit, h - 110 * unit, 240 * unit, 76 * unit);
             ParkCardPaint.Plate(c, _shareButton, true, unit);
-            ParkCardPaint.Centered(c, _sharing ? "Sharing…" : "Share", _shareButton.MidX, _shareButton.MidY, font, EditorPaint.ChipInk);
+            ParkCardPaint.Centered(c, _sharing ? "Подготовка экспорта…" : "Поделиться", _shareButton.MidX, _shareButton.MidY, font, EditorPaint.ChipInk);
         }
     }
 

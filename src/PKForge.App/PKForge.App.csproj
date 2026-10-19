@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net10.0-android</TargetFramework>
+    <TargetFramework Condition="'$(TargetFramework)' == '' and $([MSBuild]::IsOSPlatform('windows'))">net10.0-windows10.0.19041.0</TargetFramework>
+    <TargetFramework Condition="'$(TargetFramework)' == ''">net10.0-android</TargetFramework>
     <OutputType>Exe</OutputType>
     <RootNamespace>PKForge.App</RootNamespace>
     <UseMaui>true</UseMaui>
@@ -8,11 +9,24 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <ApplicationId>org.pkforge.app</ApplicationId>
-    <ApplicationTitle>PKForge</ApplicationTitle>
+    <ApplicationId>org.pkforge.ru</ApplicationId>
+    <ApplicationTitle>PKForge RU</ApplicationTitle>
     <ApplicationVersion>311</ApplicationVersion>
     <ApplicationDisplayVersion>3.1.1</ApplicationDisplayVersion>
-    <RuntimeIdentifiers>android-arm64</RuntimeIdentifiers>
+    <RuntimeIdentifiers Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">android-arm64</RuntimeIdentifiers>
+  </PropertyGroup>
+  <PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">
+    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
+    <TargetPlatformMinVersion>10.0.19041.0</TargetPlatformMinVersion>
+    <WindowsPackageType>None</WindowsPackageType>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <!-- The upstream MVVM view models use field generators and reflection bindings.
+         Ship a JIT build; NativeAOT/trimmed WinRT marshalling is not used here. -->
+    <PublishAot>false</PublishAot>
+    <PublishTrimmed>false</PublishTrimmed>
+    <NoWarn>$(NoWarn);MVVMTK0045</NoWarn>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <ApplicationManifest>Platforms/Windows/app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(DiagnosticBuild)' == 'true'">
     <!-- Diagnostic builds install beside production and cannot overwrite its app-private data. -->

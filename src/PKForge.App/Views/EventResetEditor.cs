@@ -22,19 +22,19 @@ public static class EventResetEditor
             var options = events.Select(e => new PadOption(e.Title,
                 Accent: e.Done ? null : UiTokens.Green, IconPath: e.Done ? "restore" : "check",
                 Detail: $"{e.Where} · {(e.Done ? "used up - can reset" : "still available")}")).ToArray();
-            var choice = await EditorMenu.ShowAsync(host, "Re-arm one-time encounters", Warning, options);
+            var choice = await EditorMenu.ShowAsync(host, "Сбросить разовые встречи", Warning, options);
             var index = Array.FindIndex(options, o => o.Label == choice);
             if (index < 0) return;
             var picked = events[index];
 
-            var detail = $"{picked.Where}{Environment.NewLine}{(picked.Done ? "Used up." : "Still waiting in the game - nothing to reset.")}";
+            var detail = $"{picked.Where}{Environment.NewLine}{(picked.Done ? "Использован." : "Still waiting in the game - nothing to reset.")}";
             if (await WorldEventsMenu.BlockedAsync(host, picked.Title, detail)) continue;
             if (!picked.Done)
             {
                 await EditorMenu.ShowAsync(host, picked.Title, detail, "OK");
                 continue;
             }
-            if (!await EditorMenu.ConfirmAsync(host, $"Reset {picked.Title}?", detail + Environment.NewLine + Warning, "Reset"))
+            if (!await EditorMenu.ConfirmAsync(host, $"Reset {picked.Title}?", detail + Environment.NewLine + Warning, "Сбросить"))
                 continue;
             var ok = await viewModel.RunMutationAsync(s => EventResetService.Reset(s, picked.Id),
                 Math.Max(0, viewModel.SelectedSlot), refreshSlot: false, action: SaveAction.EditWorld);

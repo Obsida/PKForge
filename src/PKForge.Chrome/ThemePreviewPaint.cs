@@ -101,8 +101,8 @@ public static class ThemePreviewPaint
                 continue;
             }
             using (var band = Fill(t.Band.WithAlpha(i % 2 == 0 ? (byte)150 : (byte)60))) c.DrawRect(row, band);
-            c.DrawText("Nature", row.Left + 2 * u, row.MidY + 1.6f * u, SKTextAlign.Left, small, label);
-            c.DrawText("Timid", row.Left + 24 * u, row.MidY + 1.6f * u, SKTextAlign.Left, small, value);
+            c.DrawText("Характер", row.Left + 2 * u, row.MidY + 1.6f * u, SKTextAlign.Left, small, label);
+            c.DrawText("Робкий", row.Left + 24 * u, row.MidY + 1.6f * u, SKTextAlign.Left, small, value);
         }
         c.Restore();
     }

@@ -163,10 +163,10 @@ public partial class SavePickerViewModel : ObservableObject
 
     /// <summary>Copyable evidence for folder grants, traversal, candidate bytes and parser outcomes.</summary>
     public string ScanReport => _scanDiagnostics.Count == 0
-        ? "No diagnostic scan has run yet. Use Rescan games, then open Scan report again."
+        ? "Поиск ещё не выполнялся. Запусти поиск игр, затем открой отчёт."
         : string.Join("\n", _scanDiagnostics);
 
-    [ObservableProperty] private string _status = "Link an emulator's storage to begin.";
+    [ObservableProperty] private string _status = "Для начала подключи папку эмулятора.";
     [ObservableProperty] private bool _isBusy;
 
     private DateTimeOffset _busySince;
@@ -244,7 +244,7 @@ public partial class SavePickerViewModel : ObservableObject
         var roots = _roots.GetRoots();
         if (roots.Count == 0)
         {
-            Status = "No storage units linked yet. Open Link and choose your platform and emulator.";
+            Status = "Хранилища ещё не подключены. Выбери подключение, платформу и эмулятор.";
             return;
         }
 
@@ -268,7 +268,7 @@ public partial class SavePickerViewModel : ObservableObject
                 _scanDiagnostics.Add($"ROOT kind={root.Kind} name={root.DisplayName}");
                 _scanDiagnostics.Add($"TREE URI {root.TreeId}");
                 _scanningRoot = root.TreeId;
-                Status = $"Scanning {SaveDescriptions.EmulatorName(root.Kind)} unit · {root.DisplayName}…";
+                Status = $"Поиск: хранилищ {SaveDescriptions.EmulatorName(root.Kind)} · {root.DisplayName}…";
                 try
                 {
                     if (_detection is IIncrementalEmulatorDetectionService incremental)
@@ -316,8 +316,8 @@ public partial class SavePickerViewModel : ObservableObject
             AppLog.Info("scan", $"{roots.Count} linked folder(s): {Saves.Count} save(s), {filesSeen} file(s) scanned, {_rejectedCandidates.Count} rejected");
             RebuildGroups();
             Status = Saves.Count == 0
-                ? $"No games found. Scanned {filesSeen} file(s), {_rejectedCandidates.Count} looked like saves but did not parse."
-                : $"{Saves.Count} save(s) on the shelf. Scanned {filesSeen} file(s).";
+                ? $"Игры не найдены. Проверено файлов: {filesSeen}; не распознано сохранений: {_rejectedCandidates.Count}."
+                : $"Сохранений: {Saves.Count}. Проверено файлов: {filesSeen}.";
         }
         finally
         {
@@ -378,7 +378,7 @@ public partial class SavePickerViewModel : ObservableObject
     /// <summary>Caption of the active shelf filter, for the home screen chip.</summary>
     public partial class FilterState : ObservableObject
     {
-        [ObservableProperty] private string _caption = "All";
+        [ObservableProperty] private string _caption = "Все";
     }
 
     public FilterState Filter { get; } = new();
@@ -457,7 +457,7 @@ public partial class SavePickerViewModel : ObservableObject
             _ when label.Contains("Legends: Z-A", StringComparison.Ordinal) => 2025,
             _ when label.Contains("Colosseum", StringComparison.Ordinal) => 2003,
             _ when label.Contains("XD", StringComparison.Ordinal) => 2005,
-            _ when label.Contains("Box", StringComparison.Ordinal) => 2002,
+            _ when label.Contains("Бокс", StringComparison.Ordinal) => 2002,
             _ when label.Contains("Red", StringComparison.Ordinal) || label.Contains("Blue", StringComparison.Ordinal) ||
                     label.Contains("Green", StringComparison.Ordinal) => 1996,
             _ when label.Contains("Yellow", StringComparison.Ordinal) => 1998,
@@ -487,15 +487,15 @@ public partial class SavePickerViewModel : ObservableObject
         {
             _busyWith = "opening a save file";
             IsBusy = true;
-            Status = "Select the save file to link…";
+            Status = "Выбери файл для подключения…";
             var document = await _filePicker.PickSaveAsync();
-            if (document is null) { Status = "Link cancelled."; return; }
-            Status = $"Linking {document.DisplayName}…";
+            if (document is null) { Status = "Подключение отменено."; return; }
+            Status = $"Подключение {document.DisplayName}…";
             await _sessions.OpenAsync(document);
             _boxBrowser.RefreshFromCurrentSession();
             OpenedSave = true;
             CompleteSetup();
-            Status = "Storage linked.";
+            Status = "Хранилище подключено.";
         }
         catch (Exception error)
         {
@@ -503,7 +503,7 @@ public partial class SavePickerViewModel : ObservableObject
             // to the copyable scan report so a player can send it.
             _scanDiagnostics.Add($"OPEN FAILED (single file) {error}");
             AppLog.Error("open", "Linking a single save file failed", error);
-            Status = $"Could not link save: {error.Message}";
+            Status = $"Не удалось подключить сохранение: {error.Message}";
         }
         finally
         {
@@ -531,12 +531,12 @@ public partial class SavePickerViewModel : ObservableObject
         var emulator = SaveDescriptions.EmulatorName(kind);
         if (found > 0)
         {
-            LinkReported?.Invoke($"{emulator} linked",
-                $"Found {found} Pokémon save{(found == 1 ? "" : "s")} in {folder.DisplayName}.");
+            LinkReported?.Invoke($"{emulator} подключено",
+                $"Найдено сохранений Pok\u00E9mon: {found}{(found == 1 ? "" : "s")}, папка: {folder.DisplayName}.");
             return;
         }
         var rejected = _rejectedCandidates.Count(r => r.StartsWith($"{kind}:", StringComparison.Ordinal));
-        LinkReported?.Invoke($"No saves found in {folder.DisplayName}",
+        LinkReported?.Invoke($"Сохранения в {folder.DisplayName} не найдены",
             (rejected > 0 ? $"{rejected} file(s) looked like saves but could not be read. " : "")
             + WhereToPoint(kind) + " The folder stays linked; unlink it from Manage linked storage.");
     }
@@ -550,7 +550,7 @@ public partial class SavePickerViewModel : ObservableObject
             "Pick the folder that holds your .sav files: next to your ROMs by default, or the save folder set in melonDS's settings.",
         EmulatorKind.DraStic => "Pick DraStic's backup folder (its .dsv battery saves) or the DraStic data folder.",
         EmulatorKind.Eden => "Pick Eden's files root, the folder that contains its emulated storage.",
-        _ => "Pick the folder that holds your save files.",
+        _ => "Выбери папку с файлами сохранений.",
     };
 
     public async Task OpenAsync(DetectedSave save)
@@ -561,20 +561,20 @@ public partial class SavePickerViewModel : ObservableObject
         {
             _busyWith = $"opening {save.GameLabel}";
             IsBusy = true;
-            Status = $"Connecting to {save.GameLabel}…";
+            Status = $"Подключение к {save.GameLabel}…";
             // EngineHint carries the chosen game (FireRed vs LeafGreen), never the custom
             // name; the session service reads the chosen engine route from the store.
             await _sessions.OpenAsync(new PickedDocument(save.DocumentId, save.EngineHint));
             _boxBrowser.RefreshFromCurrentSession();
             OpenedSave = true;
-            AppLog.Info("open", $"Opened {save.GameLabel} ({save.Emulator}, gen {save.Generation})");
-            Status = "Connected.";
+            AppLog.Info("open", $"Открыто {save.GameLabel} ({save.Emulator}, поколение {save.Generation})");
+            Status = "Подключено.";
         }
         catch (Exception error)
         {
             _scanDiagnostics.Add($"OPEN FAILED {save.FileName} {error}");
             AppLog.Error("open", $"Opening {save.GameLabel} ({save.Emulator}, {save.FileName}) failed", error);
-            Status = $"Could not connect: {error.Message}";
+            Status = $"Не удалось подключиться: {error.Message}";
         }
         finally
         {

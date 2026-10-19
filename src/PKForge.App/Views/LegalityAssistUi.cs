@@ -22,17 +22,17 @@ public static class LegalityAssistUi
     {
         if (!session.SupportsLegalityAnalysis)
         {
-            await EditorMenu.ShowAsync(host, "Suggest", "This game has no offline legality tables, so there is nothing to suggest.", "OK");
+            await EditorMenu.ShowAsync(host, "Подобрать", "This game has no offline legality tables, so there is nothing to suggest.", "OK");
             return false;
         }
 
-        var overlay = LoadingOverlay.Show(host, "Suggesting…", "Checking the legal options offline.");
+        var overlay = LoadingOverlay.Show(host, "Подбор…", "Проверка доступных легальных вариантов без сети.");
         LegalityFixPreview preview;
         try { preview = await Task.Run(() => Assist.Preview(session, box, slot, fix)); }
         catch (Exception error) when (error is ArgumentException or InvalidOperationException or NotSupportedException)
         {
             overlay.Close();
-            await EditorMenu.ShowAsync(host, "Suggest", error.Message, "OK");
+            await EditorMenu.ShowAsync(host, "Подобрать", error.Message, "OK");
             return false;
         }
         overlay.Close();
@@ -44,15 +44,15 @@ public static class LegalityAssistUi
     {
         if (!preview.Available)
         {
-            await EditorMenu.ShowAsync(host, preview.Title, preview.Unavailable ?? "No suggestion.", "OK");
+            await EditorMenu.ShowAsync(host, preview.Title, preview.Unavailable ?? "Нет подходящего варианта.", "OK");
             return false;
         }
 
-        var applyLabel = preview.Safe ? "Apply" : "Apply anyway";
+        var applyLabel = preview.Safe ? "Применить" : "Всё равно применить";
         var choice = await EditorMenu.ShowAsync(host, preview.Title, Describe(preview),
             new PadOption(applyLabel, Glyph: preview.Safe ? "●" : "!", Accent: preview.Safe ? UiTokens.Green : UiTokens.Warn,
                 Detail: preview.Outcome),
-            new PadOption("Cancel", Detail: "Nothing is changed"));
+            new PadOption("Отмена", Detail: "Ничего не изменяется"));
         if (choice != applyLabel) return false;
 
         var outcome = Assist.Apply(session, preview);
@@ -100,7 +100,7 @@ public static class LegalityAssistUi
 /// </summary>
 public static class LegalityReportEditor
 {
-    private const string FixAll = "Fix all safe";
+    private const string FixAll = "Исправить все безопасные";
 
     public static async Task<bool> ShowAsync(Grid host, ISaveEngineSession session, int box, int slot)
     {
@@ -111,7 +111,7 @@ public static class LegalityReportEditor
             try { report = await Task.Run(() => LegalityAssistUi.Assist.GetReport(session, box, slot)); }
             catch (Exception error) when (error is ArgumentException or InvalidOperationException or NotSupportedException)
             {
-                await EditorMenu.ShowAsync(host, "Legality", error.Message, "OK");
+                await EditorMenu.ShowAsync(host, "Легальность", error.Message, "OK");
                 return dirty;
             }
 
@@ -123,9 +123,9 @@ public static class LegalityReportEditor
             foreach (var group in report.Groups)
                 options.Add(GroupOption(group));
 
-            var verdict = !report.Supported ? "Not analyzed" : report.Valid ? "Legal" : "Illegal";
+            var verdict = !report.Supported ? "Не проверен" : report.Valid ? "Легален" : "Нелегален";
             var message = report.Encounter.Length > 0 ? $"{verdict} · matched: {report.Encounter}" : verdict;
-            var choice = await EditorMenu.ShowAsync(host, "Legality report", message, options.ToArray());
+            var choice = await EditorMenu.ShowAsync(host, "Отчёт о легальности", message, options.ToArray());
             if (choice is null) return dirty;
 
             if (choice == FixAll)

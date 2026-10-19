@@ -20,19 +20,19 @@ public static class GrandUndergroundEditor
             }
 
             var options = items.Select(item => new PadOption($"{item.Name} · {item.Count}/{item.MaxCount} · {item.Type}"))
-                .Append(new PadOption("Fill every stack", IconPath: "fill", Detail: "Every item goes to its maximum; a restore point is made first."))
-                .Append(new PadOption("Clear every stack", IconPath: "clear", Detail: "Every item goes to 0; a restore point is made first."))
+                .Append(new PadOption("Пополнить все стопки", IconPath: "fill", Detail: "Every item goes to its maximum; a restore point is made first."))
+                .Append(new PadOption("Очистить все стопки", IconPath: "clear", Detail: "Every item goes to 0; a restore point is made first."))
                 .ToArray();
             var choice = await EditorMenu.ShowAsync(host, "Grand underground", "Spheres, treasures, statues, and pedestals", options);
             if (choice is null) return;
 
-            if (choice is "Fill every stack" or "Clear every stack")
+            if (choice is "Пополнить все стопки" or "Очистить все стопки")
             {
-                var filling = choice == "Fill every stack";
-                var verb = filling ? "Fill" : "Clear";
+                var filling = choice == "Пополнить все стопки";
+                var verb = filling ? "Заполнить" : "Очистить";
                 var confirmed = await PadMenu.ConfirmAsync(host, $"{verb} underground items?",
                     filling ? "Every Grand Underground stack becomes full. A restore point is created first." : "Every Grand Underground stack becomes 0. A restore point is created first.",
-                    filling ? "Fill" : "Clear");
+                    filling ? "Заполнить" : "Очистить");
                 if (!confirmed) continue;
                 var saved = await viewModel.RunMutationAsync(s =>
                 {

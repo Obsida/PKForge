@@ -26,7 +26,7 @@ public static class HoneyTreeEditor
     {
         if (!HoneyTreeService.IsSupported(session))
         {
-            await EditorMenu.ShowAsync(host, "Honey trees", "Honey trees exist only in Diamond, Pearl and Platinum.", "OK");
+            await EditorMenu.ShowAsync(host, "Медовые деревья", "Honey trees exist only in Diamond, Pearl and Platinum.", "OK");
             return;
         }
 
@@ -39,7 +39,7 @@ public static class HoneyTreeEditor
                 string.Join(", ", munchlax.Select(i => HoneyTreeService.Locations[i])) + ".";
             var options = trees.Select(tree => new PadOption(TreeLabel(tree),
                 Accent: tree.IsMunchlaxTree ? UiTokens.Green : null)).ToArray();
-            var choice = await EditorMenu.ShowAsync(host, "Honey trees", summary, options);
+            var choice = await EditorMenu.ShowAsync(host, "Медовые деревья", summary, options);
             if (choice is null) return;
             var index = Array.FindIndex(options, o => o.Label == choice);
             if (index < 0) continue;
@@ -115,7 +115,7 @@ public static class HoneyTreeEditor
 
     private static async Task<int?> PickSlotAsync(Grid host, IReadOnlyList<string> species)
     {
-        var labels = species.Select((name, i) => $"Slot {i + 1} · {name}").ToArray();
+        var labels = species.Select((name, i) => $"Ячейка {i + 1} · {name}").ToArray();
         var choice = await EditorMenu.ShowAsync(host, "Encounter slot", null, labels);
         var index = Array.IndexOf(labels, choice);
         return index < 0 ? null : index;

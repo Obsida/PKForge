@@ -40,9 +40,9 @@ public static class StatsPopup
                 Close(Math.Clamp(value, 0, max));
         }
 
-        var ok = Kit.Capsule("Apply", UiTokens.Green);
+        var ok = Kit.Capsule("Применить", UiTokens.Green);
         ok.Clicked += (_, _) => Apply();
-        var cancel = Kit.Capsule("Cancel", UiTokens.Ink1);
+        var cancel = Kit.Capsule("Отмена", UiTokens.Ink1);
         cancel.Clicked += (_, _) => Close(null);
 
         var content = new VerticalStackLayout
@@ -123,9 +123,9 @@ public static class StatsPopup
             Close(values);
         }
 
-        var ok = Kit.Capsule("Apply", UiTokens.Green);
+        var ok = Kit.Capsule("Применить", UiTokens.Green);
         ok.Clicked += (_, _) => Apply();
-        var cancel = Kit.Capsule("Cancel", UiTokens.Ink1);
+        var cancel = Kit.Capsule("Отмена", UiTokens.Ink1);
         cancel.Clicked += (_, _) => Close(null);
 
         var buttons = new HorizontalStackLayout { Spacing = 8, HorizontalOptions = LayoutOptions.End, Children = { cancel, ok } };
@@ -152,7 +152,7 @@ public static class StatsPopup
     /// <summary>The live card under the entries; it re-reads the entries on every keystroke.</summary>
     private static View BuildPreview(Grid host, Entry[] entries, int max, StatsPreview preview)
     {
-        var heading = InfoKit.Heading("Resulting stats");
+        var heading = InfoKit.Heading("Итоговые характеристики");
         var total = new Label { FontFamily = DsChrome.PixelFont, FontSize = UiTokens.TextSmall, FontAttributes = FontAttributes.Bold, HorizontalTextAlignment = TextAlignment.End };
         var grid = new InfoKit.StatDeltaGrid();
         var overCap = InfoKit.Note(tone: InfoKit.NoteTone.Bad);
@@ -163,7 +163,7 @@ public static class StatsPopup
         if (preview.HiddenPower is not null)
         {
             hpBadge = InfoKit.TypeBadge();
-            var change = Kit.Capsule("Change", UiTokens.Blue);
+            var change = Kit.Capsule("Изменить", UiTokens.Blue);
             change.FontSize = UiTokens.TextSmall;
             change.Padding = new Thickness(10, 2);
             change.HeightRequest = 30;
@@ -182,7 +182,7 @@ public static class StatsPopup
                 ColumnDefinitions = [new(GridLength.Auto), new(GridLength.Star), new(GridLength.Auto)],
                 Children =
                 {
-                    new Label { Text = "Hidden power", FontFamily = DsChrome.PixelFont, FontSize = UiTokens.TextSmall, TextColor = UiTokens.InkSoft, VerticalTextAlignment = TextAlignment.Center },
+                    new Label { Text = "Скрытая сила", FontFamily = DsChrome.PixelFont, FontSize = UiTokens.TextSmall, TextColor = UiTokens.InkSoft, VerticalTextAlignment = TextAlignment.Center },
                     hpBadge,
                     change,
                 },

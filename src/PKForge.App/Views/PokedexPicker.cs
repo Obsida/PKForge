@@ -15,8 +15,8 @@ public sealed class PokedexPicker : IPadHandler
 {
     private static readonly string[] TypeNames =
     [
-        "Normal", "Fighting", "Flying", "Poison", "Ground", "Rock", "Bug", "Ghost", "Steel",
-        "Fire", "Water", "Grass", "Electric", "Psychic", "Ice", "Dragon", "Dark", "Fairy",
+        "Обычный", "Боевой", "Летающий", "Ядовитый", "Земляной", "Каменный", "Насекомый", "Призрачный", "Стальной",
+        "Огненный", "Водный", "Травяной", "Электрический", "Психический", "Ледяной", "Драконий", "Тёмный", "Волшебный",
     ];
 
     private static readonly (int Gen, int First, int Last)[] GenRanges =
@@ -40,9 +40,9 @@ public sealed class PokedexPicker : IPadHandler
     private readonly SecondScreenClaim? _claim;
     private readonly List<Border> _typeChips = [];
     private readonly List<Border> _genChips = [];
-    private string _category = "Any";
-    private string _power = "Any";
-    private string _theme = "Any";
+    private string _category = "Любой";
+    private string _power = "Любой";
+    private string _theme = "Любой";
     private Label _categoryLabel = null!;
     private Label _powerLabel = null!;
     private Label _themeLabel = null!;
@@ -215,7 +215,7 @@ public sealed class PokedexPicker : IPadHandler
 
         var search = new Entry
         {
-            Placeholder = "Search a Pokémon…",
+            Placeholder = "Поиск покемона…",
             FontSize = 14,
             TextColor = UiTokens.Ink0,
             PlaceholderColor = UiTokens.Ink1,
@@ -242,19 +242,19 @@ public sealed class PokedexPicker : IPadHandler
             RowSpacing = 8,
             RowDefinitions = [new(GridLength.Auto), new(GridLength.Auto), new(GridLength.Auto), new(GridLength.Star), new(GridLength.Auto)],
         };
-        var title = new Label { Text = "Pokédex", TextColor = UiTokens.Ink0, FontFamily = DsChrome.PixelFont, FontSize = UiTokens.TextHeading };
+        var title = new Label { Text = "Покедекс", TextColor = UiTokens.Ink0, FontFamily = DsChrome.PixelFont, FontSize = UiTokens.TextHeading };
         content.Add(title);
         content.Add(search); Grid.SetRow(search, 1);
         var filters = BuildFilterRows();
         content.Add(filters); Grid.SetRow(filters, 2);
         content.Add(_grid); Grid.SetRow(_grid, 3);
         var hints = Kit.WindowHints(
-            ("A", "Choose", () => OnPadButton(PadButton.A)),
-            ("B", "Cancel", () => Close(null)),
+            ("A", "Выбрать", () => OnPadButton(PadButton.A)),
+            ("B", "Отмена", () => Close(null)),
             ("LR", "Gen", () => OnPadButton(PadButton.R)),
-            ("X", "Types", () => _ = ShowTypeFilterMenuAsync()),
-            ("+", "Filters", () => _ = ShowFilterAxisMenuAsync()),
-            ("Y", "Clear", ClearFilters));
+            ("X", "Типы", () => _ = ShowTypeFilterMenuAsync()),
+            ("+", "Фильтры", () => _ = ShowFilterAxisMenuAsync()),
+            ("Y", "Очистить", ClearFilters));
         content.Add(hints); Grid.SetRow(hints, 4);
 
         var window = Kit.DevicePanel(content, padding: 12);
@@ -313,9 +313,9 @@ public sealed class PokedexPicker : IPadHandler
     {
         _typeFilters.Clear();
         _genFilter = null;
-        _category = "Any";
-        _power = "Any";
-        _theme = "Any";
+        _category = "Любой";
+        _power = "Любой";
+        _theme = "Любой";
         RefreshCapsules();
         RefreshChipStates();
         Refilter();
@@ -324,9 +324,9 @@ public sealed class PokedexPicker : IPadHandler
     private void RefreshCapsules()
     {
         if (_categoryLabel is null) return;
-        _categoryLabel.Text = $"Category: {_category}";
-        _powerLabel.Text = $"Power: {_power}";
-        _themeLabel.Text = $"Theme: {_theme}";
+        _categoryLabel.Text = $"Категория: {_category}";
+        _powerLabel.Text = $"Сила: {_power}";
+        _themeLabel.Text = $"Тема: {_theme}";
     }
 
     private void RefreshChipStates()
@@ -366,7 +366,7 @@ public sealed class PokedexPicker : IPadHandler
                 Opacity = 0.55,
                 StrokeShape = new RoundRectangle { CornerRadius = 6 },
                 Padding = new Thickness(10, 3),
-                Content = new Label { Text = $"Gen {DexRegions.All[gen - 1].Roman}", TextColor = Colors.White, FontSize = UiTokens.TextSmall, FontAttributes = FontAttributes.Bold },
+                Content = new Label { Text = $"Поколение {DexRegions.All[gen - 1].Roman}", TextColor = Colors.White, FontSize = UiTokens.TextSmall, FontAttributes = FontAttributes.Bold },
             };
             var tap = new TapGestureRecognizer();
             tap.Tapped += (_, _) =>
@@ -386,7 +386,7 @@ public sealed class PokedexPicker : IPadHandler
             StrokeThickness = 0,
             StrokeShape = new RoundRectangle { CornerRadius = 6 },
             Padding = new Thickness(10, 3),
-            Content = new Label { Text = "Clear", TextColor = Colors.White, FontSize = UiTokens.TextSmall, FontAttributes = FontAttributes.Bold },
+            Content = new Label { Text = "Очистить", TextColor = Colors.White, FontSize = UiTokens.TextSmall, FontAttributes = FontAttributes.Bold },
         };
         var clearTap = new TapGestureRecognizer();
         clearTap.Tapped += (_, _) => ClearFilters();
@@ -394,9 +394,9 @@ public sealed class PokedexPicker : IPadHandler
         genRow.Children.Add(clear);
 
         var extras = new HorizontalStackLayout { Spacing = 5 };
-        extras.Children.Add(FilterCapsule("Category", () => _ = ShowCategoryMenuAsync(), ref _categoryLabel));
-        extras.Children.Add(FilterCapsule("Power", () => _ = ShowPowerMenuAsync(), ref _powerLabel));
-        extras.Children.Add(FilterCapsule("Theme", () => _ = ShowThemeMenuAsync(), ref _themeLabel));
+        extras.Children.Add(FilterCapsule("Категория", () => _ = ShowCategoryMenuAsync(), ref _categoryLabel));
+        extras.Children.Add(FilterCapsule("Сила", () => _ = ShowPowerMenuAsync(), ref _powerLabel));
+        extras.Children.Add(FilterCapsule("Тема", () => _ = ShowThemeMenuAsync(), ref _themeLabel));
 
         return new VerticalStackLayout
         {
@@ -441,29 +441,29 @@ public sealed class PokedexPicker : IPadHandler
             source = source.Where(e => _typeFilters.All(t => e.Types.Contains(t)));
         if (!string.IsNullOrWhiteSpace(_query))
             source = source.Where(e => e.Name.Contains(_query, StringComparison.OrdinalIgnoreCase));
-        if (_category != "Any")
+        if (_category != "Любой")
             source = source.Where(e => MatchesCategory(e, _category));
-        if (_power != "Any")
+        if (_power != "Любой")
             source = source.Where(e => MatchesPower(e, _power));
-        if (_theme != "Any")
+        if (_theme != "Любой")
             source = source.Where(e => MatchesTheme(e, _theme));
         return source.ToList();
     }
 
     private static bool MatchesCategory(DexEntry e, string category) => category switch
     {
-        "Legendary" => SpeciesCategories.Legendary.Contains(e.Id),
-        "Mythical" => SpeciesCategories.Mythical.Contains(e.Id),
-        "Ultra Beast" => SpeciesCategories.UltraBeast.Contains(e.Id),
-        "Paradox" => SpeciesCategories.Paradox.Contains(e.Id),
-        "Pseudo-Legendary" => SpeciesCategories.PseudoLegendary.Contains(e.Id),
-        "Starter" => SpeciesCategories.Starter.Contains(e.Id),
-        "Fossil" => SpeciesCategories.Fossil.Contains(e.Id),
-        "Baby" => SpeciesCategories.Baby.Contains(e.Id),
-        "Regional Form" => e.Forms.Regional,
-        "Mega-capable" => e.Forms.Mega,
-        "Gigantamax-capable" => SpeciesCategories.GigantamaxCapable.Contains(e.Id),
-        "Has Alternate Forms" => e.Forms.HasForms,
+        "Легендарные" => SpeciesCategories.Legendary.Contains(e.Id),
+        "Мифические" => SpeciesCategories.Mythical.Contains(e.Id),
+        "Ультрачудовища" => SpeciesCategories.UltraBeast.Contains(e.Id),
+        "Парадоксы" => SpeciesCategories.Paradox.Contains(e.Id),
+        "Псевдолегендарные" => SpeciesCategories.PseudoLegendary.Contains(e.Id),
+        "Стартовые" => SpeciesCategories.Starter.Contains(e.Id),
+        "Ископаемые" => SpeciesCategories.Fossil.Contains(e.Id),
+        "Малыши" => SpeciesCategories.Baby.Contains(e.Id),
+        "Региональная форма" => e.Forms.Regional,
+        "Способные к мегаэволюции" => e.Forms.Mega,
+        "Способные к гигантамаксу" => SpeciesCategories.GigantamaxCapable.Contains(e.Id),
+        "Есть другие формы" => e.Forms.HasForms,
         _ => true,
     };
 
@@ -475,8 +475,8 @@ public sealed class PokedexPicker : IPadHandler
             "400+ BST" => total >= 400,
             "500+ BST" => total >= 500,
             "600+ BST" => total >= 600,
-            "Physical Attacker" => e.Stats.Atk >= 100 && e.Stats.Atk >= e.Stats.SpA + 15,
-            "Special Attacker" => e.Stats.SpA >= 100 && e.Stats.SpA >= e.Stats.Atk + 15,
+            "Физические атакующие" => e.Stats.Atk >= 100 && e.Stats.Atk >= e.Stats.SpA + 15,
+            "Специальные атакующие" => e.Stats.SpA >= 100 && e.Stats.SpA >= e.Stats.Atk + 15,
             "Fast" => e.Stats.Spe >= 100,
             "Sturdy" => e.Stats.Hp + e.Stats.Def + e.Stats.SpD >= 280,
             _ => true,
@@ -485,12 +485,12 @@ public sealed class PokedexPicker : IPadHandler
 
     private static bool MatchesTheme(DexEntry e, string theme) => theme switch
     {
-        "Dragons" => e.Types.Contains(15) || SpeciesCategories.Themes.DragonExtras.Contains(e.Id),
-        "Aquatic" => e.Types.Contains(10) || SpeciesCategories.Themes.AquaticExtras.Contains(e.Id),
-        "Felines" => SpeciesCategories.Themes.Felines.Contains(e.Id),
-        "Canines" => SpeciesCategories.Themes.Canines.Contains(e.Id),
-        "Birds" => SpeciesCategories.Themes.Birds.Contains(e.Id),
-        "Dinosaurs" => SpeciesCategories.Themes.Dinosaurs.Contains(e.Id),
+        "Драконы" => e.Types.Contains(15) || SpeciesCategories.Themes.DragonExtras.Contains(e.Id),
+        "Водные обитатели" => e.Types.Contains(10) || SpeciesCategories.Themes.AquaticExtras.Contains(e.Id),
+        "Кошачьи" => SpeciesCategories.Themes.Felines.Contains(e.Id),
+        "Псовые" => SpeciesCategories.Themes.Canines.Contains(e.Id),
+        "Птицы" => SpeciesCategories.Themes.Birds.Contains(e.Id),
+        "Динозавры" => SpeciesCategories.Themes.Dinosaurs.Contains(e.Id),
         _ => true,
     };
 
@@ -562,11 +562,11 @@ public sealed class PokedexPicker : IPadHandler
     {
         var options = Enumerable.Range(0, TypeNames.Length)
             .Select(t => (_typeFilters.Contains(t) ? "✓ " : "") + TypeNames[t])
-            .Append("Clear all filters")
+            .Append("Сбросить все фильтры")
             .ToArray();
-        var choice = await PadMenu.ShowAsync(_host, "FILTER BY TYPE (toggle)", "A Pokémon must match every checked type.", options);
+        var choice = await PadMenu.ShowAsync(_host, "ФИЛЬТР ПО ТИПУ (переключение)", "A Pokémon must match every checked type.", options);
         if (choice is null) return;
-        if (choice == "Clear all filters") { ClearFilters(); return; }
+        if (choice == "Сбросить все фильтры") { ClearFilters(); return; }
         var name = choice.StartsWith("✓ ", StringComparison.Ordinal) ? choice[2..] : choice;
         var type = Array.IndexOf(TypeNames, name);
         if (type >= 0) ToggleType(type);
@@ -575,28 +575,28 @@ public sealed class PokedexPicker : IPadHandler
     /// <summary>Pad path into the three deep-filter axes (the capsules are the touch path).</summary>
     private async Task ShowFilterAxisMenuAsync()
     {
-        var choice = await PadMenu.ShowAsync(_host, "Filters",
+        var choice = await PadMenu.ShowAsync(_host, "Фильтры",
             "Categories, power, and themes combine with the type gems and generation chips.",
-            new PadOption($"Category: {_category}", IconPath: "type", Detail: "Legendary, starter, fossil, baby and other groups."),
-            new PadOption($"Power: {_power}", IconPath: "battle", Detail: "Base stat total or battle style, such as fast."),
-            new PadOption($"Theme: {_theme}", IconPath: "filter", Detail: "Fun groups like dragons, birds or dinosaurs."),
-            new PadOption("Clear all filters", IconPath: "clear", Detail: "Also clears the type and generation picks."));
+            new PadOption($"Категория: {_category}", IconPath: "type", Detail: "Legendary, starter, fossil, baby and other groups."),
+            new PadOption($"Сила: {_power}", IconPath: "battle", Detail: "Base stat total or battle style, such as fast."),
+            new PadOption($"Тема: {_theme}", IconPath: "filter", Detail: "Fun groups like dragons, birds or dinosaurs."),
+            new PadOption("Сбросить все фильтры", IconPath: "clear", Detail: "Также сбрасывает выбор типа и поколения."));
         switch (choice)
         {
-            case "Clear all filters": ClearFilters(); return;
-            case { } picked when picked.StartsWith("Category", StringComparison.Ordinal): await ShowCategoryMenuAsync(); return;
-            case { } picked when picked.StartsWith("Power", StringComparison.Ordinal): await ShowPowerMenuAsync(); return;
-            case { } picked when picked.StartsWith("Theme", StringComparison.Ordinal): await ShowThemeMenuAsync(); return;
+            case "Сбросить все фильтры": ClearFilters(); return;
+            case { } picked when picked.StartsWith("Категория", StringComparison.Ordinal): await ShowCategoryMenuAsync(); return;
+            case { } picked when picked.StartsWith("Сила", StringComparison.Ordinal): await ShowPowerMenuAsync(); return;
+            case { } picked when picked.StartsWith("Тема", StringComparison.Ordinal): await ShowThemeMenuAsync(); return;
         }
     }
 
     private async Task ShowCategoryMenuAsync()
     {
-        var choice = await PadMenu.ShowAsync(_host, "Category",
+        var choice = await PadMenu.ShowAsync(_host, "Категория",
             "Rarity and special families. Combines with types, generation, power, and theme.",
-            "Any", "Legendary", "Mythical", "Ultra Beast", "Paradox", "Pseudo-Legendary",
-            "Starter", "Fossil", "Baby", "Regional Form", "Mega-capable",
-            "Gigantamax-capable", "Has Alternate Forms");
+            "Любой", "Легендарные", "Мифические", "Ультрачудовища", "Парадоксы", "Псевдолегендарные",
+            "Стартовые", "Ископаемые", "Малыши", "Региональная форма", "Способные к мегаэволюции",
+            "Способные к гигантамаксу", "Есть другие формы");
         if (choice is null) return;
         _category = choice;
         RefreshCapsules();
@@ -605,9 +605,9 @@ public sealed class PokedexPicker : IPadHandler
 
     private async Task ShowPowerMenuAsync()
     {
-        var choice = await PadMenu.ShowAsync(_host, "Power", null,
-            "Any", "400+ BST", "500+ BST", "600+ BST", "Physical Attacker",
-            "Special Attacker", "Fast", "Sturdy");
+        var choice = await PadMenu.ShowAsync(_host, "Сила", null,
+            "Любой", "400+ BST", "500+ BST", "600+ BST", "Физические атакующие",
+            "Специальные атакующие", "Fast", "Sturdy");
         if (choice is null) return;
         _power = choice;
         RefreshCapsules();
@@ -616,8 +616,8 @@ public sealed class PokedexPicker : IPadHandler
 
     private async Task ShowThemeMenuAsync()
     {
-        var choice = await PadMenu.ShowAsync(_host, "Theme", "The fun filters. Subjective by design.",
-            "Any", "Dragons", "Aquatic", "Felines", "Canines", "Birds", "Dinosaurs");
+        var choice = await PadMenu.ShowAsync(_host, "Тема", "The fun filters. Subjective by design.",
+            "Любой", "Драконы", "Водные обитатели", "Кошачьи", "Псовые", "Птицы", "Динозавры");
         if (choice is null) return;
         _theme = choice;
         RefreshCapsules();

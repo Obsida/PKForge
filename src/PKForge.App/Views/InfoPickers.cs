@@ -39,20 +39,20 @@ public static class InfoPickers
             // No facts for this session (none open, or a romhack's own move table): the plain list.
             var plain = Enumerable.Range(includeNone ? 0 : 1, Math.Max(0, data.MoveNames.Count - (includeNone ? 0 : 1)))
                 .Where(i => i == 0 || data.MoveNames[i].Length > 0)
-                .Select(i => new PickItem(i, i == 0 ? "(none)" : data.MoveNames[i])).ToList();
+                .Select(i => new PickItem(i, i == 0 ? "(нет)" : data.MoveNames[i])).ToList();
             return await PickerMenu.ShowAsync(host, title, plain, current);
         }
 
         var hasLearnData = choices.Any(c => c.Learn.IsLegal);
         var byId = choices.ToDictionary(c => c.Id);
         var items = new List<PickItem>(choices.Count + 1);
-        if (includeNone) items.Add(new PickItem(0, "(none)"));
+        if (includeNone) items.Add(new PickItem(0, "(нет)"));
         foreach (var move in MoveChoiceOrder.Sort(choices.Where(c => (uint)c.Id < (uint)data.MoveNames.Count && data.MoveNames[c.Id].Length > 0),
                      id => NameOf(data.MoveNames, id)))
             items.Add(MoveRow(move, NameOf(data.MoveNames, move.Id), hasLearnData));
 
         var filter = hasLearnData
-            ? new PickerFilter("Legal", "Show all", item => item.Id == 0 || !item.Muted, StartOn: !Services.HaXMode.IsOn)
+            ? new PickerFilter("Легален", "Показать всё", item => item.Id == 0 || !item.Muted, StartOn: !Services.HaXMode.IsOn)
             : null;
         return await PickerMenu.ShowAsync(host, title, items, current, MovePreview(byId, hasLearnData), filter);
     }
@@ -67,7 +67,7 @@ public static class InfoPickers
         {
             TypeId = move.Type,
             Category = move.Category,
-            Tag = move.Learn.IsLegal ? $"✓ {move.Learn.Label}" : hasLearnData ? "Illegal" : null,
+            Tag = move.Learn.IsLegal ? $"✓ {move.Learn.Label}" : hasLearnData ? "Нелегален" : null,
             TagColor = move.Learn.IsLegal ? InfoKit.LearnColor(move.Learn.Kind) : UiTokens.Bad,
             Muted = hasLearnData && !move.Learn.IsLegal,
             Keywords = $"{TypeFacts.Name(move.Type)} {TypeFacts.CategoryName(move.Category)} {move.Learn.Label}" + (move.Learn.IsLegal ? " legal" : ""),
@@ -94,7 +94,7 @@ public static class InfoPickers
             {
                 heading.Text = item?.Name ?? "";
                 badges.IsVisible = numbers.IsVisible = learn.IsVisible = false;
-                effect.Text = item?.Id == 0 ? "Leaves the move slot empty." : "";
+                effect.Text = item?.Id == 0 ? "Ячейка приёма останется пустой." : "";
                 return;
             }
             badges.IsVisible = true;
@@ -103,7 +103,7 @@ public static class InfoPickers
             category.Category = move.Category;
             numbers.Text = $"{TypeFacts.CategoryName(move.Category)} · Power {InfoKit.Power(move.Power)} · Accuracy {InfoKit.Accuracy(move.Accuracy)} · PP {move.PP}";
             numbers.IsVisible = true;
-            effect.Text = move.Effect.Length > 0 ? move.Effect : "No description available.";
+            effect.Text = move.Effect.Length > 0 ? move.Effect : "Описание недоступно.";
             learn.IsVisible = hasLearnData;
             learn.Text = move.Learn.Sentence;
             learn.TextColor = InfoKit.ToneColor(move.Learn.IsLegal ? InfoKit.NoteTone.Good : InfoKit.NoteTone.Bad);
@@ -144,14 +144,14 @@ public static class InfoPickers
         {
             var row = InfoKit.HeaderRow(
                 new Label { Text = NameOf(data.AbilityNames, ability.Id), FontSize = UiTokens.TextSmall, FontAttributes = FontAttributes.Bold, TextColor = UiTokens.Ink0 },
-                InfoKit.Tag(ability.Slot == "Hidden" ? "Hidden" : $"Slot {ability.Slot}",
+                InfoKit.Tag(ability.Slot == "Hidden" ? "Hidden" : $"Ячейка {ability.Slot}",
                     ability.Slot == "Hidden" ? Color.FromArgb("#B8860B") : UiTokens.Blueprint));
             children.Add(row);
             if (ability.Effect.Length > 0) children.Add(InfoKit.DetailLine(ability.Effect, maxLines: 2));
         }
         if (card.Gender is { } gender)
             children.Add(InfoKit.HeaderRow(
-                new Label { Text = "Gender", FontFamily = DsChrome.PixelFont, FontSize = UiTokens.TextSmall, TextColor = UiTokens.InkSoft, VerticalTextAlignment = TextAlignment.Center },
+                new Label { Text = "Пол", FontFamily = DsChrome.PixelFont, FontSize = UiTokens.TextSmall, TextColor = UiTokens.InkSoft, VerticalTextAlignment = TextAlignment.Center },
                 new Label { Text = gender.Label, FontSize = UiTokens.TextSmall, FontAttributes = FontAttributes.Bold, TextColor = UiTokens.Ink0 }));
         return InfoKit.Card([.. children]);
     }
@@ -170,7 +170,7 @@ public static class InfoPickers
             : [];
         var items = own.Select(a => new PickItem(a.Id, NameOf(data.AbilityNames, a.Id), Detail: Blank(a.Effect))
         {
-            Tag = a.Slot == "Hidden" ? "Hidden" : $"Slot {a.Slot}",
+            Tag = a.Slot == "Hidden" ? "Hidden" : $"Ячейка {a.Slot}",
             TagColor = a.Slot == "Hidden" ? Color.FromArgb("#B8860B") : UiTokens.Blueprint,
             Keywords = a.Slot,
         }).ToList();
@@ -179,7 +179,7 @@ public static class InfoPickers
         var seen = own.Select(a => a.Id).ToHashSet();
         var rest = Enumerable.Range(0, data.AbilityNames.Count)
             .Where(id => !seen.Contains(id) && (id == 0 || data.AbilityNames[id].Length > 0))
-            .Select(id => new PickItem(id, id == 0 ? "(none)" : data.AbilityNames[id], Detail: Blank(DexFacts.Ability(id)))
+            .Select(id => new PickItem(id, id == 0 ? "(нет)" : data.AbilityNames[id], Detail: Blank(DexFacts.Ability(id)))
             {
                 Muted = own.Count > 0,
             })
@@ -204,7 +204,7 @@ public static class InfoPickers
         var names = session?.GetItemNames() is { Count: > 0 } n ? n : modern;
         var legal = session is not null ? Info?.GetHeldItems(session).ToHashSet() ?? [] : [];
 
-        var items = new List<PickItem>(names.Count) { new(0, "(none)", Detail: "Holds nothing.") };
+        var items = new List<PickItem>(names.Count) { new(0, "(нет)", Detail: "Holds nothing.") };
         var rows = new List<PickItem>();
         for (var id = 1; id < names.Count; id++)
         {
@@ -215,7 +215,7 @@ public static class InfoPickers
         // Holdable first, in the game's id order (it groups balls, berries, plates…).
         items.AddRange(rows.OrderBy(r => r.Muted ? 1 : 0));
         var filter = legal.Count > 0
-            ? new PickerFilter("Holdable", "Show all", item => item.Id == 0 || !item.Muted, StartOn: !Services.HaXMode.IsOn)
+            ? new PickerFilter("Holdable", "Показать всё", item => item.Id == 0 || !item.Muted, StartOn: !Services.HaXMode.IsOn)
             : null;
         return PickerMenu.ShowAsync(host, title, items, current, filter: filter);
     }
@@ -238,7 +238,7 @@ public static class InfoPickers
                 TagColor = own ? UiTokens.Green : UiTokens.Blueprint,
             };
         }).ToList();
-        return PickerMenu.ShowAsync(host, "Tera type", items, current);
+        return PickerMenu.ShowAsync(host, "Тера-тип", items, current);
     }
 
     /// <summary>What the Tera type does for this Pokémon, in one line.</summary>
@@ -264,7 +264,7 @@ public static class InfoPickers
                 Muted = ivs is null,
             };
         }).ToList();
-        return PickerMenu.ShowAsync(host, "Hidden power", items, current);
+        return PickerMenu.ShowAsync(host, "Скрытая сила", items, current);
     }
 
     private static string? Blank(string? text) => string.IsNullOrWhiteSpace(text) ? null : text;

@@ -86,7 +86,7 @@ public sealed class PickerMenu : IPadHandler
         _router = IPlatformApplication.Current?.Services.GetService<GamepadRouter>();
 
         var search = Kit.TextField();
-        search.Placeholder = "Search…";
+        search.Placeholder = "Поиск…";
         search.TextChanged += (_, args) =>
         {
             _query = args.NewTextValue ?? "";
@@ -160,9 +160,9 @@ public sealed class PickerMenu : IPadHandler
             LineBreakMode = LineBreakMode.TailTruncation,
         };
         var hintList = new List<(string, string, Action?)> { ("A", "PICK", livePreview is null ? null : PickHighlighted) };
-        if (_hasTypes) hintList.Add(("X", "Type", () => _ = ChooseTypeAsync()));
-        if (filter is not null) hintList.Add(("Y", "Filter", ToggleFilter));
-        hintList.Add(("B", "Cancel", () => Close(null)));
+        if (_hasTypes) hintList.Add(("X", "Тип", () => _ = ChooseTypeAsync()));
+        if (filter is not null) hintList.Add(("Y", "Фильтр", ToggleFilter));
+        hintList.Add(("B", "Отмена", () => Close(null)));
         var hints = Kit.WindowHints([.. hintList]);
         var previewBar = Kit.Well(_preview, padding: 4);
         previewBar.Padding = new Thickness(10, 4);
@@ -288,8 +288,8 @@ public sealed class PickerMenu : IPadHandler
                 Name = "CommonStates",
                 States =
                 {
-                    new VisualState { Name = "Normal", Setters = { new Setter { Property = Border.StrokeProperty, Value = Colors.Transparent } } },
-                    new VisualState { Name = "Selected", Setters = {
+                    new VisualState { Name = "Обычный", Setters = { new Setter { Property = Border.StrokeProperty, Value = Colors.Transparent } } },
+                    new VisualState { Name = "Выбрано", Setters = {
                         new Setter { Property = Border.StrokeProperty, Value = UiTokens.Rim },
                         new Setter { Property = Border.BackgroundColorProperty, Value = UiTokens.SelectFill } } },
                 },
@@ -332,7 +332,7 @@ public sealed class PickerMenu : IPadHandler
     private async Task ChooseTypeAsync()
     {
         if (!_hasTypes) return;
-        const string All = "All types";
+        const string All = "Все типы";
         var types = _all.Where(x => x.TypeId is not null).Select(x => x.TypeId!.Value).Distinct().Order().ToList();
         var options = new List<PadOption> { new(All, IconPath: "all") };
         options.AddRange(types.Select(t => new PadOption(TypeFacts.Name(t), Glyph: "●", Accent: InfoKit.TypeColor(t))));
@@ -347,7 +347,7 @@ public sealed class PickerMenu : IPadHandler
     private void PaintTypeChip()
     {
         if (_typeChip is null || _typeLabel is null) return;
-        _typeLabel.Text = _typeFilter is { } t ? $"✓ {TypeFacts.Name(t)}" : "Type: All";
+        _typeLabel.Text = _typeFilter is { } t ? $"✓ {TypeFacts.Name(t)}" : "Тип: все";
         Kit.SetTab(_typeChip, _typeFilter is not null, _typeFilter is { } type ? InfoKit.TypeColor(type) : null);
         _typeLabel.TextColor = _typeFilter is not null ? UiTokens.SelectInk : UiTokens.Ink0;
     }

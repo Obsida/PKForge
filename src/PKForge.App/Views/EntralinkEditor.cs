@@ -52,7 +52,7 @@ public static class EntralinkEditor
                     break;
                 case Fill:
                     if (await EditorMenu.ConfirmAsync(host, "Refill the forest?",
-                            "Every slot is replaced with a random Pokémon from the Dream World list for this game, each with a move it can have there. All areas open.", "Fill"))
+                            "Every slot is replaced with a random Pokémon from the Dream World list for this game, each with a move it can have there. All areas open.", "Заполнить"))
                         ok = await WorldEventsMenu.WriteAsync(viewModel, s =>
                             $"Entree Forest filled: {EntralinkService.FillForestLegally(s).VisitorCount} legal Dream World Pokémon.");
                     break;
@@ -64,7 +64,7 @@ public static class EntralinkEditor
                     });
                     break;
                 case Clear:
-                    if (await EditorMenu.ConfirmAsync(host, "Empty the forest?", "Every Entree Forest Pokémon leaves.", "Empty"))
+                    if (await EditorMenu.ConfirmAsync(host, "Empty the forest?", "Every Entree Forest Pokémon leaves.", "Пусто"))
                         ok = await WorldEventsMenu.WriteAsync(viewModel, s =>
                         {
                             EntralinkService.ClearForest(s);
@@ -112,12 +112,12 @@ public static class EntralinkEditor
             await EditorMenu.ShowAsync(host, "Pass Powers", detail + Environment.NewLine + string.Join(Environment.NewLine, state.PassPowers), "OK");
             return true;
         }
-        var slots = state.PassPowers.Select((p, i) => $"Slot {i + 1} · {p}").ToArray();
+        var slots = state.PassPowers.Select((p, i) => $"Ячейка {i + 1} · {p}").ToArray();
         var slotChoice = await EditorMenu.ShowAsync(host, "Pass Powers", detail, slots);
         var slot = Array.IndexOf(slots, slotChoice);
         if (slot < 0) return true;
         var choices = EntralinkService.GetPassPowerChoices();
-        var picked = await PickerMenu.ShowAsync(host, $"Slot {slot + 1}",
+        var picked = await PickerMenu.ShowAsync(host, $"Ячейка {slot + 1}",
             choices.Select(c => new PickItem(c.Value, c.Name)).ToArray());
         if (picked is null) return true;
         return await WorldEventsMenu.WriteAsync(viewModel, s =>

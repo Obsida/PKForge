@@ -12,8 +12,13 @@ public sealed class App : Application
         base.OnSleep();
     }
 
+#if ANDROID
     private static Platforms.Android.MusicPlayer? Music =>
         IPlatformApplication.Current?.Services.GetService<Domain.IMusicPlayer>() as Platforms.Android.MusicPlayer;
+#elif WINDOWS
+    private static Platforms.Windows.DesktopMusicPlayer? Music =>
+        IPlatformApplication.Current?.Services.GetService<Domain.IMusicPlayer>() as Platforms.Windows.DesktopMusicPlayer;
+#endif
 
     /// <summary>The user's optional default background music starts with the app, once.</summary>
     protected override void OnStart()
@@ -55,6 +60,8 @@ public sealed class App : Application
     {
 #if ANDROID
         Android.Util.Log.Info("PKForgeBoot", message);
+#elif WINDOWS
+        Services.AppLog.Info("boot", message);
 #endif
     }
 
@@ -99,11 +106,16 @@ public sealed class App : Application
         try
         {
             var services = IPlatformApplication.Current?.Services
-                ?? throw new InvalidOperationException("MAUI services are unavailable.");
-            return new Window(CreateRoot(services));
+                ?? throw new InvalidOperationException("Службы приложения недоступны.");
+            var window = new Window(CreateRoot(services)) { Title = "PKForge RU", Width = 1280, Height = 800, MinimumWidth = 960, MinimumHeight = 640 };
+#if WINDOWS
+            window.Created += (_, _) => Platforms.Windows.DesktopInput.Attach(window);
+#endif
+            return window;
         }
         catch (Exception error)
         {
+            Services.AppLog.Error("boot", "Startup failed", error);
             Trace($"CreateWindow FAILED: {error}");
             return new Window(new ContentPage
             {
@@ -112,7 +124,7 @@ public sealed class App : Application
                 {
                     Content = new Label
                     {
-                        Text = $"PKForge failed to start:\n\n{error}",
+                        Text = $"Не удалось запустить PKForge:\n\n{error}",
                         TextColor = Colors.White,
                         Margin = new Thickness(20),
                     },

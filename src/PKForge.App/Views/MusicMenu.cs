@@ -11,9 +11,9 @@ public static class MusicMenu
 {
     private static readonly (MusicPlace Place, string Name, string Detail)[] Places =
     [
-        (MusicPlace.Menus, "Menus", "Plays everywhere in PKForge outside the Poképark."),
-        (MusicPlace.ParkDay, "Park by day", "Plays in the Poképark in the morning and the afternoon."),
-        (MusicPlace.ParkNight, "Park by night", "Plays in the Poképark in the evening and at night."),
+        (MusicPlace.Menus, "Меню", "Музыка во всём приложении, кроме Покепарка."),
+        (MusicPlace.ParkDay, "Парк днём", "Музыка в Покепарке утром и днём."),
+        (MusicPlace.ParkNight, "Парк ночью", "Музыка в Покепарке вечером и ночью."),
     ];
 
     public static async Task ShowAsync(Grid host, Action<string> status)
@@ -24,27 +24,32 @@ public static class MusicMenu
 
         while (true)
         {
-            var order = music.Order == MusicOrder.Shuffle ? "Shuffle" : "In order";
-            var auto = music.Autostart ? "ON" : "OFF";
+            var order = music.Order == MusicOrder.Shuffle ? "Случайно" : "По порядку";
+            var auto = music.Autostart ? "ВКЛ" : "ВЫКЛ";
             var message = music.IsPlaying && music.CurrentIndex is { } index && index < music.Library.Count
-                ? $"Playing: {music.Library[index].Title}"
-                : music.IsOn && music.Library.Count > 0 ? $"Silence here ({PlaceName(music.Place)})."
-                : $"Library: {music.Library.Count} track(s)";
+                ? $"Сейчас играет: {music.Library[index].Title}"
+                : music.IsOn && music.Library.Count > 0 ? $"Здесь тишина ({PlaceName(music.Place)})."
+                : $"Медиатека: треков {music.Library.Count}";
+#if ANDROID
             if (music is Platforms.Android.MusicPlayer { LastError: { } error })
                 message += $"\nLast error: {error}";
+#elif WINDOWS
+            if (music is Platforms.Windows.DesktopMusicPlayer { LastError: { } error })
+                message += $"\nLast error: {error}";
+#endif
             PadOption[] options =
             [
-                new(music.IsOn ? "Pause" : "Play", IconPath: music.IsOn ? "pause" : "play"),
-                new("Skip to next track", IconPath: "skip"),
+                new(music.IsOn ? "Пауза" : "Воспроизвести", IconPath: music.IsOn ? "pause" : "play"),
+                new("Следующий трек", IconPath: "skip"),
                 .. Places.Select(p => new PadOption($"{p.Name}: {MusicPlaces.Describe(p.Place, music.SourceFor(p.Place), music.Library)}",
                     IconPath: p.Place == MusicPlace.Menus ? "music" : "park", Detail: p.Detail)),
-                new($"Add music files ({music.Library.Count})", IconPath: "folder", Detail: "Pick audio files on your device to add to the library."),
-                new(music.Library.Count > 0 ? "Clear library" : "-", IconPath: "delete",
-                    Detail: music.Library.Count > 0 ? "Empties the list. Your audio files stay on the device." : null),
-                new($"Order: {order}", IconPath: "shuffle", Detail: "Play the tracks in order or shuffled."),
-                new($"Autostart: {auto}", IconPath: "settings", Detail: "ON starts the music when PKForge opens."),
+                new($"Добавить музыку ({music.Library.Count})", IconPath: "folder", Detail: "Выбери аудиофайлы на устройстве для добавления в медиатеку."),
+                new(music.Library.Count > 0 ? "Очистить медиатеку" : "-", IconPath: "delete",
+                    Detail: music.Library.Count > 0 ? "Очистить список. Аудиофайлы останутся на устройстве." : null),
+                new($"Порядок: {order}", IconPath: "shuffle", Detail: "Воспроизводить треки по порядку или случайно."),
+                new($"Автозапуск: {auto}", IconPath: "settings", Detail: "При включении музыка запускается вместе с PKForge."),
             ];
-            var choice = await PadMenu.ShowAtAsync(host, "Background music", message, start, options);
+            var choice = await PadMenu.ShowAtAsync(host, "Фоновая музыка", message, start, options);
             start = Math.Max(0, Array.FindIndex(options, o => o.Label == choice));
             if (Places.FirstOrDefault(p => choice?.StartsWith(p.Name + ": ", StringComparison.Ordinal) == true) is { Name: not null } place)
             {
@@ -53,28 +58,28 @@ public static class MusicMenu
             }
             switch (choice)
             {
-                case "Play": music.Play(); break;
-                case "Pause": music.Pause(); break;
-                case "Skip to next track": music.Skip(); break;
-                case var add when add?.StartsWith("Add music files", StringComparison.Ordinal) == true:
+                case "Воспроизвести": music.Play(); break;
+                case "Пауза": music.Pause(); break;
+                case "Следующий трек": music.Skip(); break;
+                case var add when add?.StartsWith("Добавить музыку", StringComparison.Ordinal) == true:
                 {
                     var picker = IPlatformApplication.Current?.Services.GetService<IDocumentPicker>();
                     if (picker is null) break;
                     var documents = await picker.PickManyAsync();
                     if (documents.Count == 0) break;
                     var added = music.Add(documents);
-                    status(added > 0 ? $"Added {added} track(s) to the music library." : "Those files are already in the library.");
+                    status(added > 0 ? $"Добавлено треков: {added}." : "Эти файлы уже в медиатеке.");
                     break;
                 }
-                case "Clear library":
-                    var confirmed = await PadMenu.ConfirmAsync(host, "Clear music library?",
-                        "Removes every track. Your audio files on storage are untouched.", "Clear");
+                case "Очистить медиатеку":
+                    var confirmed = await PadMenu.ConfirmAsync(host, "Очистить медиатеку?",
+                        "Очистить список треков. Аудиофайлы не удаляются.", "Очистить");
                     if (confirmed) music.Clear();
                     break;
-                case var o when o?.StartsWith("Order: ", StringComparison.Ordinal) == true:
+                case var o when o?.StartsWith("Порядок: ", StringComparison.Ordinal) == true:
                     music.SetOrder(music.Order == MusicOrder.InOrder ? MusicOrder.Shuffle : MusicOrder.InOrder);
                     break;
-                case var a when a?.StartsWith("Autostart: ", StringComparison.Ordinal) == true:
+                case var a when a?.StartsWith("Автозапуск: ", StringComparison.Ordinal) == true:
                     music.SetAutostart(!music.Autostart);
                     break;
                 default:
@@ -99,24 +104,24 @@ public static class MusicMenu
             var source = music.SourceFor(place);
             var library = music.Library;
             var titles = UniqueTitles(library);
-            var fallback = place == MusicPlace.Menus ? "All tracks" : "Same as menus";
+            var fallback = place == MusicPlace.Menus ? "Все треки" : "Как в меню";
             var ticked = source.Kind == MusicSourceKind.Tracks ? source.Tracks.ToHashSet() : [];
             PadOption Option(string label, bool on, string icon, string? optionDetail = null) =>
                 new(label, IconPath: on ? "check" : icon, Detail: optionDetail);
             var options = new List<PadOption>
             {
                 Option(fallback, source.Kind == MusicSourceKind.Default || (source.Kind == MusicSourceKind.AllTracks && place == MusicPlace.Menus), "music",
-                    place == MusicPlace.Menus ? "The whole library." : "Keeps the menus' music playing, without a cut."),
+                    place == MusicPlace.Menus ? "Вся медиатека." : "Продолжать музыку меню без прерывания."),
             };
             if (place != MusicPlace.Menus)
-                options.Add(Option("All tracks", source.Kind == MusicSourceKind.AllTracks, "music", "The whole library."));
-            options.Add(Option("Silence", source.Kind == MusicSourceKind.Silence, "close", "No music here."));
+                options.Add(Option("Все треки", source.Kind == MusicSourceKind.AllTracks, "music", "Вся медиатека."));
+            options.Add(Option("Тишина", source.Kind == MusicSourceKind.Silence, "close", "Здесь без музыки."));
             for (var i = 0; i < library.Count; i++)
                 options.Add(Option(titles[i], ticked.Contains(library[i].DocumentId), "music"));
             var message = library.Count == 0
                 ? $"{detail} Add music files first to pick tracks."
                 : $"{detail} Tick one or more tracks.";
-            var choice = await PadMenu.ShowAtAsync(host, $"Music: {name}", message, start, options.ToArray());
+            var choice = await PadMenu.ShowAtAsync(host, $"Музыка: {name}", message, start, options.ToArray());
             if (choice is null) return;
             start = Math.Max(0, options.FindIndex(o => o.Label == choice));
             var track = Array.IndexOf(titles, choice);
@@ -128,8 +133,8 @@ public static class MusicMenu
             }
             music.SetSource(place, choice switch
             {
-                "Silence" => MusicSource.Silence,
-                "All tracks" when place != MusicPlace.Menus => MusicSource.AllTracks,
+                "Тишина" => MusicSource.Silence,
+                "Все треки" when place != MusicPlace.Menus => MusicSource.AllTracks,
                 _ => MusicSource.Default,
             });
             status($"{name}: {MusicPlaces.Describe(place, music.SourceFor(place), library)}.");
@@ -146,7 +151,7 @@ public static class MusicMenu
         {
             var title = library[i].Title;
             seen[title] = seen.GetValueOrDefault(title) + 1;
-            titles[i] = seen[title] == 1 && title is not ("All tracks" or "Same as menus" or "Silence") ? title : $"{title} ({seen[title]})";
+            titles[i] = seen[title] == 1 && title is not ("Все треки" or "Как в меню" or "Тишина") ? title : $"{title} ({seen[title]})";
         }
         return titles;
     }

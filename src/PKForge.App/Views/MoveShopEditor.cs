@@ -11,7 +11,7 @@ public static class MoveShopEditor
         var info = session.GetMoveShop(box, slot);
         if (!info.Supported)
         {
-            await EditorMenu.ShowAsync(host, "Move shop", "Move Shop and move mastery are only stored by Legends: Arceus Pokémon.", "OK");
+            await EditorMenu.ShowAsync(host, "Магазин приёмов", "Move Shop and move mastery are only stored by Legends: Arceus Pokémon.", "OK");
             return false;
         }
 
@@ -27,7 +27,7 @@ public static class MoveShopEditor
             var purchased = info.Entries.Count(entry => entry.Purchased);
             var mastered = info.Entries.Count(entry => entry.Mastered);
             var options = info.Entries.Select(entry => new PickItem(entry.Index,
-                $"{Name(entry.Move)} · {(entry.Purchased ? "PURCHASED" : "NOT PURCHASED")} · {(entry.Mastered ? "MASTERED" : "NOT MASTERED")}"))
+                $"{Name(entry.Move)} · {(entry.Purchased ? "КУПЛЕНО" : "НЕ КУПЛЕНО")} · {(entry.Mastered ? "ОСВОЕНО" : "НЕ ОСВОЕНО")}"))
                 .ToArray();
             var choice = await PickerMenu.ShowAsync(host, $"Move shop · {purchased} P · {mastered} M", options);
             if (choice is null)
@@ -44,15 +44,15 @@ public static class MoveShopEditor
     private static async Task<bool> EditEntryAsync(Grid host, ISaveEngineSession session, int box, int slot,
         MoveShopEntry entry, Func<int, string> getMoveName)
     {
-        var purchased = entry.Purchased ? "ON" : "OFF";
-        var mastered = entry.Mastered ? "ON" : "OFF";
+        var purchased = entry.Purchased ? "ВКЛ" : "ВЫКЛ";
+        var mastered = entry.Mastered ? "ВКЛ" : "ВЫКЛ";
         var choice = await EditorMenu.ShowAsync(host, getMoveName(entry.Move), null,
-            new PadOption($"Purchased · {purchased}"), new PadOption($"Mastered · {mastered}"));
+            new PadOption($"Куплено · {purchased}"), new PadOption($"Освоено · {mastered}"));
         if (choice is null) return false;
 
-        if (choice.StartsWith("Purchased", StringComparison.Ordinal))
+        if (choice.StartsWith("Куплено", StringComparison.Ordinal))
             session.ApplyMoveShopEdit(box, slot, new MoveShopEdit(entry.Index, Purchased: !entry.Purchased));
-        else if (choice.StartsWith("Mastered", StringComparison.Ordinal))
+        else if (choice.StartsWith("Освоено", StringComparison.Ordinal))
             session.ApplyMoveShopEdit(box, slot, new MoveShopEdit(entry.Index, Mastered: !entry.Mastered));
         else
             return false;

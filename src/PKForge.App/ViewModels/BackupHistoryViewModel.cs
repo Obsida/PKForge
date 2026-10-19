@@ -43,10 +43,10 @@ public partial class BackupHistoryViewModel : ObservableObject
             if (open is null || info.BelongsTo(open.Document.DocumentId, open.Snapshot))
                 Backups.Add(info);
         Status = Backups.Count == 0
-            ? "No backups yet. One is created automatically before every write."
+            ? "Резервных копий пока нет. Они создаются автоматически перед каждой записью."
             : CanRestore
-                ? $"{Backups.Count} backup(s) of this save. Restoring writes into it."
-                : $"{Backups.Count} backup(s). Open a save to enable restore.";
+                ? $"Резервных копий этого сохранения: {Backups.Count}. Восстановление записывает данные в него."
+                : $"Резервных копий: {Backups.Count}. Для восстановления открой сохранение.";
     }
 
     /// <summary>
@@ -77,13 +77,13 @@ public partial class BackupHistoryViewModel : ObservableObject
         var session = _sessions.Current;
         if (session is null)
         {
-            Status = "Open a save first - restore writes into the open save file.";
+            Status = "Сначала открой сохранение: восстановление записывается в открытый файл.";
             return;
         }
 
         if (!backup.BelongsTo(session.Document.DocumentId, session.Snapshot))
         {
-            Status = "This restore point belongs to another save, so it was not restored here.";
+            Status = "Эта точка принадлежит другому сохранению. Восстановление не выполнено.";
             return;
         }
 
@@ -91,24 +91,24 @@ public partial class BackupHistoryViewModel : ObservableObject
         try
         {
             IsBusy = true;
-            Status = $"Restoring {backup.BackupId[..13]}…";
+            Status = $"Восстановление {backup.BackupId[..13]}…";
             var bytes = await _backups.ReadAsync(backup.BackupId);
             // A restore is the recovery path: a deliberate whole-file write, never slot-scoped.
             var receipt = await _writer.WriteScopedAsync(session.Document.DocumentId, session.Snapshot, bytes,
                 WriteScope.Everything,
-                "Safety copy: the state right before this restore");
+                "Резервная копия: состояние перед восстановлением");
             if (receipt.Changed)
                 _sessions.MarkWritten(session.Document.DocumentId, bytes);
             await _sessions.OpenAsync(session.Document);
             _boxBrowser.RefreshFromCurrentSession();
             Status = receipt.Changed
-                ? $"Restored. Previous state kept as restore point {receipt.BackupId[..13]}…"
-                : "This restore point matches the current state - nothing was written.";
+                ? $"Восстановлено. Прежнее состояние сохранено в точке {receipt.BackupId[..13]}…"
+                : "Точка совпадает с текущим состоянием. Запись не требуется.";
             await LoadAsync();
         }
         catch (Exception error)
         {
-            Status = $"Restore aborted: {error.Message}";
+            Status = $"Восстановление отменено: {error.Message}";
         }
         finally
         {

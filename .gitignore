@@ -9,6 +9,7 @@ obj/
 .DS_Store
 
 # Local tooling / SDKs (not part of the repo)
+.tools/
 .dotnet-home/
 .agents/
 .omp/

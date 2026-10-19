@@ -14,7 +14,7 @@ public static class DaycareEditor
             var info = session.GetDaycare();
             if (!info.Supported)
             {
-                await EditorMenu.ShowAsync(host, "Day care", "This game has no supported Day Care or Nursery storage.", "OK");
+                await EditorMenu.ShowAsync(host, "Пансион", "This game has no supported Day Care or Nursery storage.", "OK");
                 return;
             }
 
@@ -22,7 +22,7 @@ public static class DaycareEditor
             var facilityIndex = 0;
             if (facilities.Count > 1)
             {
-                var picked = await PickerMenu.ShowAsync(host, "Day care", facilities.Select((f, i) =>
+                var picked = await PickerMenu.ShowAsync(host, "Пансион", facilities.Select((f, i) =>
                     new PickItem(i, $"{f.Name} · {(f.EggAvailable ? "egg ready" : "no egg")}")).ToList());
                 if (picked is null) return;
                 facilityIndex = picked.Id;
@@ -31,19 +31,19 @@ public static class DaycareEditor
             var facility = session.GetDaycare().Facilities[facilityIndex];
             var choices = facility.Slots.Select(slot => new PadOption(SlotLabel(slot))).ToArray();
             var choice = await EditorMenu.ShowAsync(host, facility.Name,
-                facility.EggAvailable ? "An egg is ready. Egg state is read-only." : "Deposited Pokémon", choices);
+                facility.EggAvailable ? "An egg is ready. Egg state is read-only." : "Покемоны в пансионе", choices);
             if (choice is null) return;
             var slotIndex = Array.FindIndex(facility.Slots.ToArray(), slot => choice == SlotLabel(slot));
             if (slotIndex < 0 || !facility.Slots[slotIndex].Occupied)
             {
                 if (slotIndex >= 0)
-                    await EditorMenu.ShowAsync(host, facility.Name, "This slot is empty.", "OK");
+                    await EditorMenu.ShowAsync(host, facility.Name, "Эта ячейка пуста.", "OK");
                 continue;
             }
 
             var slot = facility.Slots[slotIndex];
-            var confirmed = await PadMenu.ConfirmAsync(host, "WITHDRAW POKéMON?",
-                $"{DisplayName(slot)} moves to the first empty PC box slot. A restore point is created first.", "Withdraw");
+            var confirmed = await PadMenu.ConfirmAsync(host, "ЗАБРАТЬ ПОКЕМОНА?",
+                $"{DisplayName(slot)} moves to the first empty PC box slot. A restore point is created first.", "Забрать");
             if (!confirmed) continue;
             var saved = await viewModel.RunMutationAsync(s =>
             {
@@ -55,8 +55,8 @@ public static class DaycareEditor
     }
 
     private static string SlotLabel(DaycareSlot slot) => !slot.Occupied
-        ? $"Slot {slot.Index + 1} · empty"
-        : $"Slot {slot.Index + 1} · {DisplayName(slot)} · Lv. {slot.Level}{(slot.Experience is { } exp ? $" · EXP {exp}" : "")}";
+        ? $"Ячейка {slot.Index + 1} · пусто"
+        : $"Ячейка {slot.Index + 1} · {DisplayName(slot)} · ур. {slot.Level}{(slot.Experience is { } exp ? $" · EXP {exp}" : "")}";
 
     private static string DisplayName(DaycareSlot slot) => string.IsNullOrWhiteSpace(slot.Nickname) || slot.Nickname == slot.SpeciesName
         ? slot.SpeciesName

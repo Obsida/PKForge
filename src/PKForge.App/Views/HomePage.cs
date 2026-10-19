@@ -33,7 +33,7 @@ public sealed class HomePage : ContentPage, IPadHandler
         // GAMES section: the cartridge shelf (reused), labelled DS-style.
         var gamesLabel = new Label
         {
-            Text = "Games", FontFamily = DsChrome.PixelFont, FontSize = UiTokens.TextTitle,
+            Text = "Игры", FontFamily = DsChrome.PixelFont, FontSize = UiTokens.TextTitle,
             TextColor = UiTokens.Ink0, VerticalOptions = LayoutOptions.Center,
         };
         var filterCaption = new Label
@@ -42,9 +42,9 @@ public sealed class HomePage : ContentPage, IPadHandler
             TextColor = UiTokens.Ink0, VerticalOptions = LayoutOptions.Center,
         };
         filterCaption.SetBinding(Label.TextProperty, new Binding("Caption",
-            source: _viewModel.Filter, stringFormat: "Filter · {0}"));
+            source: _viewModel.Filter, stringFormat: "Фильтр · {0}"));
         // A menu button (the summary's resting tab), not an outlined pill.
-        var filterChip = Kit.Tab("Filter");
+        var filterChip = Kit.Tab("Фильтр");
         filterChip.Content = filterCaption;
         Kit.SetTab(filterChip, false);
         filterCaption.TextColor = UiTokens.Ink0;
@@ -83,11 +83,11 @@ public sealed class HomePage : ContentPage, IPadHandler
         BlockNativeFocus(_shelf);
 
         // The three destinations as PKSM tiles with bundled pixel icons.
-        var bank = new DsCard("bank", "Bank") { Tapped = () => _ = PushAsync<BankPage>() };
-        var autopilot = new DsCard("pokedex", "Dex Autopilot") { Tapped = () => _ = OpenAutopilotAsync() };
-        var park = new DsCard("park", "Poképark") { Tapped = () => _ = PushParkAsync() };
-        var events = new DsCard("events", "Events") { Tapped = () => _ = ShowEventsMenuAsync() };
-        var settings = new DsCard("settings", "Settings") { Tapped = () => _ = ShowSettingsAsync() };
+        var bank = new DsCard("bank", "Банк") { Tapped = () => _ = PushAsync<BankPage>() };
+        var autopilot = new DsCard("pokedex", "Автопилот покедекса") { Tapped = () => _ = OpenAutopilotAsync() };
+        var park = new DsCard("park", "Покепарк") { Tapped = () => _ = PushParkAsync() };
+        var events = new DsCard("events", "События") { Tapped = () => _ = ShowEventsMenuAsync() };
+        var settings = new DsCard("settings", "Настройки") { Tapped = () => _ = ShowSettingsAsync() };
         _cards = [bank, autopilot, park, events, settings];
         foreach (var card in _cards) BlockNativeFocus(card);
         var cards = new Grid
@@ -112,21 +112,21 @@ public sealed class HomePage : ContentPage, IPadHandler
         var bodyHost = new Grid { Children = { DsChrome.GridBackground(), body } };
 
         var footer = DsChrome.Footer(
-            ("A", "Open", () => OnPadButton(PadButton.A)),
+            ("A", "Открыть", () => OnPadButton(PadButton.A)),
             // The cartridge identity menu (rename, color, which game): B on the pad, a hold by touch.
-            ("B", "Edit game · hold", () =>
+            ("B", "Настроить игру · правый щелчок", () =>
             {
                 if ((uint)_shelfIndex < (uint)_viewModel.Groups.Count) _ = ShowSaveMenuAsync(_viewModel.Groups[_shelfIndex]);
             }),
-            ("L", "Filter", () => _ = ShowFilterMenuAsync()),
-            ("Y", "Link", () => _ = ShowLinkMenuAsync()),
-            ("X", "File", () => _ = LinkFileAsync()),
-            ("+", "Settings", () => _ = ShowSettingsAsync()));
+            ("L", "Фильтр", () => _ = ShowFilterMenuAsync()),
+            ("Y", "Подключить", () => _ = ShowLinkMenuAsync()),
+            ("X", "Файл", () => _ = LinkFileAsync()),
+            ("+", "Настройки", () => _ = ShowSettingsAsync()));
 
         var root = new Grid
         {
             RowDefinitions = [new(GridLength.Auto), new(GridLength.Auto), new(GridLength.Star), new(GridLength.Auto)],
-            Children = { DsChrome.TitleBar(), DsChrome.StatusStrip("PKForge", "Offline"), bodyHost, footer },
+            Children = { DsChrome.TitleBar(), DsChrome.StatusStrip("PKForge", "Без сети"), bodyHost, footer },
         };
         Grid.SetRow((View)root.Children[1], 1);
         Grid.SetRow(bodyHost, 2);
@@ -144,6 +144,7 @@ public sealed class HomePage : ContentPage, IPadHandler
     /// </summary>
     private static void BlockNativeFocus(View view)
     {
+#if ANDROID
         view.HandlerChanged += (_, _) =>
         {
             if (view.Handler?.PlatformView is Android.Views.View platform)
@@ -152,6 +153,7 @@ public sealed class HomePage : ContentPage, IPadHandler
                 platform.FocusableInTouchMode = false;
             }
         };
+#endif
     }
 
     /// <summary>
@@ -163,6 +165,7 @@ public sealed class HomePage : ContentPage, IPadHandler
     /// </summary>
     private static void AttachPress(View view, Action onTap, Action onLongPress)
     {
+#if ANDROID
         view.HandlerChanged += (_, _) =>
         {
             if (view.Handler?.PlatformView is not Android.Views.View platform) return;
@@ -206,6 +209,14 @@ public sealed class HomePage : ContentPage, IPadHandler
                 e.Handled = true;
             };
         };
+#elif WINDOWS
+        view.HandlerChanged += (_, _) =>
+        {
+            if (view.Handler?.PlatformView is not Microsoft.UI.Xaml.UIElement platform) return;
+            platform.Tapped += (_, e) => { onTap(); e.Handled = true; };
+            platform.RightTapped += (_, e) => { onLongPress(); e.Handled = true; };
+        };
+#endif
     }
 
     // Once per launch, not per page: a color scheme change rebuilds Home, and the new page
@@ -289,22 +300,22 @@ public sealed class HomePage : ContentPage, IPadHandler
             {
                 // First run plays like a Pokémon intro: a professor-style dialogue, then the choices.
                 await DialogueBox.ShowSequenceAsync(_hostGrid,
-                    "Hello! Welcome to PKForge!",
-                    "This is a place where your Pokémon from every game can live together, safely.",
-                    "I can edit them, keep them in the Bank, and make sure each one is legal.",
-                    "And every change is backed up before it is written, so nothing is ever lost.",
-                    "Now then... let's find your games!");
+                    "Привет! Добро пожаловать в PKForge!",
+                    "Здесь покемоны из разных игр могут безопасно жить вместе.",
+                    "Можно редактировать покемонов, хранить их в банке и проверять легальность.",
+                    "Перед каждой записью создаётся резервная копия для восстановления.",
+                    "А теперь… найдём твои игры!");
 
-                var choice = await PadMenu.ShowAsync(_hostGrid, "Get started", null,
-                    new PadOption("Link an emulator", IconPath: "link", Detail: "Pick the emulator folder where your games keep their saves."),
-                    new PadOption("Open a single save file", IconPath: "file", Detail: "Pick one save file instead of a whole emulator folder."),
-                    new PadOption($"Download the sprite pack ({SpritePackDownloader.SizeHint})", IconPath: "download", Detail: "Animated sprites, HOME pictures and item icons, to use offline."),
-                    new PadOption("Maybe later", IconPath: "close"));
+                var choice = await PadMenu.ShowAsync(_hostGrid, "Начать", null,
+                    new PadOption("Подключить эмулятор", IconPath: "link", Detail: "Выбрать папку эмулятора с сохранениями игр."),
+                    new PadOption("Открыть отдельное сохранение", IconPath: "file", Detail: "Выбрать отдельный файл сохранения."),
+                    new PadOption($"Скачать набор спрайтов ({SpritePackDownloader.SizeHint})", IconPath: "download", Detail: "Анимации, изображения HOME и значки предметов для работы без сети."),
+                    new PadOption("Позже", IconPath: "close"));
                 switch (choice)
                 {
-                    case "Link an emulator": await ShowLinkMenuAsync(); break;
-                    case "Open a single save file": await LinkFileAsync(); break;
-                    case var pack when pack?.StartsWith("Download the sprite pack", StringComparison.Ordinal) == true:
+                    case "Подключить эмулятор": await ShowLinkMenuAsync(); break;
+                    case "Открыть отдельное сохранение": await LinkFileAsync(); break;
+                    case var pack when pack?.StartsWith("Скачать набор спрайтов", StringComparison.Ordinal) == true:
                         await DownloadSpritePackAsync();
                         break;
                 }
@@ -420,37 +431,44 @@ public sealed class HomePage : ContentPage, IPadHandler
     /// or plain alphabetical.</summary>
     private async Task ShowFilterMenuAsync()
     {
-        var choice = await PadMenu.ShowAsync(_hostGrid, "Filter games", null,
-            new PadOption("All games", IconPath: "all"),
-            new PadOption("Release order", IconPath: "calendar", Detail: "Every game, from the oldest release to the newest."),
-            new PadOption("Alphabetical (A-Z)", IconPath: "alpha"),
+        var choice = await PadMenu.ShowAsync(_hostGrid, "Фильтр игр", null,
+            new PadOption("Все игры", IconPath: "all"),
+            new PadOption("Порядок выхода", IconPath: "calendar", Detail: "Все игры, от старых до новых."),
+            new PadOption("По алфавиту (A–Z)", IconPath: "alpha"),
             new PadOption("Game Boy (Gen I-II)", IconPath: "platform-gb"),
             new PadOption("GBA (Gen III)", IconPath: "platform-gba"),
             new PadOption("DS (Gen IV-V)", IconPath: "platform-ds"),
             new PadOption("3DS (Gen VI-VII)", IconPath: "azahar"),
             new PadOption("Switch (Gen VII-IX)", IconPath: "eden"),
-            new PadOption("Gen I", IconPath: "generation"),
-            new PadOption("Gen II", IconPath: "generation"),
-            new PadOption("Gen III", IconPath: "generation"),
-            new PadOption("Gen IV", IconPath: "generation"),
-            new PadOption("Gen V", IconPath: "generation"),
-            new PadOption("Gen VI", IconPath: "generation"),
-            new PadOption("Gen VII", IconPath: "generation"),
-            new PadOption("Gen VIII", IconPath: "generation"),
-            new PadOption("Gen IX", IconPath: "generation"));
+            new PadOption("Поколение I", IconPath: "generation"),
+            new PadOption("Поколение II", IconPath: "generation"),
+            new PadOption("Поколение III", IconPath: "generation"),
+            new PadOption("Поколение IV", IconPath: "generation"),
+            new PadOption("Поколение V", IconPath: "generation"),
+            new PadOption("Поколение VI", IconPath: "generation"),
+            new PadOption("Поколение VII", IconPath: "generation"),
+            new PadOption("Поколение VIII", IconPath: "generation"),
+            new PadOption("Поколение IX", IconPath: "generation"));
         var (key, caption) = choice switch
         {
-            "All games" => ("all", "All"),
-            "Release order" => ("release", "Release"),
-            "Alphabetical (A-Z)" => ("az", "A-Z"),
+            "Все игры" => ("all", "Все"),
+            "Порядок выхода" => ("release", "По выходу"),
+            "По алфавиту (A–Z)" => ("az", "A-Z"),
             "Game Boy (Gen I-II)" => ("gb", "Game Boy"),
             "GBA (Gen III)" => ("gba", "GBA"),
             "DS (Gen IV-V)" => ("ds", "DS"),
             "3DS (Gen VI-VII)" => ("3ds", "3DS"),
             "Switch (Gen VII-IX)" => ("switch", "Switch"),
-            { } gen when gen is not null && gen.StartsWith("Gen ", StringComparison.Ordinal) && int.TryParse(gen[4..], out var n)
-                => ($"gen{n}", $"Gen {gen[4..]}"),
-            _ => ("all", "All"),
+            "Поколение I" => ("gen1", "Поколение I"),
+            "Поколение II" => ("gen2", "Поколение II"),
+            "Поколение III" => ("gen3", "Поколение III"),
+            "Поколение IV" => ("gen4", "Поколение IV"),
+            "Поколение V" => ("gen5", "Поколение V"),
+            "Поколение VI" => ("gen6", "Поколение VI"),
+            "Поколение VII" => ("gen7", "Поколение VII"),
+            "Поколение VIII" => ("gen8", "Поколение VIII"),
+            "Поколение IX" => ("gen9", "Поколение IX"),
+            _ => ("all", "Все"),
         };
         _viewModel.ApplyFilter(key, caption);
         // Groups were replaced wholesale: re-run selection so a cartridge is highlighted.
@@ -460,14 +478,14 @@ public sealed class HomePage : ContentPage, IPadHandler
     /// <summary>A cartridge with one save opens it; a shared cartridge asks which save first.</summary>
     private async Task OpenCardAsync(SaveCard card)
     {
-        var save = await ChooseSaveAsync(card, "Which save do you want to open?");
+        var save = await ChooseSaveAsync(card, "Какое сохранение открыть?");
         if (save is not null) await OpenSaveAsync(save);
     }
 
     /// <summary>Long-press / B: the save's identity menu ("Open save" first); a shared cartridge picks the save first.</summary>
     private async Task ShowSaveMenuAsync(SaveCard card)
     {
-        var save = await ChooseSaveAsync(card, "Choose the save to rename, recolor or identify.");
+        var save = await ChooseSaveAsync(card, "Выбери сохранение для изменения имени, цвета или версии игры.");
         if (save is null) return;
         if (await SaveIdentitySheet.ShowAsync(_hostGrid, _viewModel, save))
             await OpenSaveAsync(save);
@@ -490,13 +508,13 @@ public sealed class HomePage : ContentPage, IPadHandler
             || !SaveIdentityRules.NeedsEditionChoice(guess, current.GameChoiceId))
             return true;
 
-        const string later = "Decide later";
+        const string later = "Решить позже";
         var editions = SaveIdentityRules.ChoicesFor(guess.Family, guess.Label).Where(c => !c.IsHack).ToArray();
         var options = editions.Select(c => new PadOption(c.Label, IconPath: "game"))
             .Append(new PadOption(later, IconPath: "close")).ToArray();
-        var choice = await PadMenu.ShowAsync(_hostGrid, "Which version is this?",
-            "Both versions write the same save file, so PKForge cannot tell them apart. " +
-            "Pick yours once; you can change it later from the save's menu (long-press).", options);
+        var choice = await PadMenu.ShowAsync(_hostGrid, "Какая это версия игры?",
+            "Обе версии используют одинаковый формат сохранения, поэтому PKForge не может различить их. " +
+            "Выбери версию. Изменить её можно в меню сохранения (правый щелчок на ПК).", options);
         if (choice is null) return false;
         if (choice == later)
         {
@@ -515,16 +533,16 @@ public sealed class HomePage : ContentPage, IPadHandler
     {
         while (true)
         {
-            var platform = await PadMenu.ShowAsync(_hostGrid, "Link a storage unit", "Choose a platform to see its emulators.",
+            var platform = await PadMenu.ShowAsync(_hostGrid, "Подключить хранилище", "Выбери платформу, чтобы увидеть её эмуляторы.",
                 new PadOption("Game Boy / Game Boy Color", IconPath: "platform-gb"),
                 new PadOption("Game Boy Advance", IconPath: "platform-gba"),
                 new PadOption("Nintendo DS", IconPath: "platform-ds"),
                 new PadOption("GameCube", IconPath: "platform-gc"),
                 new PadOption("Nintendo 3DS", IconPath: "azahar"),
                 new PadOption("Nintendo Switch", IconPath: "eden"),
-                new PadOption("Single save file", IconPath: "file"));
+                new PadOption("Отдельное сохранение", IconPath: "file"));
             if (platform is null) return;
-            if (platform == "Single save file") { await LinkFileAsync(); return; }
+            if (platform == "Отдельное сохранение") { await LinkFileAsync(); return; }
             var options = platform switch
             {
                 "Game Boy / Game Boy Color" => new[]
@@ -560,16 +578,16 @@ public sealed class HomePage : ContentPage, IPadHandler
                 "Dolphin" => "Save in game and stop emulation before editing Colosseum or XD. Select Dolphin's GC folder, a region folder, or Card A / Card B containing .gci saves. For .raw memory cards, export the game as GCI with Dolphin's Memory Card Manager, or configure that card slot as GCI Folder. After editing, start the game normally; loading an old save state can undo your edits.",
                 "DraStic" => "Save in game and close DraStic. Select its backup folder containing .dsv battery saves, or the DraStic data folder. Save states are not supported. Restart the game normally after editing.",
                 "Pizza Boy A (GBA)" or "Pizza Boy C (GB/GBC)" => "Save in game and close Pizza Boy. Select the folder containing its battery saves (.sav), not save states. If Android hides the folder, export the battery save in Pizza Boy and link that export. Import the edited export back into Pizza Boy, then restart the game normally.",
-                "Azahar / Lime3DS" => "Save in game and close the emulator. Select the user folder you chose in its setup (the one containing sdmc); sdmc, Nintendo 3DS or a folder above the user folder also work. Restart the game normally after editing.",
+                "Azahar / Lime3DS" => "Сохранись в игре и закрой эмулятор. Выбери пользовательскую папку с sdmc, саму sdmc или Nintendo 3DS. После редактирования запусти игру обычным способом.",
                 "Citra MMJ" => "Save in game and close Citra MMJ. In the file picker open the Citra MMJ entry (or Android/data/org.citra.emu/files) and select citra-emu, or /citra-emu on older Android. Restart the game normally after editing.",
-                "Eden" => "Save in game and close the emulator. Select its files root containing the emulated storage. Restart the game normally after editing.",
-                "melonDS" => "Save in game and close melonDS. Select the folder containing your .sav battery saves: next to your ROMs by default, or the save folder set in melonDS's settings. Save states are not supported. Restart the game normally after editing.",
-                _ => "Save in game and close the emulator. Select its saves folder (or the folder containing your battery saves). Save states are not supported. Restart the game normally after editing.",
+                "Eden" => "Сохранись в игре и закрой эмулятор. Выбери его папку данных с эмулируемым хранилищем. После редактирования запусти игру обычным способом.",
+                "melonDS" => "Сохранись в игре и закрой melonDS. Выбери папку файлов .sav рядом с ROM или указанную в настройках melonDS. Состояния эмулятора не поддерживаются. После редактирования запусти игру обычным способом.",
+                _ => "Сохранись в игре и закрой эмулятор. Выбери папку обычных сохранений. Состояния эмулятора (save states) не поддерживаются. После редактирования запусти игру обычным способом.",
             };
-            var proceed = await PadMenu.ShowAsync(_hostGrid, $"Link {choice}",
+            var proceed = await PadMenu.ShowAsync(_hostGrid, $"Подключить {choice}",
                 guidance + " If Android does not offer access to the folder, use Single save file with an exported save.",
-                new PadOption("Choose folder", IconPath: "folder"), new PadOption("Back", IconPath: "back"));
-            if (proceed != "Choose folder") continue;
+                new PadOption("Выбрать папку", IconPath: "folder"), new PadOption("Назад", IconPath: "back"));
+            if (proceed != "Выбрать папку") continue;
             switch (choice)
             {
                 case "RetroArch": await _viewModel.AddRetroArchCommand.ExecuteAsync(null); break;
@@ -590,43 +608,43 @@ public sealed class HomePage : ContentPage, IPadHandler
     private async Task ShowSettingsAsync()
     {
         var hiddenCount = _viewModel.HiddenSaves.Count;
-        var hiddenOption = $"Show hidden saves ({hiddenCount})";
+        var hiddenOption = $"Показать скрытые сохранения ({hiddenCount})";
         var options = new List<PadOption>
         {
-            new("Link an emulator", IconPath: "link", Detail: "Pick the emulator folder where your games keep their saves."),
-            new("Manage linked storage", IconPath: "sdcard", Detail: "Unlink emulator folders. Your files stay on the device."),
-            new("Open a save file", IconPath: "file", Detail: "Pick one save file instead of a whole emulator folder."),
+            new("Подключить эмулятор", IconPath: "link", Detail: "Выбрать папку эмулятора с сохранениями игр."),
+            new("Подключённые папки", IconPath: "sdcard", Detail: "Отключить папки эмуляторов. Файлы останутся на устройстве."),
+            new("Открыть сохранение", IconPath: "file", Detail: "Выбрать отдельный файл сохранения."),
         };
-        if (hiddenCount > 0) options.Add(new PadOption(hiddenOption, IconPath: "show", Detail: "Saves you hid from Home. Pick one to show it again."));
-        var scheme = $"Color scheme: {PKForge.Chrome.ColorTheme.Current.Name}";
-        var background = $"Box background: {BoxBackground.Name(BoxBackground.Style)}";
+        if (hiddenCount > 0) options.Add(new PadOption(hiddenOption, IconPath: "show", Detail: "Сохранения, скрытые с главного экрана. Выбери, чтобы вернуть."));
+        var scheme = $"Цветовая тема: {PKForge.Chrome.ColorTheme.Current.Name}";
+        var background = $"Фон боксов: {BoxBackground.Name(BoxBackground.Style)}";
         options.AddRange(
         [
-            new PadOption(scheme, IconPath: "palette", Detail: "The app's colors: the default blues or a theme for each type."),
-            new PadOption(background, IconPath: "box", Detail: "How each PC box shows the wallpaper the game gives it."),
-            new PadOption("Restore points", IconPath: "history", Detail: "The backups made before each write, to put a save back as it was."),
-            new PadOption("About PKForge", IconPath: "info"),
-            new PadOption("Check for update", IconPath: "update"),
-            new PadOption("Music", IconPath: "music", Detail: "Play your own audio files in the background."),
-            new PadOption("Misc", IconPath: "gears", Detail: "Sprite pack, rescan, logs, screen and editing modes."),
-            new PadOption("Quit PKForge", IconPath: "quit"),
+            new PadOption(scheme, IconPath: "palette", Detail: "Цвета приложения: стандартная синяя тема или тема для каждого типа."),
+            new PadOption(background, IconPath: "box", Detail: "Способ отображения игровых обоев в боксах."),
+            new PadOption("Точки восстановления", IconPath: "history", Detail: "Резервные копии перед каждой записью для возврата к прежнему состоянию."),
+            new PadOption("О PKForge", IconPath: "info"),
+            new PadOption("Проверить обновления", IconPath: "update"),
+            new PadOption("Музыка", IconPath: "music", Detail: "Воспроизводить свои аудиофайлы в фоне."),
+            new PadOption("Разное", IconPath: "gears", Detail: "Спрайты, поиск игр, журналы, экран и режимы редактирования."),
+            new PadOption("Выйти из PKForge", IconPath: "quit"),
         ]);
-        var choice = await PadMenu.ShowAsync(_hostGrid, "Settings", null, [.. options]);
+        var choice = await PadMenu.ShowAsync(_hostGrid, "Настройки", null, [.. options]);
         if (choice == hiddenOption) { await ShowHiddenSavesAsync(); return; }
         if (choice == scheme) { await ShowColorSchemeAsync(); return; }
         if (choice == background) { await ShowBoxBackgroundAsync(); return; }
         switch (choice)
         {
-            case "Link an emulator": await ShowLinkMenuAsync(); break;
-            case "Manage linked storage": await ShowManageLinkedStorageAsync(); break;
-            case "Open a save file": await LinkFileAsync(); break;
-            case "Restore points": await PushAsync<BackupHistoryPage>(); break;
-            case "About PKForge": await AboutPopup.ShowAsync(_hostGrid); break;
-            case "Check for update": await CheckForUpdateAsync(automatic: false); break;
-            case "Music": await ShowMusicAsync(); break;
-            case "Misc": await ShowMiscAsync(); break;
-            case "Quit PKForge":
-                if (await PadMenu.ConfirmAsync(_hostGrid, "Quit PKForge?", "Unsaved edits in open menus are already backed up per write.", "Quit"))
+            case "Подключить эмулятор": await ShowLinkMenuAsync(); break;
+            case "Подключённые папки": await ShowManageLinkedStorageAsync(); break;
+            case "Открыть сохранение": await LinkFileAsync(); break;
+            case "Точки восстановления": await PushAsync<BackupHistoryPage>(); break;
+            case "О PKForge": await AboutPopup.ShowAsync(_hostGrid); break;
+            case "Проверить обновления": await CheckForUpdateAsync(automatic: false); break;
+            case "Музыка": await ShowMusicAsync(); break;
+            case "Разное": await ShowMiscAsync(); break;
+            case "Выйти из PKForge":
+                if (await PadMenu.ConfirmAsync(_hostGrid, "Выйти из PKForge?", "Перед записью каждого изменения создаётся резервная копия.", "Выйти"))
                     Microsoft.Maui.Controls.Application.Current?.Quit();
                 break;
         }
@@ -637,8 +655,8 @@ public sealed class HomePage : ContentPage, IPadHandler
     {
         while (_viewModel.HiddenSaves is { Count: > 0 } hidden)
         {
-            var save = await SavePickerSheet.ChooseFromTileAsync(_hostGrid, hidden, "Hidden saves",
-                "Pick a save to show it on Home and in save pickers again.", allowSingle: true);
+            var save = await SavePickerSheet.ChooseFromTileAsync(_hostGrid, hidden, "Скрытые сохранения",
+                "Выбери сохранение для возврата на главный экран и в список выбора.", allowSingle: true);
             if (save is null) return;
             var current = _viewModel.Identities.Get(save.DocumentId) ?? new SaveIdentity(save.DocumentId);
             _viewModel.Identities.Set(current with { Hidden = false });
@@ -663,38 +681,38 @@ public sealed class HomePage : ContentPage, IPadHandler
         var roots = IPlatformApplication.Current!.Services.GetRequiredService<IWatchedRootStore>().GetRoots();
         if (roots.Count == 0)
         {
-            _viewModel.Status = "No linked storage units.";
+            _viewModel.Status = "Нет подключённых хранилищ.";
             return;
         }
 
         var options = roots
-            .Select(root => new PadOption($"Unlink {SaveDescriptions.EmulatorName(root.Kind)} · {root.DisplayName}", IconPath: IconFor(root.Kind)))
-            .Append(new PadOption("Unlink all storage units", IconPath: "unlink", Detail: "Removes every linked folder. Your files stay on the device."))
-            .Append(new PadOption("Cancel", IconPath: "close"))
+            .Select(root => new PadOption($"Отключить {SaveDescriptions.EmulatorName(root.Kind)} · {root.DisplayName}", IconPath: IconFor(root.Kind)))
+            .Append(new PadOption("Отключить все папки", IconPath: "unlink", Detail: "Отключить все папки. Файлы останутся на устройстве."))
+            .Append(new PadOption("Отмена", IconPath: "close"))
             .ToArray();
-        var choice = await PadMenu.ShowAsync(_hostGrid, "Linked storage", "Remove a linked emulator folder without resetting the app.", options);
-        if (choice is null or "Cancel") return;
+        var choice = await PadMenu.ShowAsync(_hostGrid, "Подключённые хранилища", "Отключить папку эмулятора без сброса приложения.", options);
+        if (choice is null or "Отмена") return;
 
         var store = IPlatformApplication.Current!.Services.GetRequiredService<IWatchedRootStore>();
-        if (choice == "Unlink all storage units")
+        if (choice == "Отключить все папки")
         {
-            var confirmedAll = await PadMenu.ConfirmAsync(_hostGrid, "Unlink all storage?",
-                "Every linked emulator folder will be removed from PKForge. Your files stay on the device.", "Unlink all");
+            var confirmedAll = await PadMenu.ConfirmAsync(_hostGrid, "Отключить все хранилища?",
+                "Все папки эмуляторов будут отключены от PKForge. Файлы останутся на устройстве.", "Отключить всё");
             if (!confirmedAll) return;
             foreach (var root in roots)
                 store.RemoveRoot(root);
-            _viewModel.Status = "All linked storage units removed.";
+            _viewModel.Status = "Все хранилища отключены.";
         }
         else
         {
             var index = Array.FindIndex(options, option => option.Label == choice);
             if (index < 0 || index >= roots.Count) return;
             var root = roots[index];
-            var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Unlink storage?",
-                $"Remove {SaveDescriptions.EmulatorName(root.Kind)} · {root.DisplayName} from PKForge? Your files stay on the device.", "Unlink");
+            var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Отключить хранилище?",
+                $"Отключить {SaveDescriptions.EmulatorName(root.Kind)} · {root.DisplayName} от PKForge? Файлы останутся на устройстве.", "Отключить");
             if (!confirmed) return;
             store.RemoveRoot(root);
-            _viewModel.Status = $"{SaveDescriptions.EmulatorName(root.Kind)} unlinked.";
+            _viewModel.Status = $"{SaveDescriptions.EmulatorName(root.Kind)} отключено.";
         }
 
         await _viewModel.RescanCommand.ExecuteAsync(null);
@@ -713,9 +731,9 @@ public sealed class HomePage : ContentPage, IPadHandler
         }
         catch (Exception error)
         {
-            Android.Util.Log.Warn("PKForgeUpdate", $"Automatic update check failed: {error}");
+            AppLog.Warn("update", $"Automatic update check failed: {error}");
             if (!automatic)
-                _viewModel.Status = $"Update check failed: {error.Message}";
+                _viewModel.Status = $"Ошибка проверки обновлений: {error.Message}";
             return;
         }
 
@@ -732,13 +750,13 @@ public sealed class HomePage : ContentPage, IPadHandler
 
         var choice = await DialogueChoiceBox.ShowAsync(_hostGrid,
             $"A new version of PKForge is available! Version {update.Version} is ready to install. Would you like to update now?",
-            "YES", "NO", "DON'T REMIND ME");
+            "ДА", "НЕТ", "DON'T REMIND ME");
         switch (choice)
         {
-            case "YES":
+            case "ДА":
                 await InstallUpdateAsync(update);
                 break;
-            case "NO":
+            case "НЕТ":
                 _viewModel.Status = $"Version {update.Version} will be offered again next launch.";
                 break;
             case "DON'T REMIND ME":
@@ -769,10 +787,10 @@ public sealed class HomePage : ContentPage, IPadHandler
         }
         catch (Exception error)
         {
-            Android.Util.Log.Error("PKForgeUpdate", $"Download/install failed: {error}");
-            _viewModel.Status = $"Update failed: {error.Message}";
+            AppLog.Warn("update", $"Download/install failed: {error}");
+            _viewModel.Status = $"Ошибка обновления: {error.Message}";
             var openRelease = await PadMenu.ConfirmAsync(_hostGrid, "Open the release page?",
-                "The in-app installer could not finish. The GitHub release page has the same APK.", "Open");
+                "The in-app installer could not finish. The GitHub release page has the same APK.", "Открыть");
             if (openRelease)
                 await Launcher.OpenAsync(update.ReleaseUrl);
             return;
@@ -803,7 +821,7 @@ public sealed class HomePage : ContentPage, IPadHandler
                 _pendingAuthorizedUpdate = update;
                 var permissionChoice = await DialogueChoiceBox.ShowAsync(_hostGrid,
                     "Android needs permission to install PKForge updates. Allow install unknown apps for PKForge, then check again?",
-                    "OPEN SETTINGS", "NOT NOW");
+                    "OPEN SETTINGS", "НЕ СЕЙЧАС");
                 if (permissionChoice == "OPEN SETTINGS")
                     AppUpdateService.OpenInstallPermissionSettings();
                 break;
@@ -812,9 +830,9 @@ public sealed class HomePage : ContentPage, IPadHandler
 
     private async Task ReportInstallFailureAsync(AvailableAppUpdate update, string reason)
     {
-        _viewModel.Status = $"Update failed: {reason}";
+        _viewModel.Status = $"Ошибка обновления: {reason}";
         var openRelease = await PadMenu.ConfirmAsync(_hostGrid, "Open the release page?",
-            $"Android did not install the update ({reason}). The GitHub release page has the same APK.", "Open");
+            $"Android did not install the update ({reason}). The GitHub release page has the same APK.", "Открыть");
         if (openRelease)
             await Launcher.OpenAsync(update.ReleaseUrl);
     }
@@ -825,17 +843,17 @@ public sealed class HomePage : ContentPage, IPadHandler
     private async Task ShowBoxBackgroundAsync()
     {
         var styles = Enum.GetValues<PKForge.Chrome.StoragePaint.WallpaperStyle>();
-        var picked = await PadMenu.ShowAsync(_hostGrid, "Box background", null,
+        var picked = await PadMenu.ShowAsync(_hostGrid, "Фон боксов", null,
             [
-                new PadOption(BoxBackground.Name(PKForge.Chrome.StoragePaint.WallpaperStyle.Blue), Detail: "The game's wallpaper pattern in the color scheme's tones."),
-                new PadOption(BoxBackground.Name(PKForge.Chrome.StoragePaint.WallpaperStyle.Veiled), Detail: "The game's wallpaper under a veil of the color scheme."),
-                new PadOption(BoxBackground.Name(PKForge.Chrome.StoragePaint.WallpaperStyle.Duotone), Detail: "The wallpaper's pattern in two tones, the color scheme's to its own."),
-                new PadOption(BoxBackground.Name(PKForge.Chrome.StoragePaint.WallpaperStyle.Horizon), Detail: "The wallpaper rises from the bottom and fades into the color scheme."),
+                new PadOption(BoxBackground.Name(PKForge.Chrome.StoragePaint.WallpaperStyle.Blue), Detail: "Узор игровых обоев в цветах выбранной темы."),
+                new PadOption(BoxBackground.Name(PKForge.Chrome.StoragePaint.WallpaperStyle.Veiled), Detail: "Игровые обои под оттенком выбранной темы."),
+                new PadOption(BoxBackground.Name(PKForge.Chrome.StoragePaint.WallpaperStyle.Duotone), Detail: "Узор обоев в двух оттенках: темы и самих обоев."),
+                new PadOption(BoxBackground.Name(PKForge.Chrome.StoragePaint.WallpaperStyle.Horizon), Detail: "Обои появляются снизу и плавно переходят в цвета темы."),
             ]);
         foreach (var style in styles.Where(style => BoxBackground.Name(style) == picked))
         {
             BoxBackground.Set(style);
-            _viewModel.Status = $"Box background: {BoxBackground.Name(style)}.";
+            _viewModel.Status = $"Фон боксов: {BoxBackground.Name(style)}.";
         }
     }
 
@@ -853,46 +871,46 @@ public sealed class HomePage : ContentPage, IPadHandler
     private async Task ShowMiscAsync()
     {
         var trainerProfiles = IPlatformApplication.Current!.Services.GetRequiredService<TrainerProfileStore>();
-        var choice = await PadMenu.ShowAsync(_hostGrid, "Misc", null,
+        var choice = await PadMenu.ShowAsync(_hostGrid, "Разное", null,
             new PadOption(trainerProfiles.UseCurrentTrainerForGeneration
-                ? "Generated Pokémon obey trainer: ON"
-                : "Generated Pokémon obey trainer: OFF", IconPath: "profile",
-                Detail: "ON makes Pokémon you create belong to the open save's trainer."),
-            new PadOption($"Download full sprite pack ({SpritePackDownloader.SizeHint})", IconPath: "download", Detail: "Animated sprites, HOME pictures and item icons, to use offline."),
-            new PadOption("Rescan games", IconPath: "refresh", Detail: "Look through your linked folders for saves again."),
-            new PadOption("Scan report", IconPath: "report", Detail: "What the last scan found in each folder, to copy and send us."),
-            new PadOption("Share logs", IconPath: "export", Detail: "Crash reports and recent activity, to send us when something goes wrong."),
-            new PadOption(SecondScreenMode.UserOff ? "Second screen: OFF" : "Second screen: ON", IconPath: "compact",
+                ? "Подчинение тренеру: ВКЛ"
+                : "Подчинение тренеру: ВЫКЛ", IconPath: "profile",
+                Detail: "Созданные покемоны будут принадлежать тренеру из открытого сохранения."),
+            new PadOption($"Скачать все спрайты ({SpritePackDownloader.SizeHint})", IconPath: "download", Detail: "Анимации, изображения HOME и значки предметов для работы без сети."),
+            new PadOption("Найти игры заново", IconPath: "refresh", Detail: "Повторно найти сохранения в подключённых папках."),
+            new PadOption("Отчёт поиска", IconPath: "report", Detail: "Результаты последнего поиска по папкам. Отчёт можно скопировать."),
+            new PadOption("Поделиться журналами", IconPath: "export", Detail: "Отчёты об ошибках и последних действиях для диагностики."),
+            new PadOption(SecondScreenMode.UserOff ? "Второй экран: ВЫКЛ" : "Второй экран: ВКЛ", IconPath: "compact",
                 Detail: "OFF keeps PKForge on one screen, so the other stays free (an emulator, say)."),
-            new PadOption(Services.HaXMode.IsOn ? "HaX mode: ON" : "HaX mode: OFF", IconPath: "hax",
-                Detail: "ON lets pickers offer any option, even illegal ones."),
-            new PadOption(Services.HardcoreMode.IsOn ? "Hardcore mode: ON" : "Hardcore mode: OFF", IconPath: "hardcore",
-                Detail: "ON blocks edits, new Pokémon and copies. Moving Pokémon still works."));
+            new PadOption(Services.HaXMode.IsOn ? "Режим HaX: ВКЛ" : "Режим HaX: ВЫКЛ", IconPath: "hax",
+                Detail: "Разрешает любые значения, в том числе нелегальные."),
+            new PadOption(Services.HardcoreMode.IsOn ? "Режим Hardcore: ВКЛ" : "Режим Hardcore: ВЫКЛ", IconPath: "hardcore",
+                Detail: "Блокирует изменения, создание и копирование. Перемещение остаётся доступным."));
         switch (choice)
         {
-            case var ownership when ownership?.StartsWith("Generated Pokémon obey trainer:", StringComparison.Ordinal) == true:
+            case var ownership when ownership?.StartsWith("Подчинение тренеру:", StringComparison.Ordinal) == true:
                 trainerProfiles.SetUseCurrentTrainerForGeneration(!trainerProfiles.UseCurrentTrainerForGeneration);
                 _viewModel.Status = trainerProfiles.UseCurrentTrainerForGeneration
-                    ? "Generated Pokémon will be owned by the open save's trainer."
-                    : "Generated Pokémon may use Auto-Legality trainer data.";
+                    ? "Созданные покемоны будут принадлежать тренеру из открытого сохранения."
+                    : "При создании могут использоваться данные тренера Auto-Legality.";
                 break;
-            case var pack when pack?.StartsWith("Download full sprite pack", StringComparison.Ordinal) == true:
+            case var pack when pack?.StartsWith("Скачать все спрайты", StringComparison.Ordinal) == true:
                 await DownloadSpritePackAsync();
                 break;
-            case "Rescan games":
+            case "Найти игры заново":
                 if (_viewModel.IsBusy && !_viewModel.ReleaseIfStuck())
                 {
-                    await PadMenu.ShowAsync(_hostGrid, "Still busy",
-                        $"PKForge is still busy with {_viewModel.BusyWith}. Try again in a moment; if it stays stuck, close and reopen PKForge.", "OK");
+                    await PadMenu.ShowAsync(_hostGrid, "Операция выполняется",
+                        $"PKForge выполняет операцию \u00AB{_viewModel.BusyWith}\u00BB. Подожди; если она зависла, перезапусти приложение.", "OK");
                     break;
                 }
                 // Called directly: the command refuses to start while an older run it owns is still pending.
                 await _viewModel.RescanAsync();
                 break;
-            case "Share logs":
+            case "Поделиться журналами":
                 await ShareLogsAsync();
                 break;
-            case "Second screen: ON" or "Second screen: OFF":
+            case "Второй экран: ВКЛ" or "Второй экран: ВЫКЛ":
             {
                 var turnOff = !SecondScreenMode.UserOff;
                 SecondScreenMode.SetUserOff(turnOff);
@@ -908,40 +926,40 @@ public sealed class HomePage : ContentPage, IPadHandler
                 }
                 AppLog.Info("second", turnOff ? "Player turned the second screen off" : "Player turned the second screen on");
                 _viewModel.Status = turnOff
-                    ? "Second screen off: PKForge stays on this screen."
-                    : host?.IsAvailable == true ? "Second screen on." : "Second screen on, but no second display is available.";
+                    ? "Второй экран выключен."
+                    : host?.IsAvailable == true ? "Второй экран включён." : "Второй экран включён, но дополнительный дисплей недоступен.";
                 break;
             }
-            case "Scan report":
+            case "Отчёт поиска":
             {
-                var action = await PadMenu.ShowAsync(_hostGrid, "Scan report", _viewModel.ScanReport, "Copy report", "Close");
-                if (action == "Copy report")
+                var action = await PadMenu.ShowAsync(_hostGrid, "Отчёт поиска", _viewModel.ScanReport, "Копировать отчёт", "Закрыть");
+                if (action == "Копировать отчёт")
                 {
                     await Clipboard.Default.SetTextAsync(_viewModel.ScanReport);
-                    _viewModel.Status = "Scan report copied";
+                    _viewModel.Status = "Отчёт поиска скопирован";
                 }
                 break;
             }
-            case "HaX mode: OFF":
-                var on = await PadMenu.ConfirmAsync(_hostGrid, "Turn on hax mode?",
+            case "Режим HaX: ВЫКЛ":
+                var on = await PadMenu.ConfirmAsync(_hostGrid, "Включить режим HaX?",
                     "Pickers will offer every option instead of the legal subset (any ability on any mon). " +
-                    "Use at your own risk: mons edited this way will show as illegal.", "Turn on");
-                if (on) { Services.HaXMode.Set(true); _viewModel.Status = "HaX mode is ON."; }
+                    "Такие изменения могут сделать покемонов нелегальными.", "Включить");
+                if (on) { Services.HaXMode.Set(true); _viewModel.Status = "Режим HaX включён."; }
                 break;
-            case "HaX mode: ON":
+            case "Режим HaX: ВКЛ":
                 Services.HaXMode.Set(false);
-                _viewModel.Status = "HaX mode is OFF.";
+                _viewModel.Status = "Режим HaX выключен.";
                 break;
-            case "Hardcore mode: OFF":
-                if (await PadMenu.ConfirmAsync(_hostGrid, "Turn on hardcore mode?", Services.HardcoreMode.SettingExplanation, "Turn on"))
+            case "Режим Hardcore: ВЫКЛ":
+                if (await PadMenu.ConfirmAsync(_hostGrid, "Включить режим Hardcore?", Services.HardcoreMode.SettingExplanation, "Включить"))
                 {
                     Services.HardcoreMode.Set(true);
                     _viewModel.Status = $"{Services.HardcoreMode.Marker}: Hardcore mode is ON - moves only, no edits or copies.";
                 }
                 break;
-            case "Hardcore mode: ON":
+            case "Режим Hardcore: ВКЛ":
                 Services.HardcoreMode.Set(false);
-                _viewModel.Status = "Hardcore mode is OFF.";
+                _viewModel.Status = "Режим Hardcore выключен.";
                 break;
         }
     }
@@ -959,12 +977,12 @@ public sealed class HomePage : ContentPage, IPadHandler
                 ["scan-report.txt"] = _viewModel.ScanReport,
             }));
             AppLog.MarkCrashesSeen();
-            await Share.Default.RequestAsync(new ShareFileRequest("PKForge logs", new ShareFile(archive, "application/zip")));
+            await Share.Default.RequestAsync(new ShareFileRequest("Журналы PKForge", new ShareFile(archive, "application/zip")));
         }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException or InvalidOperationException)
         {
-            AppLog.Error("logs", "Sharing the logs failed", error);
-            await PadMenu.ShowAsync(_hostGrid, "Share logs", $"The logs could not be packed: {error.Message}", "OK");
+            AppLog.Error("logs", "Не удалось отправить журналы", error);
+            await PadMenu.ShowAsync(_hostGrid, "Поделиться журналами", $"Не удалось собрать журналы: {error.Message}", "OK");
         }
     }
 
@@ -974,11 +992,11 @@ public sealed class HomePage : ContentPage, IPadHandler
     private async Task OfferCrashReportAsync()
     {
         if (AppLog.UnseenCrashes().Count == 0) return;
-        var choice = await PadMenu.ShowAsync(_hostGrid, "PKForge closed unexpectedly",
-            "A crash report was saved. Sharing it helps us fix it: it holds the error, your recent activity, file names and your device model, never your save data.",
-            "Share report", "Not now");
+        var choice = await PadMenu.ShowAsync(_hostGrid, "PKForge завершился с ошибкой",
+            "Отчёт об ошибке сохранён. Он содержит ошибку, недавние действия, имена файлов и модель устройства, без данных сохранений.",
+            "Поделиться отчётом", "Не сейчас");
         AppLog.MarkCrashesSeen();
-        if (choice == "Share report") await ShareLogsAsync();
+        if (choice == "Поделиться отчётом") await ShareLogsAsync();
     }
 
     /// <summary>Downloads every species' animated + HOME sprites for full offline use.</summary>
@@ -988,23 +1006,23 @@ public sealed class HomePage : ContentPage, IPadHandler
         if (downloader is null) return;
         if (await Task.Run(downloader.CountMissing) == 0)
         {
-            await PadMenu.ShowAsync(_hostGrid, "Sprite pack", "Already downloaded: every sprite is on this device, so it all works offline.", "OK");
+            await PadMenu.ShowAsync(_hostGrid, "Набор спрайтов", "Все спрайты уже загружены и доступны без сети.", "OK");
             return;
         }
-        var overlay = LoadingOverlay.Show(_hostGrid, "Catching all the sprites!",
-            "Downloading animated battle sprites and HOME renders for every Pokémon. You can cancel anytime; finished parts are kept and it resumes where it left off.");
+        var overlay = LoadingOverlay.Show(_hostGrid, "Собираем все спрайты!",
+            "Загрузка анимаций и изображений HOME для всех покемонов. Можно прервать: загруженные части сохранятся.");
         try
         {
             await downloader.RunAsync(overlay.Report, overlay.Cancellation.Token);
-            _viewModel.Status = "Sprite pack complete - fully offline now.";
+            _viewModel.Status = "Спрайты загружены и доступны без сети.";
         }
         catch (OperationCanceledException)
         {
-            _viewModel.Status = "Sprite pack paused - resume anytime from Settings.";
+            _viewModel.Status = "Загрузка спрайтов приостановлена. Продолжить можно в настройках.";
         }
         catch (Exception error)
         {
-            _viewModel.Status = $"Sprite pack stopped: {error.Message}";
+            _viewModel.Status = $"Загрузка спрайтов остановлена: {error.Message}";
         }
         finally
         {
@@ -1017,8 +1035,8 @@ public sealed class HomePage : ContentPage, IPadHandler
         await _viewModel.LinkFileCommand.ExecuteAsync(null);
         if (_viewModel.OpenedSave)
             await PushAsync<BoxBrowserPage>();
-        else if (_viewModel.Status.StartsWith("Could not", StringComparison.Ordinal))
-            await PadMenu.ShowAsync(_hostGrid, "Save could not open", _viewModel.Status, "OK");
+        else if (_viewModel.Status.StartsWith("Не удалось", StringComparison.Ordinal))
+            await PadMenu.ShowAsync(_hostGrid, "Сохранение не открылось", _viewModel.Status, "OK");
     }
 
     /// <summary>
@@ -1245,18 +1263,18 @@ public sealed class HomePage : ContentPage, IPadHandler
     /// <summary>The events shelf: community collections here, wondercards inside the game.</summary>
     private async Task ShowEventsMenuAsync()
     {
-        var choice = await PadMenu.ShowAsync(_hostGrid, "Event database", null,
-            new PadOption($"Community boxes ({Services.CommunityBoxService.RepoTitle})", IconPath: "community",
-                Detail: "Event Pokémon collections shared online, to put in your Bank."),
-            new PadOption("Wonder cards", IconPath: "events", Detail: "Found inside each game: open a game, press Y, then Wonder cards."));
+        var choice = await PadMenu.ShowAsync(_hostGrid, "База событий", null,
+            new PadOption($"Боксы сообщества ({Services.CommunityBoxService.RepoTitle})", IconPath: "community",
+                Detail: "Коллекции событийных покемонов для добавления в банк."),
+            new PadOption("Карточки подарков", IconPath: "events", Detail: "Открой игру, нажми Y и выбери карточки подарков."));
         switch (choice)
         {
-            case var boxes when boxes?.StartsWith("Community boxes", StringComparison.Ordinal) == true:
+            case var boxes when boxes?.StartsWith("Боксы сообщества", StringComparison.Ordinal) == true:
                 await CollectionCenter.ShowAsync(_hostGrid);
                 break;
-            case "Wonder cards":
-                await PadMenu.ShowAsync(_hostGrid, "Wonder cards",
-                    "Wondercards depend on the game they are delivered to. Open a game from the shelf, press the Y button (Save data), and choose Wonder cards there.", "OK");
+            case "Карточки подарков":
+                await PadMenu.ShowAsync(_hostGrid, "Карточки подарков",
+                    "Подарки зависят от игры. Открой игру, нажми Y (данные сохранения) и выбери карточки подарков.", "OK");
                 break;
         }
     }
@@ -1282,8 +1300,8 @@ public sealed class HomePage : ContentPage, IPadHandler
             var confirmed = await PadMenu.ConfirmAsync(_hostGrid,
                 "Emulated console storage",
                 $"{save.GameLabel} lives inside {save.Emulator}'s emulated storage - the delicate path. " +
-                "PKForge backs up before every write, but close the emulator first.",
-                "Connect");
+                "PKForge создаёт копию перед записью. Перед редактированием закрой эмулятор.",
+                "Подключить");
             if (!confirmed) return;
         }
 
@@ -1294,14 +1312,14 @@ public sealed class HomePage : ContentPage, IPadHandler
             // coming back shows the game just left instead of blank branding.
             await PushAsync<BoxBrowserPage>();
         }
-        else if (_viewModel.Status.StartsWith("Could not", StringComparison.Ordinal))
-            await PadMenu.ShowAsync(_hostGrid, "Save could not open", _viewModel.Status, "OK");
+        else if (_viewModel.Status.StartsWith("Не удалось", StringComparison.Ordinal))
+            await PadMenu.ShowAsync(_hostGrid, "Сохранение не открылось", _viewModel.Status, "OK");
     }
 
     private async Task PushAsync<TPage>() where TPage : Page
     {
         var services = IPlatformApplication.Current?.Services
-            ?? throw new InvalidOperationException("MAUI services are unavailable.");
+            ?? throw new InvalidOperationException("Службы приложения недоступны.");
         await Navigation.PushAsync(services.GetRequiredService<TPage>());
     }
 
@@ -1311,7 +1329,7 @@ public sealed class HomePage : ContentPage, IPadHandler
         try
         {
             var services = IPlatformApplication.Current?.Services
-                ?? throw new InvalidOperationException("MAUI services are unavailable.");
+                ?? throw new InvalidOperationException("Службы приложения недоступны.");
             _parkPage ??= services.GetRequiredService<PokeparkPage>();
             await Navigation.PushAsync(_parkPage);
         }

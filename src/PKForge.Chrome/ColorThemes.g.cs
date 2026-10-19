@@ -146,7 +146,7 @@ public static partial class ColorThemes
         new ColorTheme
         {
             Id = "default",
-            Name = "Default",
+            Name = "По умолчанию",
             Void = new SKColor(0x14, 0x12, 0x1D),
             Deep = new SKColor(0x17, 0x1B, 0x32),
             Deck = new SKColor(0x1B, 0x24, 0x47),
@@ -215,7 +215,7 @@ public static partial class ColorThemes
         new ColorTheme
         {
             Id = "normal",
-            Name = "Normal",
+            Name = "Обычный",
             Void = new SKColor(0x30, 0x37, 0x44),
             Deep = new SKColor(0x53, 0x58, 0x61),
             Deck = new SKColor(0x8D, 0x8B, 0x8D),
@@ -284,7 +284,7 @@ public static partial class ColorThemes
         new ColorTheme
         {
             Id = "fighting",
-            Name = "Fighting",
+            Name = "Боевой",
             Void = new SKColor(0x60, 0x18, 0x07),
             Deep = new SKColor(0x7F, 0x26, 0x00),
             Deck = new SKColor(0x94, 0x3D, 0x02),
@@ -353,7 +353,7 @@ public static partial class ColorThemes
         new ColorTheme
         {
             Id = "flying",
-            Name = "Flying",
+            Name = "Летающий",
             Void = new SKColor(0x49, 0x0A, 0x64),
             Deep = new SKColor(0x5C, 0x14, 0x7B),
             Deck = new SKColor(0x64, 0x21, 0x8B),
@@ -422,7 +422,7 @@ public static partial class ColorThemes
         new ColorTheme
         {
             Id = "poison",
-            Name = "Poison",
+            Name = "Ядовитый",
             Void = new SKColor(0x10, 0x01, 0x32),
             Deep = new SKColor(0x1C, 0x02, 0x40),
             Deck = new SKColor(0x2D, 0x04, 0x51),
@@ -491,7 +491,7 @@ public static partial class ColorThemes
         new ColorTheme
         {
             Id = "ground",
-            Name = "Ground",
+            Name = "Земляной",
             Void = new SKColor(0x24, 0x06, 0x02),
             Deep = new SKColor(0x34, 0x08, 0x00),
             Deck = new SKColor(0x47, 0x14, 0x00),
@@ -560,7 +560,7 @@ public static partial class ColorThemes
         new ColorTheme
         {
             Id = "rock",
-            Name = "Rock",
+            Name = "Каменный",
             Void = new SKColor(0x4D, 0x2B, 0x06),
             Deep = new SKColor(0x64, 0x39, 0x00),
             Deck = new SKColor(0x74, 0x45, 0x03),
@@ -629,7 +629,7 @@ public static partial class ColorThemes
         new ColorTheme
         {
             Id = "bug",
-            Name = "Bug",
+            Name = "Насекомый",
             Void = new SKColor(0x21, 0x37, 0x09),
             Deep = new SKColor(0x2F, 0x46, 0x02),
             Deck = new SKColor(0x3B, 0x51, 0x00),
@@ -698,7 +698,7 @@ public static partial class ColorThemes
         new ColorTheme
         {
             Id = "ghost",
-            Name = "Ghost",
+            Name = "Призрачный",
             Void = new SKColor(0x07, 0x01, 0x39),
             Deep = new SKColor(0x0D, 0x02, 0x48),
             Deck = new SKColor(0x17, 0x03, 0x55),
@@ -767,7 +767,7 @@ public static partial class ColorThemes
         new ColorTheme
         {
             Id = "steel",
-            Name = "Steel",
+            Name = "Стальной",
             Void = new SKColor(0x09, 0x18, 0x22),
             Deep = new SKColor(0x16, 0x26, 0x2C),
             Deck = new SKColor(0x25, 0x37, 0x3B),
@@ -836,7 +836,7 @@ public static partial class ColorThemes
         new ColorTheme
         {
             Id = "fire",
-            Name = "Fire",
+            Name = "Огненный",
             Void = new SKColor(0x3A, 0x02, 0x15),
             Deep = new SKColor(0x51, 0x00, 0x17),
             Deck = new SKColor(0x69, 0x03, 0x1D),
@@ -905,7 +905,7 @@ public static partial class ColorThemes
         new ColorTheme
         {
             Id = "water",
-            Name = "Water",
+            Name = "Водный",
             Void = new SKColor(0x00, 0x03, 0x25),
             Deep = new SKColor(0x00, 0x03, 0x32),
             Deck = new SKColor(0x03, 0x05, 0x48),
@@ -974,7 +974,7 @@ public static partial class ColorThemes
         new ColorTheme
         {
             Id = "grass",
-            Name = "Grass",
+            Name = "Травяной",
             Void = new SKColor(0x00, 0x31, 0x1D),
             Deep = new SKColor(0x00, 0x42, 0x20),
             Deck = new SKColor(0x00, 0x54, 0x1E),
@@ -1043,7 +1043,7 @@ public static partial class ColorThemes
         new ColorTheme
         {
             Id = "electric",
-            Name = "Electric",
+            Name = "Электрический",
             Void = new SKColor(0x4B, 0x2A, 0x04),
             Deep = new SKColor(0x67, 0x3C, 0x00),
             Deck = new SKColor(0x7C, 0x54, 0x00),
@@ -1112,7 +1112,7 @@ public static partial class ColorThemes
         new ColorTheme
         {
             Id = "psychic",
-            Name = "Psychic",
+            Name = "Психический",
             Void = new SKColor(0x4E, 0x07, 0x62),
             Deep = new SKColor(0x65, 0x0B, 0x78),
             Deck = new SKColor(0x74, 0x14, 0x82),
@@ -1181,7 +1181,7 @@ public static partial class ColorThemes
         new ColorTheme
         {
             Id = "ice",
-            Name = "Ice",
+            Name = "Ледяной",
             Void = new SKColor(0x00, 0x4B, 0x51),
             Deep = new SKColor(0x00, 0x60, 0x63),
             Deck = new SKColor(0x00, 0x6A, 0x6F),
@@ -1250,7 +1250,7 @@ public static partial class ColorThemes
         new ColorTheme
         {
             Id = "dragon",
-            Name = "Dragon",
+            Name = "Драконий",
             Void = new SKColor(0x27, 0x37, 0x09),
             Deep = new SKColor(0x37, 0x45, 0x02),
             Deck = new SKColor(0x46, 0x4E, 0x00),
@@ -1319,7 +1319,7 @@ public static partial class ColorThemes
         new ColorTheme
         {
             Id = "dark",
-            Name = "Dark",
+            Name = "Тёмный",
             Void = new SKColor(0x0D, 0x0E, 0x10),
             Deep = new SKColor(0x13, 0x13, 0x13),
             Deck = new SKColor(0x1C, 0x1C, 0x1C),
@@ -1388,7 +1388,7 @@ public static partial class ColorThemes
         new ColorTheme
         {
             Id = "fairy",
-            Name = "Fairy",
+            Name = "Волшебный",
             Void = new SKColor(0x3E, 0x07, 0x48),
             Deep = new SKColor(0x67, 0x01, 0x6A),
             Deck = new SKColor(0x8E, 0x1A, 0x8D),

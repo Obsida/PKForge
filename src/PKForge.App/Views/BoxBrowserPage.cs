@@ -73,14 +73,14 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         {
             var choice = await PadMenu.ShowAsync(_hostGrid, RomHackNotice.Title, RomHackNotice.Warning,
                 new PadOption(RomHackNotice.EditOption, Glyph: "!", Accent: UiTokens.Bad,
-                    Detail: "Your edit is saved now. A restore point is made first. Change this later from Home."),
-                new PadOption("Cancel", IconPath: "back", Detail: "Nothing is written."));
+                    Detail: "Изменения сохранены. Предварительно создана точка восстановления."),
+                new PadOption("Отмена", IconPath: "back", Detail: "Данные не записываются."));
             return choice == RomHackNotice.EditOption;
         };
         _sprites = sprites;
         _theme = theme;
         BindingContext = viewModel;
-        Title = "Storage";
+        Title = "Хранилище";
         NavigationPage.SetHasNavigationBar(this, false);
 
         _canvas = new SKCanvasView { EnableTouchEvents = true };
@@ -128,14 +128,14 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         Grid.SetColumn(_sidePanel, 1);
         var bodyHost = new Grid { Children = { DsChrome.GridBackground(), _storageContent } };
 
-        var title = string.IsNullOrEmpty(_viewModel.ConnectedName) ? "Storage" : _viewModel.ConnectedName;
+        var title = string.IsNullOrEmpty(_viewModel.ConnectedName) ? "Хранилище" : _viewModel.ConnectedName;
         _footerHost = new ContentView();
         SetStorageFooter();
 
         var root = new Grid
         {
             RowDefinitions = [new(GridLength.Auto), new(GridLength.Auto), new(GridLength.Star), new(GridLength.Auto)],
-            Children = { DsChrome.TitleBar(), DsChrome.StatusStrip(title, "Connected"), bodyHost, _footerHost },
+            Children = { DsChrome.TitleBar(), DsChrome.StatusStrip(title, "Подключено"), bodyHost, _footerHost },
         };
         Grid.SetRow((View)root.Children[1], 1);
         Grid.SetRow(bodyHost, 2);
@@ -188,10 +188,10 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         }
         using var font = new SKFont(PixelTypeface(), fontSize);
         // The game's own box name (PKHeX IBoxDetailName; "BOX 01" style when the save has none).
-        var boxName = _viewModel.BoxIndex == -1 ? "Party"
+        var boxName = _viewModel.BoxIndex == -1 ? "Команда"
             : _sessionsFor() is { } headerSession && _viewModel.BoxIndex < _viewModel.BoxCount
                 ? headerSession.GetBoxName(_viewModel.BoxIndex)
-                : $"Box {_viewModel.BoxIndex + 1:00}";
+                : $"Бокс {_viewModel.BoxIndex + 1:00}";
         if (_boxManageMode) boxName = _boxHeld ? $"Holding · {boxName}" : $"Manage · {boxName}";
         else if (_viewModel.SelectMode) boxName = $"{boxName} · marked {_viewModel.MarkedInCurrentBox}/{_viewModel.MarkedCount}";
         StoragePaint.BoxHeader(canvas, bounds, boxName, font,
@@ -230,7 +230,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             PksmPaint.CenterText(canvas, $"{(offset < 0 ? "L  " : offset > 0 ? "R  " : "")}{session.GetBoxName(box)}",
                 rect.MidX, rect.Top + 13, label, SKColors.White, Pksm.WallpaperShade(background.Color), SKTextAlign.Center);
             if (locked)
-                PksmPaint.CenterText(canvas, "LOCK", rect.Right - 22, rect.Bottom - 8, label,
+                PksmPaint.CenterText(canvas, "ЗАЩИТА", rect.Right - 22, rect.Bottom - 8, label,
                     SKColors.White, Pksm.Illegal, SKTextAlign.Center);
 
             var slots = Enumerable.Range(0, BoxGridRenderer.Columns * BoxGridRenderer.Rows)
@@ -267,21 +267,21 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
     // box bar's mark counter and this footer always say which hand is active.
 
     private void SetStorageFooter() => _footerHost.Content = DsChrome.Footer(
-        ("A", _viewModel.CarrySource is null ? "Grab" : "Place", null),
-        ("-", "Multi-select", EnterSelectMode),
-        ("LR", "Box", () => OnPadButton(PadButton.R)),
-        ("X", "Tools", () => _ = ShowToolsAsync()), ("Y", "Save data", () => _ = ShowSaveDataAsync()),
-        ("+", "Menu", () => OpenCursorMenu()),
-        ("B", _viewModel.CarrySource is null ? "Back" : "Cancel", () => OnPadButton(PadButton.B)));
+        ("A", _viewModel.CarrySource is null ? "Взять" : "Поместить", null),
+        ("-", "Множественный выбор", EnterSelectMode),
+        ("LR", "Бокс", () => OnPadButton(PadButton.R)),
+        ("X", "Инструменты", () => _ = ShowToolsAsync()), ("Y", "Данные сохранения", () => _ = ShowSaveDataAsync()),
+        ("+", "Меню", () => OpenCursorMenu()),
+        ("B", _viewModel.CarrySource is null ? "Назад" : "Отмена", () => OnPadButton(PadButton.B)));
 
     private void SetSelectFooter() => _footerHost.Content = DsChrome.Footer(
         ("A", "Mark · hold for area", () => { OnPadButton(PadButton.A); OnPadReleased(PadButton.A); }),
-        ("Y", _viewModel.CurrentBoxFullyMarked ? "Unmark box" : "Select box", () => OnPadButton(PadButton.Y)),
-        ("X", $"Actions ({_viewModel.MarkedCount})", () => _ = ShowOrganizerMenuAsync()),
-        ("+", "Boxes", EnterBoxManageMode),
-        ("LR", "Box", () => OnPadButton(PadButton.R)),
-        ("-", "Move mode", ExitSelectMode),
-        ("B", _viewModel.MarkedCount > 0 ? "Clear" : "Done", () => OnPadButton(PadButton.B)));
+        ("Y", _viewModel.CurrentBoxFullyMarked ? "Снять отметку бокса" : "Выбрать бокс", () => OnPadButton(PadButton.Y)),
+        ("X", $"Действия ({_viewModel.MarkedCount})", () => _ = ShowOrganizerMenuAsync()),
+        ("+", "Боксы", EnterBoxManageMode),
+        ("LR", "Бокс", () => OnPadButton(PadButton.R)),
+        ("-", "Режим перемещения", ExitSelectMode),
+        ("B", _viewModel.MarkedCount > 0 ? "Очистить" : "Готово", () => OnPadButton(PadButton.B)));
 
     /// <summary>The footer for whichever mode is active; every mode change ends here.</summary>
     private void RefreshFooter()
@@ -336,17 +336,17 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
     }
 
     private void SetEditorFooter() => _footerHost.Content = DsChrome.Footer(
-        ("↑↓", "Navigate", null),
-        ("A", "Use field", () => ActivateEditorFocus()),
-        ("B", "Box", ExitEditorFocusMode),
-        ("+", "Box", ExitEditorFocusMode));
+        ("↑↓", "Навигация", null),
+        ("A", "Изменить поле", () => ActivateEditorFocus()),
+        ("B", "Бокс", ExitEditorFocusMode),
+        ("+", "Бокс", ExitEditorFocusMode));
 
     private void SetBoxManageFooter() => _footerHost.Content = DsChrome.Footer(
-        ("A", _boxHeld ? "Drop box" : "Hold box", () => OnPadButton(PadButton.A)),
-        ("B", "Done", ExitBoxManageMode),
-        ("LR", _boxHeld ? "Swap" : "Browse", null),
-        ("Y", _markedBoxes.Contains(_viewModel.BoxIndex) ? "Deselect" : "Select", ToggleMarkedBox),
-        ("X", "Box actions", () => _ = ShowBoxBulkActionsAsync()));
+        ("A", _boxHeld ? "Поставить бокс" : "Взять бокс", () => OnPadButton(PadButton.A)),
+        ("B", "Готово", ExitBoxManageMode),
+        ("LR", _boxHeld ? "Поменять" : "Просмотр", null),
+        ("Y", _markedBoxes.Contains(_viewModel.BoxIndex) ? "Снять выделение" : "Выбрать", ToggleMarkedBox),
+        ("X", "Действия с боксом", () => _ = ShowBoxBulkActionsAsync()));
 
     // ── Hardcore mode ─────────────────────────────────────────────────────────
     // One guard per surface, never a condition buried inside a flow. Allowed()/Menu()
@@ -384,14 +384,14 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
     private async Task<bool> DeniedAsync(SaveAction action)
     {
         if (!Denied(action)) return false;
-        await PadMenu.ShowAsync(_hostGrid, "Hardcore mode", _viewModel.Status, "OK");
+        await PadMenu.ShowAsync(_hostGrid, "Режим Hardcore", _viewModel.Status, "OK");
         return true;
     }
 
     /// <summary>The idle status line, carrying the marker so the mode is visible on the screen it gates.</summary>
     private void ShowReady() => _viewModel.Status = HardcoreMode.IsOn
         ? $"Ready · {HardcoreMode.StatusLine}"
-        : LayoutMarker ?? "Ready";
+        : LayoutMarker ?? "Готово";
 
     // ── Layout risk (ROM hacks on a retail layout) ────────────────────────────
     // A suspected hack warns once per save and stays read-only unless the player picks
@@ -407,7 +407,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
     private string? LayoutMarker => _layoutRisk switch
     {
         LayoutRiskKind.SuspectedHack => _viewModel.OpenSaveIsReadOnly ? RomHackNotice.ReadOnlyStatus : RomHackNotice.Marker,
-        LayoutRiskKind.CorruptingLayout => "READ-ONLY · this save's layout is not supported",
+        LayoutRiskKind.CorruptingLayout => "ТОЛЬКО ЧТЕНИЕ · формат сохранения не поддерживается",
         _ => null,
     };
 
@@ -441,7 +441,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                     new PadOption(RomHackNotice.ReadOnlyOption, IconPath: "box",
                         Detail: "Look at boxes and party. Nothing is ever written."),
                     new PadOption(RomHackNotice.EditOption, Glyph: "!", Accent: UiTokens.Bad,
-                        Detail: "Restore points are still made. Change this later from Home."));
+                        Detail: "Точки восстановления сохраняются. Режим можно изменить на главном экране."));
                 if (choice == RomHackNotice.EditOption) _viewModel.AcceptHackRisk();
                 break;
             case LayoutRiskKind.CorruptingLayout when CorruptingExplained.Add(documentId):
@@ -461,10 +461,10 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         try
         {
             // Bundled font copied to cache once (the ball-icon pattern), then opened by path.
-            var cache = System.IO.Path.Combine(FileSystem.CacheDirectory, "NDS12.ttf");
+            var cache = System.IO.Path.Combine(FileSystem.CacheDirectory, "NotoSans.ttf");
             if (!File.Exists(cache))
             {
-                using var asset = FileSystem.OpenAppPackageFileAsync("NDS12.ttf").GetAwaiter().GetResult();
+                using var asset = FileSystem.OpenAppPackageFileAsync("NotoSans.ttf").GetAwaiter().GetResult();
                 using var output = File.Create(cache);
                 asset.CopyTo(output);
             }
@@ -494,8 +494,8 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             Children =
             {
                 PksmIcons.Icon("storage", 44),
-                new Label { Text = "Select a Pokémon", TextColor = UiTokens.Ink1, FontFamily = DsChrome.PixelFont, FontSize = 15 },
-                new Label { Text = "Tap an empty slot to add one", TextColor = UiTokens.Ink1, FontSize = UiTokens.TextSmall, HorizontalTextAlignment = TextAlignment.Center },
+                new Label { Text = "Выбери покемона", TextColor = UiTokens.Ink1, FontFamily = DsChrome.PixelFont, FontSize = 15 },
+                new Label { Text = "Нажми пустую ячейку для добавления", TextColor = UiTokens.Ink1, FontSize = UiTokens.TextSmall, HorizontalTextAlignment = TextAlignment.Center },
             },
         };
 
@@ -635,57 +635,57 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         var boxTools = _sessionsFor()?.SupportsBoxTools == true;
         var options = new List<PadOption>
         {
-            new("Multi-select (- button)", IconPath: "select", Detail: "Mark several Pokémon to move, copy or edit them together."),
-            new("Box manager…", IconPath: "box", Detail: "Reorder, copy, lock or empty whole boxes."),
+            new("Множественный выбор (кнопка −)", IconPath: "select", Detail: "Отметить несколько покемонов для общих действий."),
+            new("Управление боксами…", IconPath: "box", Detail: "Перестановка, копирование, защита и очистка боксов."),
         };
         options.AddRange(Menu(
-            Allowed(SaveAction.CreateMon, new("Import .pk files", IconPath: "import", Detail: "Pick Pokémon files to fill this box's empty slots.")),
-            Allowed(SaveAction.CreateMon, new("Import Showdown team", IconPath: "script", Detail: "Paste Showdown sets, see their legality, then place them in empty slots.")),
-            new("Export box to Showdown", IconPath: "script", Detail: "This box as Showdown text to copy or share."),
-            Allowed(SaveAction.CreateMon, new("Generate Living Dex", IconPath: "create", Detail: "Replaces every box with one legal Pokémon of each species.")),
-            new("How to get a Pokémon…", IconPath: "map", Detail: "How to obtain a species in the game you are editing."),
-            new("Find held item…", IconPath: "item", Detail: "See which Pokémon hold an item and go to one."),
-            new("IV ranking…", IconPath: "stats", Detail: "Every Pokémon sorted by its IVs; pick one to go to it."),
-            Allowed(SaveAction.CreateMon, new("Egg factory…", IconPath: "egg", Detail: "Fill empty PC slots with eggs: one of each species, or one species.")),
-            new("Day Care / Nursery", IconPath: "daycare", Detail: "See who is at the Day Care and withdraw them to the PC.")));
+            Allowed(SaveAction.CreateMon, new("Импорт файлов .pk", IconPath: "import", Detail: "Pick Pokémon files to fill this box's empty slots.")),
+            Allowed(SaveAction.CreateMon, new("Импорт команды Showdown", IconPath: "script", Detail: "Paste Showdown sets, see their legality, then place them in empty slots.")),
+            new("Экспорт бокса в Showdown", IconPath: "script", Detail: "This box as Showdown text to copy or share."),
+            Allowed(SaveAction.CreateMon, new("Создать живой покедекс", IconPath: "create", Detail: "Replaces every box with one legal Pokémon of each species.")),
+            new("Где найти покемона…", IconPath: "map", Detail: "Способы получения вида в текущей игре."),
+            new("Найти предмет у покемонов…", IconPath: "item", Detail: "See which Pokémon hold an item and go to one."),
+            new("Рейтинг IV…", IconPath: "stats", Detail: "Every Pokémon sorted by its IVs; pick one to go to it."),
+            Allowed(SaveAction.CreateMon, new("Фабрика яиц…", IconPath: "egg", Detail: "Fill empty PC slots with eggs: one of each species, or one species.")),
+            new("Пансион / Питомник", IconPath: "daycare", Detail: "See who is at the Day Care and withdraw them to the PC.")));
         if (_sessionsFor() is { } honeySession && PKForge.Engine.HoneyTreeService.IsSupported(honeySession))
-            options.Add(new("Honey trees", IconPath: "tree", Detail: "See and change the honey trees, including your Munchlax trees."));
+            options.Add(new("Медовые деревья", IconPath: "tree", Detail: "See and change the honey trees, including your Munchlax trees."));
         if (boxTools)
         {
             options.AddRange(Menu(
-                Allowed(SaveAction.BatchEdit, new("Battle prep", IconPath: "battle", Detail: "Heal, max PP or set levels for the party or every box.")),
-                Allowed(SaveAction.BatchEdit, new("Batch editor", IconPath: "batch", Detail: "Change level, IVs, EVs, healing and more on many Pokémon at once.")),
-                Allowed(SaveAction.BatchEdit, new("Batch rename / OT…", IconPath: "rename", Detail: "Reset nicknames, or make you the original trainer, on many Pokémon.")),
-                Allowed(SaveAction.CreateMon, new("Random team…", IconPath: "dice", Detail: "Roll a random legal team into the party or empty box slots."))));
+                Allowed(SaveAction.BatchEdit, new("Подготовка к бою", IconPath: "battle", Detail: "Лечение, максимум PP и уровни для команды или боксов.")),
+                Allowed(SaveAction.BatchEdit, new("Массовый редактор", IconPath: "batch", Detail: "Массовое изменение уровней, IV, EV, лечения и других параметров.")),
+                Allowed(SaveAction.BatchEdit, new("Имена и исходный тренер…", IconPath: "rename", Detail: "Сбросить имена или назначить себя исходным тренером нескольких покемонов.")),
+                Allowed(SaveAction.CreateMon, new("Случайная команда…", IconPath: "dice", Detail: "Roll a random legal team into the party or empty box slots."))));
         }
         options.AddRange(Menu(
-            Allowed(SaveAction.BatchEdit, new("Presets…", IconPath: "preset", Detail: "One change, like Level 100 or perfect IVs, on a box or all boxes.")),
-            new("Trainer profiles…", IconPath: "profile", Detail: "Save trainer details and give them to Pokémon as their original trainer."),
-            new("Legality check", IconPath: "check", Detail: "Check every Pokémon in the save and repair the illegal ones."),
-            new("Audit report", IconPath: "report", Detail: "Find cloned Pokémon and impossible values across the save."),
-            new("Nuzlocke report", IconPath: "skull", Detail: "The first catch on each route, from where each Pokémon was met."),
-            new("Collection dex…", IconPath: "pokedex", Detail: "Living dex tracker for the Bank and this save, normal and shiny.")));
+            Allowed(SaveAction.BatchEdit, new("Наборы…", IconPath: "preset", Detail: "One change, like Level 100 or perfect IVs, on a box or all boxes.")),
+            new("Профили тренера…", IconPath: "profile", Detail: "Сохранить данные тренера и назначать его исходным тренером покемонов."),
+            new("Проверка легальности", IconPath: "check", Detail: "Check every Pokémon in the save and repair the illegal ones."),
+            new("Отчёт аудита", IconPath: "report", Detail: "Find cloned Pokémon and impossible values across the save."),
+            new("Отчёт Nuzlocke", IconPath: "skull", Detail: "The first catch on each route, from where each Pokémon was met."),
+            new("Коллекционный покедекс…", IconPath: "pokedex", Detail: "Учёт обычных и шайни покемонов в банке и сохранении.")));
         if (boxTools)
-            options.Add(new("Sort boxes…", IconPath: "sort", Detail: "Order this box or all boxes by dex number, level, type and more."));
-        var choice = await PadMenu.ShowAsync(_hostGrid, "Storage tools", Note(null), options.ToArray());
+            options.Add(new("Сортировать боксы…", IconPath: "sort", Detail: "Order this box or all boxes by dex number, level, type and more."));
+        var choice = await PadMenu.ShowAsync(_hostGrid, "Инструменты хранилища", Note(null), options.ToArray());
         switch (choice)
         {
-            case "Multi-select (- button)":
+            case "Множественный выбор (кнопка −)":
                 EnterSelectMode();
                 return;
-            case "Import .pk files":
+            case "Импорт файлов .pk":
                 await BulkImportAsync();
                 return;
-            case "Import Showdown team":
+            case "Импорт команды Showdown":
                 await ImportShowdownTeamAsync();
                 return;
-            case "Export box to Showdown":
+            case "Экспорт бокса в Showdown":
                 await ExportBoxShowdownAsync();
                 return;
-            case "Generate Living Dex":
+            case "Создать живой покедекс":
                 await GenerateLivingDexAsync();
                 return;
-            case "How to get a Pokémon…":
+            case "Где найти покемона…":
             {
                 // Game-scoped on purpose: this is "how do I get it in the game I'm editing".
                 // The all-games answer lives in the bank/living dex.
@@ -694,63 +694,63 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                     await EncounterGallery.ShowGameScopedAsync(_hostGrid, _viewModel, session, () => _canvas.InvalidateSurface());
                 return;
             }
-            case "Find held item…":
+            case "Найти предмет у покемонов…":
                 await FindHeldItemAsync();
                 return;
-            case "IV ranking…":
+            case "Рейтинг IV…":
                 await ShowIvRankingAsync();
                 return;
-            case "Battle prep":
+            case "Подготовка к бою":
                 await ShowBattlePrepAsync();
                 return;
-            case "Egg factory…":
+            case "Фабрика яиц…":
                 await ShowEggFactoryAsync();
                 return;
-            case "Honey trees":
+            case "Медовые деревья":
                 {
                     var session = _sessionsFor();
                     if (session is not null)
                         await HoneyTreeEditor.ShowAsync(_hostGrid, session, _viewModel);
                     return;
                 }
-            case "Day Care / Nursery":
+            case "Пансион / Питомник":
                 {
                     var session = _sessionsFor();
                     if (session is not null)
                         await DaycareEditor.ShowAsync(_hostGrid, session, _viewModel);
                     return;
                 }
-            case "Batch editor":
+            case "Массовый редактор":
                 await RunBatchEditorAsync();
                 return;
-            case "Batch rename / OT…":
+            case "Имена и исходный тренер…":
                 await ShowBatchRenameAsync();
                 return;
-            case "Random team…":
+            case "Случайная команда…":
                 await ShowRandomTeamAsync();
                 return;
-            case "Presets…":
+            case "Наборы…":
                 await ShowPresetsMenuAsync();
                 return;
-            case "Trainer profiles…":
+            case "Профили тренера…":
                 await ShowTrainerProfilesAsync();
                 return;
-            case "Legality check":
+            case "Проверка легальности":
                 await ShowLegalityCheckAsync();
                 return;
-            case "Audit report":
+            case "Отчёт аудита":
                 await ShowAuditReportAsync();
                 return;
-            case "Nuzlocke report":
+            case "Отчёт Nuzlocke":
                 await ShowNuzlockeReportAsync();
                 return;
-            case "Box manager…":
+            case "Управление боксами…":
                 EnterBoxManageMode();
                 return;
-            case "Sort boxes…":
+            case "Сортировать боксы…":
                 await ShowSortMenuAsync();
                 return;
-            case "Collection dex…":
+            case "Коллекционный покедекс…":
             {
                 var services = IPlatformApplication.Current?.Services;
                 var data = services?.GetService<IGameDataService>();
@@ -815,7 +815,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         _storageContent.ColumnDefinitions[1].Width = PanelWidth;
         _storageContent.ColumnSpacing = PanelSpacing;
         _viewModel.SelectedSlot = _slotBeforeBoxManage;
-        if (_viewModel.SelectMode) _viewModel.Status = $"Multi-select - {_viewModel.MarkedCount} marked";
+        if (_viewModel.SelectMode) _viewModel.Status = $"Множественный выбор — отмечено: {_viewModel.MarkedCount}";
         else ShowReady();
         RepaintStorage();
     }
@@ -831,7 +831,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         var target = _heldBox + delta;
         if ((uint)target >= (uint)_viewModel.BoxCount)
         {
-            _viewModel.Status = delta < 0 ? "Box is already first" : "Box is already last";
+            _viewModel.Status = delta < 0 ? "Бокс уже первый" : "Бокс уже последний";
             return;
         }
 
@@ -842,7 +842,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             var ok = await _viewModel.RunMutationAsync(session =>
             {
                 session.SwapBoxes(from, target);
-                return new GenerationOutcome(true, $"Box {from + 1:00} swapped with box {target + 1:00}.");
+                return new GenerationOutcome(true, $"Бокс {from + 1:00} поменян с боксом {target + 1:00}.");
             }, Math.Max(0, _viewModel.SelectedSlot), refreshSlot: false, action: SaveAction.Move);
             if (!ok) return;
             _heldBox = target;
@@ -871,8 +871,8 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         var box = _viewModel.BoxIndex;
         if (!_markedBoxes.Remove(box)) _markedBoxes.Add(box);
         _viewModel.Status = _markedBoxes.Count == 0
-            ? "BOX MANAGER - no boxes selected"
-            : $"Box manager - {_markedBoxes.Count} box(es) selected";
+            ? "БОКСЫ — НИЧЕГО НЕ ВЫБРАНО"
+            : $"Управление боксами — выбрано: {_markedBoxes.Count}";
         SetBoxManageFooter();
         _boxNeighbors.InvalidateSurface();
     }
@@ -881,18 +881,18 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
     {
         if (_boxHeld || _boxManageBusy) return;
         var selected = _markedBoxes.Count == 0 ? new[] { _viewModel.BoxIndex } : _markedBoxes.OrderBy(x => x).ToArray();
-        var noun = selected.Length == 1 ? $"box {selected[0] + 1:00}" : $"{selected.Length} selected boxes";
-        var emptyLabel = _markedBoxes.Count > 0 ? "Empty selected boxes" : "Empty all boxes";
-        var choice = await PadMenu.ShowAsync(_hostGrid, $"Box actions · {noun}",
+        var noun = selected.Length == 1 ? $"box {selected[0] + 1:00}" : $"Выбрано боксов: {selected.Length}";
+        var emptyLabel = _markedBoxes.Count > 0 ? "Очистить выбранные боксы" : "Очистить все боксы";
+        var choice = await PadMenu.ShowAsync(_hostGrid, $"Действия с боксом · {noun}",
             Note("No selection means the current box. Every write creates a restore point."),
             Menu(
-                new PadOption("Select Pokémon in these boxes", IconPath: "select", Detail: "Mark every Pokémon in these boxes in multi-select."),
-                new PadOption("Mark all boxes", IconPath: "selectall", Detail: "Select every box for the actions in this menu."),
-                new PadOption("Lock / Unlock box(es)", IconPath: "padlock", Detail: "Locked boxes are skipped by sorting, batch edits and emptying."),
-                Allowed(SaveAction.Duplicate, new("Copy box(es)…", IconPath: "copy", Detail: "Copy these boxes over other boxes, replacing what is there.")),
-                new PadOption("Delete box(es) (rescue Pokémon)", IconPath: "delete", Detail: "Removes the boxes; their Pokémon move to free slots first."),
+                new PadOption("Выделить покемонов в боксах", IconPath: "select", Detail: "Mark every Pokémon in these boxes in multi-select."),
+                new PadOption("Отметить все боксы", IconPath: "selectall", Detail: "Выбрать все боксы для действий этого меню."),
+                new PadOption("Защита боксов", IconPath: "padlock", Detail: "Защищённые боксы пропускаются при сортировке, массовом изменении и очистке."),
+                Allowed(SaveAction.Duplicate, new("Копировать боксы…", IconPath: "copy", Detail: "Скопировать эти боксы поверх других с заменой содержимого.")),
+                new PadOption("Удалить боксы (с переносом покемонов)", IconPath: "delete", Detail: "Removes the boxes; their Pokémon move to free slots first."),
                 new PadOption(emptyLabel, IconPath: "clear", Detail: "Releases every Pokémon in the boxes. The party is not touched."),
-                new PadOption("Clear box marks", IconPath: "deselect"),
+                new PadOption("Снять отметки боксов", IconPath: "deselect"),
                 // Name/wallpaper act on the box under the cursor (PKHeX SAV_BoxLayout edits one box at a time).
                 _sessionsFor() is { } layoutSession && Engine.BoxLayoutService.SupportsNames(layoutSession)
                     ? new PadOption(BoxLayoutEditor.RenameLabel, IconPath: "rename") : null,
@@ -908,16 +908,16 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             SetBoxManageFooter();
             return;
         }
-        if (choice == "Mark all boxes")
+        if (choice == "Отметить все боксы")
         {
             _markedBoxes.Clear();
             foreach (var box in Enumerable.Range(0, _viewModel.BoxCount)) _markedBoxes.Add(box);
-            _viewModel.Status = $"Box manager - {_markedBoxes.Count} boxes selected";
+            _viewModel.Status = $"Управление боксами — выбрано: {_markedBoxes.Count}";
             SetBoxManageFooter();
             _boxNeighbors.InvalidateSurface();
             return;
         }
-        if (choice == "Select Pokémon in these boxes")
+        if (choice == "Выделить покемонов в боксах")
         {
             // Box marks become Pokémon marks: back on the grid in multi-select, ready for X.
             if (!_viewModel.SelectMode) _viewModel.EnterSelectMode();
@@ -925,14 +925,14 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             ExitBoxManageMode();
             return;
         }
-        if (choice == "Clear box marks")
+        if (choice == "Снять отметки боксов")
         {
             _markedBoxes.Clear();
             SetBoxManageFooter();
             _boxNeighbors.InvalidateSurface();
             return;
         }
-        if (choice == "Lock / Unlock box(es)")
+        if (choice == "Защита боксов")
         {
             var docId = DocumentId;
             if (docId is null) return;
@@ -945,23 +945,23 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             return;
         }
         var lockedTargets = selected.Where(box => DocumentId is not null && Protection.IsBoxLocked(DocumentId!, box)).ToList();
-        if ((choice == "Empty selected boxes" || choice == "Delete box(es) (rescue Pokémon)") && lockedTargets.Count > 0)
+        if ((choice == "Очистить выбранные боксы" || choice == "Удалить боксы (с переносом покемонов)") && lockedTargets.Count > 0)
         {
             _viewModel.Status = $"{lockedTargets.Count} target box(ES) are locked";
             return;
         }
-        if (choice == emptyLabel && choice == "Empty selected boxes")
+        if (choice == emptyLabel && choice == "Очистить выбранные боксы")
         {
-            var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Empty selected boxes?",
-                $"Release every Pokémon in {selected.Length} box(es). A restore point is created first.", "Empty");
+            var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Очистить выбранные боксы?",
+                $"Выпустить покемонов из боксов ({selected.Length}). Сначала создастся точка восстановления.", "Пусто");
             if (!confirmed) return;
             await _viewModel.RunMutationAsync(session =>
             {
                 foreach (var box in selected) session.ClearBox(box);
-                return new GenerationOutcome(true, $"Emptied {selected.Length} box(es).");
+                return new GenerationOutcome(true, $"Очищено боксов: {selected.Length}.");
             }, Math.Max(0, _viewModel.SelectedSlot), refreshSlot: false, action: SaveAction.Release);
         }
-        else if (choice == "Empty all boxes")
+        else if (choice == "Очистить все боксы")
         {
             var docId = DocumentId;
             if (docId is not null && Protection.LockedBoxes(docId).Count > 0)
@@ -969,24 +969,24 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                 _viewModel.Status = "Locked boxes are protected - unlock or empty them one by one";
                 return;
             }
-            var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Empty every box?",
-                "Release every boxed Pokémon. Party Pokémon are untouched. A restore point is created first.", "Empty all");
+            var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Очистить все боксы?",
+                "Выпустить всех покемонов из боксов. Команда останется. Сначала создастся точка восстановления.", "Очистить всё");
             if (!confirmed) return;
             await _viewModel.RunMutationAsync(session =>
             {
                 foreach (var box in Enumerable.Range(0, _viewModel.BoxCount)) session.ClearBox(box);
-                return new GenerationOutcome(true, "All storage boxes emptied.");
+                return new GenerationOutcome(true, "Все боксы очищены.");
             }, Math.Max(0, _viewModel.SelectedSlot), refreshSlot: false, action: SaveAction.Release);
         }
-        else if (choice == "Copy box(es)…")
+        else if (choice == "Копировать боксы…")
         {
             var starts = Enumerable.Range(0, _viewModel.BoxCount - selected.Length + 1)
-                .Select(i => $"Start at box {i + 1:00}").ToArray();
-            var targetChoice = await PadMenu.ShowAsync(_hostGrid, "Copy boxes", "Choose the first destination box. Existing contents there will be replaced.", starts);
+                .Select(i => $"Начать с бокса {i + 1:00}").ToArray();
+            var targetChoice = await PadMenu.ShowAsync(_hostGrid, "Копировать боксы", "Choose the first destination box. Existing contents there will be replaced.", starts);
             var start = Array.IndexOf(starts, targetChoice);
             if (start < 0) return;
-            var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Replace destination boxes?",
-                $"Copy {selected.Length} box(es) starting at box {start + 1:00}. Destination contents will be replaced.", "Copy");
+            var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Заменить боксы назначения?",
+                $"Copy {selected.Length} box(es) starting at box {start + 1:00}. Destination contents will be replaced.", "Копировать");
             if (!confirmed) return;
             await _viewModel.RunMutationAsync(session =>
             {
@@ -1002,13 +1002,13 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                 return new GenerationOutcome(true, $"Copied {copies.Length} box(es) starting at box {start + 1:00}.");
             }, Math.Max(0, _viewModel.SelectedSlot), refreshSlot: false, action: SaveAction.Duplicate);
         }
-        else if (choice == "Delete box(es) (rescue Pokémon)")
+        else if (choice == "Удалить боксы (с переносом покемонов)")
         {
             var rescueNote = selected.Length >= _viewModel.BoxCount
                 ? "Every box is selected: rescued Pokémon have nowhere to go, so they are released."
                 : "Pokémon are rescued into free slots first.";
-            var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Delete selected boxes?",
-                $"Remove {selected.Length} box(es) from the order. {rescueNote}", "Delete");
+            var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Удалить выбранные боксы?",
+                $"Remove {selected.Length} box(es) from the order. {rescueNote}", "Удалить");
             if (!confirmed) return;
             await _viewModel.RunMutationAsync(session =>
             {
@@ -1045,19 +1045,19 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         var tally = HeldItemSearch.Tally(all.Where(s => s.Species is not null).Select(s => s.HeldItem));
         if (tally.Count == 0)
         {
-            _viewModel.Status = "No Pokémon in this save is holding an item";
+            _viewModel.Status = "В сохранении нет покемонов с предметами";
             return;
         }
         const int AnyItem = int.MinValue;
         var directory = Path.Combine(FileSystem.AppDataDirectory, "items");
-        var items = new List<PickItem> { new(AnyItem, "Any held item", Detail: $"{tally.Sum(t => t.Count)} Pokémon") };
+        var items = new List<PickItem> { new(AnyItem, "Любой предмет", Detail: $"{tally.Sum(t => t.Count)} Pokémon") };
         foreach (var (id, n) in tally)
         {
             var name = HeldItemSearch.NameOf(itemNames, id);
             var cached = Path.Combine(directory, ItemArt.Slug(name) + ".png");
             items.Add(new PickItem(id, name, File.Exists(cached) ? cached : null, $"{n} Pokémon"));
         }
-        var item = await PickerMenu.ShowAsync(_hostGrid, "Find held item", items);
+        var item = await PickerMenu.ShowAsync(_hostGrid, "Найти предмет у покемонов", items);
         if (item is null) return;
 
         var holders = HeldItemSearch.Find(all, item.Id == AnyItem ? null : item.Id);
@@ -1069,7 +1069,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         for (var i = 0; i < holders.Count; i++)
         {
             var h = holders[i];
-            var where = h.Box == -1 ? $"Party {h.Slot + 1}" : $"Box {h.Box + 1:00} · slot {h.Slot + 1:00}";
+            var where = h.Box == -1 ? $"Команда {h.Slot + 1}" : $"Бокс {h.Box + 1:00} · ячейка {h.Slot + 1:00}";
             var species = h.Species is int sp && data is not null && sp < data.SpeciesNames.Count ? data.SpeciesNames[sp] : $"#{h.Species}";
             var label = h.Nickname is { Length: > 0 } nick && !string.Equals(nick, species, StringComparison.OrdinalIgnoreCase)
                 ? $"{nick} ({species})" : species;
@@ -1103,8 +1103,8 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         var session = _sessionsFor();
         var data = IPlatformApplication.Current?.Services.GetService<IGameDataService>();
         if (session is null || data is null) return;
-        const string Highest = "Highest IVs first", Lowest = "Lowest IVs first";
-        var order = await PadMenu.ShowAsync(_hostGrid, "IV ranking", null,
+        const string Highest = "Сначала лучшие IV", Lowest = "Сначала худшие IV";
+        var order = await PadMenu.ShowAsync(_hostGrid, "Рейтинг IV", null,
             new PadOption(Highest, IconPath: "stats"), new PadOption(Lowest, IconPath: "stats"));
         if (order is null) return;
 
@@ -1128,7 +1128,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         finally { overlay.Close(); }
         if (ranked.Count == 0)
         {
-            _viewModel.Status = "No Pokémon to rank in this save";
+            _viewModel.Status = "В сохранении нет покемонов для рейтинга";
             return;
         }
 
@@ -1136,7 +1136,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         for (var i = 0; i < ranked.Count; i++)
         {
             var (slot, ivs) = ranked[i];
-            var where = slot.Box == -1 ? $"Party {slot.Slot + 1}" : $"Box {slot.Box + 1:00} · slot {slot.Slot + 1:00}";
+            var where = slot.Box == -1 ? $"Команда {slot.Slot + 1}" : $"Бокс {slot.Box + 1:00} · ячейка {slot.Slot + 1:00}";
             var species = slot.Species is int sp && sp < data.SpeciesNames.Count ? data.SpeciesNames[sp] : $"#{slot.Species}";
             var label = slot.Nickname is { Length: > 0 } nick && !string.Equals(nick, species, StringComparison.OrdinalIgnoreCase)
                 ? $"{nick} ({species})" : species;
@@ -1170,29 +1170,29 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         var page = _viewModel.BoxIndex == -1 ? "the party" : "this box";
         var options = new List<PadOption>
         {
-            new(_viewModel.CurrentBoxFullyMarked ? $"Unmark {page}" : $"Select all in {page}", IconPath: "selectall"),
-            new("Select all boxes", IconPath: "all"),
-            new($"Invert {page}", IconPath: "invert", Detail: "Swap marked and unmarked Pokémon here."),
+            new(_viewModel.CurrentBoxFullyMarked ? $"Снять отметку {page}" : $"Select all in {page}", IconPath: "selectall"),
+            new("Выбрать все боксы", IconPath: "all"),
+            new($"Инвертировать {page}", IconPath: "invert", Detail: "Swap marked and unmarked Pokémon here."),
         };
         if (count > 0)
         {
-            options.Add(new("Clear marks", IconPath: "deselect"));
+            options.Add(new("Снять отметки", IconPath: "deselect"));
             options.AddRange(Menu(
-                new PadOption("Move to box…", IconPath: "move"),
-                new PadOption("Move to Bank", IconPath: "bank", Detail: "They leave this save and are stored in the Bank."),
-                Allowed(SaveAction.Duplicate, new("Copy to Bank", IconPath: "bank", Detail: "Copies go to the Bank; the originals stay here.")),
-                new PadOption("Move to another game…", IconPath: "send", Detail: "They leave this save and join another linked game."),
-                Allowed(SaveAction.Duplicate, new("Copy to another game…", IconPath: "copy", Detail: "Copies join another linked game; the originals stay here.")),
-                Allowed(SaveAction.Duplicate, new("Duplicate", IconPath: "copy", Detail: "Clone the marked Pokémon into the first free box slots.")),
-                new PadOption("Export (.pk files)", IconPath: "export", Detail: "Share each marked Pokémon as its own file."),
-                new PadOption("Release", IconPath: "release")));
+                new PadOption("Переместить в бокс…", IconPath: "move"),
+                new PadOption("Переместить в банк", IconPath: "bank", Detail: "They leave this save and are stored in the Bank."),
+                Allowed(SaveAction.Duplicate, new("Копировать в банк", IconPath: "bank", Detail: "Copies go to the Bank; the originals stay here.")),
+                new PadOption("Переместить в другую игру…", IconPath: "send", Detail: "They leave this save and join another linked game."),
+                Allowed(SaveAction.Duplicate, new("Копировать в другую игру…", IconPath: "copy", Detail: "Copies join another linked game; the originals stay here.")),
+                Allowed(SaveAction.Duplicate, new("Дублировать", IconPath: "copy", Detail: "Clone the marked Pokémon into the first free box slots.")),
+                new PadOption("Экспорт файлов .pk", IconPath: "export", Detail: "Share each marked Pokémon as its own file."),
+                new PadOption("Выпустить", IconPath: "release")));
             options.AddRange(BulkOptions());
         }
-        options.Add(new("Mark Pokémon holding…", IconPath: "item", Detail: "Find Pokémon holding an item, then mark them or go to one."));
-        options.Add(new("Box manager…", IconPath: "box", Detail: "Reorder, copy, lock or empty whole boxes."));
-        options.Add(new("Back to move mode", IconPath: "confirm", Detail: "Leave multi-select."));
+        options.Add(new("Отметить покемонов с предметом…", IconPath: "item", Detail: "Find Pokémon holding an item, then mark them or go to one."));
+        options.Add(new("Управление боксами…", IconPath: "box", Detail: "Перестановка, копирование, защита и очистка боксов."));
+        options.Add(new("Назад к перемещению", IconPath: "confirm", Detail: "Завершить множественный выбор."));
 
-        var choice = await PadMenu.ShowAsync(_hostGrid, $"Multi-select · {count} marked",
+        var choice = await PadMenu.ShowAsync(_hostGrid, $"Множественный выбор · отмечено: {count}",
             Note("Marks stay while you change box with L/R."), options.ToArray());
         if (await TryRunBulkAsync(choice))
         {
@@ -1202,48 +1202,48 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         }
         switch (choice)
         {
-            case "Select all in this box" or "Select all in the party" or "Unmark this box" or "Unmark the party":
+            case "Выбрать всех в боксе" or "Выбрать всю команду" or "Снять отметки в боксе" or "Снять отметки команды":
                 _viewModel.ToggleBoxMarks();
                 break;
-            case "Select all boxes":
+            case "Выбрать все боксы":
                 _viewModel.MarkAllBoxes();
                 break;
-            case "Invert this box" or "Invert the party":
+            case "Инвертировать этот бокс" or "Инвертировать команду":
                 _viewModel.InvertBoxMarks();
                 break;
-            case "Clear marks":
+            case "Снять отметки":
                 _viewModel.ClearMarks();
                 break;
-            case "Mark Pokémon holding…":
+            case "Отметить покемонов с предметом…":
                 await FindHeldItemAsync();
                 break;
-            case "Move to box…":
+            case "Переместить в бокс…":
             {
                 if (_viewModel.MarksEmptyTheParty()) { _viewModel.Status = PartyNeedsOne; return; }
                 var slots = _viewModel.AllSlots;
-                var placement = await StartSlotPicker.PickAsync(_hostGrid, "Move to which box?", slots, count, offerFirstFree: false);
+                var placement = await StartSlotPicker.PickAsync(_hostGrid, "В какой бокс переместить?", slots, count, offerFirstFree: false);
                 if (placement?.Start is not { } start) return;
-                if (!await PadMenu.ConfirmAsync(_hostGrid, $"Move {count} Pokémon?", StartSlotPicker.Describe(slots, start, count) + ".", "Move"))
+                if (!await PadMenu.ConfirmAsync(_hostGrid, $"Move {count} Pokémon?", StartSlotPicker.Describe(slots, start, count) + ".", "Переместить"))
                     return;
                 await _viewModel.BulkMoveAsync(start);
                 break;
             }
-            case "Move to another game…":
+            case "Переместить в другую игру…":
                 await SendSelectionToGameAsync(copy: false);
                 break;
-            case "Copy to another game…":
+            case "Копировать в другую игру…":
                 await SendSelectionToGameAsync(copy: true);
                 break;
-            case "Duplicate":
+            case "Дублировать":
                 await DuplicateSelectionAsync();
                 break;
-            case "Move to Bank":
+            case "Переместить в банк":
                 await SendSelectionToBankAsync(copy: false);
                 break;
-            case "Copy to Bank":
+            case "Копировать в банк":
                 await SendSelectionToBankAsync(copy: true);
                 break;
-            case "Export (.pk files)":
+            case "Экспорт файлов .pk":
             {
                 var directory = System.IO.Path.Combine(FileSystem.CacheDirectory, "export");
                 Directory.CreateDirectory(directory);
@@ -1254,16 +1254,16 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                     Title = $"{paths.Count} Pokémon",
                     Files = paths.Select(p => new ShareFile(p)).ToList(),
                 });
-                _viewModel.Status = $"Exported {paths.Count} Pokémon.";
+                _viewModel.Status = $"Экспортировано покемонов: {paths.Count}.";
                 break;
             }
-            case "Release":
+            case "Выпустить":
                 await ReleaseSelectionAsync();
                 break;
-            case "Box manager…":
+            case "Управление боксами…":
                 EnterBoxManageMode();
                 return;
-            case "Back to move mode":
+            case "Назад к перемещению":
                 ExitSelectMode();
                 return;
             default:
@@ -1274,7 +1274,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         RefreshFooter();
     }
 
-    private const string PartyNeedsOne = "THE PARTY NEEDS ONE POKéMON - UNMARK A PARTY MEMBER";
+    private const string PartyNeedsOne = "В КОМАНДЕ НУЖЕН ХОТЯ БЫ ОДИН ПОКЕМОН";
 
     /// <summary>Sends every marked mon to another linked game, all or none: if one cannot enter
     /// that format, nothing is written anywhere and the refusal names it.</summary>
@@ -1296,7 +1296,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         if (target is null)
         {
             if (picker.Saves.Count == 0)
-                _viewModel.Status = "No other games linked. Link another emulator or save on Home.";
+                _viewModel.Status = "Других игр нет. Подключи ещё один эмулятор или сохранение.";
             return;
         }
 
@@ -1317,7 +1317,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                 ? $"Copies of {count} Pokémon join {target.GameLabel}; the originals stay here. If one cannot enter that format, none are copied."
                 : $"{count} Pokémon will leave this save and join {target.GameLabel}. If one cannot enter that format, all stay here.")
             + $" They land in {StartSlotPicker.Describe(targetSlots, startAt, count)}.",
-            copy ? "Copy all" : "Move all");
+            copy ? "Копировать всё" : "Переместить всех");
         if (!confirm) return;
 
         // Bulk preview: the first marked mon's conversion diff stands for the
@@ -1377,7 +1377,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                 }
             }
             return new GenerationOutcome(cloned > 0,
-                cloned == 0 ? "No Pokémon could be duplicated. Check free storage."
+                cloned == 0 ? "Не удалось дублировать покемонов. Проверь свободные ячейки."
                 : $"Cloned {cloned} Pokémon." + (cloned < sources.Length ? $" {sources.Length - cloned} could not be duplicated." : ""));
         }, Math.Max(0, _viewModel.SelectedSlot), action: SaveAction.Duplicate);
         _viewModel.RefreshAllSlots();
@@ -1429,9 +1429,9 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                 return;
             }
         }
-        var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Release selection?",
-            $"Release all {_viewModel.MarkedCount} marked Pokémon? The current save state is kept as a restore point.",
-            "Release all");
+        var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Выпустить выбранных?",
+            $"Выпустить отмеченных покемонов ({_viewModel.MarkedCount})? Текущее состояние сохранится в точке восстановления.",
+            "Выпустить всех");
         if (!confirmed) return;
         await _viewModel.BulkReleaseAsync();
     }
@@ -1464,14 +1464,14 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                 else failed++;
             }
             return new GenerationOutcome(imported > 0,
-                $"Imported {imported} Pokémon." + (failed > 0 ? $" {failed} file(s) not recognized." : ""));
+                $"Импортировано покемонов: {imported}." + (failed > 0 ? $" {failed} file(s) not recognized." : ""));
         }, Math.Max(0, _viewModel.SelectedSlot), action: SaveAction.CreateMon);
         _viewModel.RefreshAllSlots();
         _canvas.InvalidateSurface();
     }
 
     /// <summary>Paste a full Showdown team: every set is previewed with its legality, then placed into chosen empty slots.</summary>
-    private Task ImportShowdownTeamAsync() => ImportShowdownPreviewedAsync("Import Showdown team");
+    private Task ImportShowdownTeamAsync() => ImportShowdownPreviewedAsync("Импорт команды Showdown");
 
     /// <summary>Every mon in the current box as one Showdown text: copy or share.</summary>
     private async Task ExportBoxShowdownAsync()
@@ -1482,18 +1482,18 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             .Where(s => s.Species is not null)
             .Select(s => session.GetShowdownText(_viewModel.BoxIndex, s.Slot));
         var text = string.Join("\n\n", sets);
-        if (text.Length == 0) { _viewModel.Status = "This box is empty."; return; }
-        var choice = await PadMenu.ShowAsync(_hostGrid, "Box as Showdown team", null, "Copy to clipboard", "Share as file", "Close");
+        if (text.Length == 0) { _viewModel.Status = "Этот бокс пуст."; return; }
+        var choice = await PadMenu.ShowAsync(_hostGrid, "Бокс как команда Showdown", null, "Копировать в буфер", "Поделиться файлом", "Закрыть");
         switch (choice)
         {
-            case "Copy to clipboard":
+            case "Копировать в буфер":
                 await Clipboard.Default.SetTextAsync(text);
-                _viewModel.Status = "Box copied as Showdown text.";
+                _viewModel.Status = "Бокс скопирован в формате Showdown.";
                 return;
-            case "Share as file":
+            case "Поделиться файлом":
                 var path = System.IO.Path.Combine(FileSystem.CacheDirectory, $"box-{_viewModel.BoxIndex + 1}.txt");
                 await File.WriteAllTextAsync(path, text);
-                await Share.Default.RequestAsync(new ShareFileRequest { Title = "Showdown team", File = new ShareFile(path) });
+                await Share.Default.RequestAsync(new ShareFileRequest { Title = "Команда Showdown", File = new ShareFile(path) });
                 return;
         }
     }
@@ -1502,14 +1502,14 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
     private async Task GenerateLivingDexAsync()
     {
         if (Denied(SaveAction.CreateMon)) return;
-        var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Generate living dex?",
+        var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Создать живой покедекс?",
             "This OVERWRITES every box with one legal Pokémon of every species this game supports. " +
-            "The current save state is kept as a restore point. This can take several minutes.",
+            "Текущее состояние сохранится в точке восстановления. Это может занять несколько минут.",
             "Fill my boxes");
         if (!confirmed) return;
 
         var session = _sessionsFor();
-        if (session is null) { _viewModel.Status = "No save connected."; return; }
+        if (session is null) { _viewModel.Status = "Сохранение не подключено."; return; }
         byte[]? bundle = null;
         try
         {
@@ -1524,7 +1524,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             return;
         }
 
-        var overlay = LoadingOverlay.Show(_hostGrid, "Filling the living dex…",
+        var overlay = LoadingOverlay.Show(_hostGrid, "Заполнение живого покедекса…",
             "One of every species, copied from the pre-generated dex. This is a straight write.");
         try
         {
@@ -1546,45 +1546,45 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
     /// <summary>Auto-sort: pick a criteria, pick a scope, one backed-up write compacts mons front.</summary>
     private async Task ShowSortMenuAsync()
     {
-        var choice = await PadMenu.ShowAsync(_hostGrid, "Sort", "How should the boxes be ordered?",
-            new PadOption("Dex number", IconPath: "pokedex"),
-            new PadOption("Alphabetical", IconPath: "alpha"),
-            new PadOption("Level (strongest first)", IconPath: "level"),
-            new PadOption("IV total (best first)", IconPath: "stats"),
-            new PadOption("Type", IconPath: "type"),
-            new PadOption("Age (oldest first)", IconPath: "calendar"),
-            new PadOption("Shiny first", IconPath: "shiny"));
+        var choice = await PadMenu.ShowAsync(_hostGrid, "Сортировка", "How should the boxes be ordered?",
+            new PadOption("Номер покедекса", IconPath: "pokedex"),
+            new PadOption("По алфавиту", IconPath: "alpha"),
+            new PadOption("Уровень (сначала сильные)", IconPath: "level"),
+            new PadOption("Сумма IV (сначала лучшие)", IconPath: "stats"),
+            new PadOption("Тип", IconPath: "type"),
+            new PadOption("Возраст (сначала старшие)", IconPath: "calendar"),
+            new PadOption("Сначала шайни", IconPath: "shiny"));
         if (choice is null) return;
 
-        var scope = await PadMenu.ShowAsync(_hostGrid, "Sort", "Which boxes?",
-            new PadOption("This box", IconPath: "box"),
-            new PadOption("All boxes", IconPath: "storage"));
+        var scope = await PadMenu.ShowAsync(_hostGrid, "Сортировка", "Какие боксы?",
+            new PadOption("Этот бокс", IconPath: "box"),
+            new PadOption("Все боксы", IconPath: "storage"));
 
-        var direction = await PadMenu.ShowAsync(_hostGrid, "Sort", "Which direction?",
-            new PadOption("Normal order", IconPath: "sort"),
-            new PadOption("Reversed", IconPath: "reverse"));
+        var direction = await PadMenu.ShowAsync(_hostGrid, "Сортировка", "В каком порядке?",
+            new PadOption("Обычный порядок", IconPath: "sort"),
+            new PadOption("Обратный порядок", IconPath: "reverse"));
         if (direction is null) return;
-        var reverse = direction == "Reversed";
+        var reverse = direction == "Обратный порядок";
 
         var criteria = choice switch
         {
-            "Alphabetical" => Domain.SortCriteria.Alphabetical,
-            "Level (strongest first)" => Domain.SortCriteria.LevelDesc,
-            "IV total (best first)" => Domain.SortCriteria.IvTotalDesc,
-            "Type" => Domain.SortCriteria.Type,
-            "Age (oldest first)" => Domain.SortCriteria.AgeOldest,
-            "Shiny first" => Domain.SortCriteria.ShinyFirst,
+            "По алфавиту" => Domain.SortCriteria.Alphabetical,
+            "Уровень (сначала сильные)" => Domain.SortCriteria.LevelDesc,
+            "Сумма IV (сначала лучшие)" => Domain.SortCriteria.IvTotalDesc,
+            "Тип" => Domain.SortCriteria.Type,
+            "Возраст (сначала старшие)" => Domain.SortCriteria.AgeOldest,
+            "Сначала шайни" => Domain.SortCriteria.ShinyFirst,
             _ => Domain.SortCriteria.DexNumber,
         };
-        IReadOnlyList<int>? boxes = scope == "This box" ? [_viewModel.BoxIndex] : null;
+        IReadOnlyList<int>? boxes = scope == "Этот бокс" ? [_viewModel.BoxIndex] : null;
 
         var directionNote = reverse ? " (reversed)" : "";
-        var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Sort now?",
-            (scope == "This box"
-                ? "This box's Pokémon are reordered and compacted to the top."
+        var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Сортировать сейчас?",
+            (scope == "Этот бокс"
+                ? "Покемоны этого бокса будут упорядочены и собраны в начало."
                 : "Every box's Pokémon are pooled, ordered, and compacted from box 1. Empties gather at the end.")
             + directionNote,
-            "Sort");
+            "Сортировка");
         if (!confirmed) return;
 
         var sorted = await _viewModel.RunMutationAsync(session =>
@@ -1612,40 +1612,40 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         if (session is null) return;
         var caps = session.GetTrainingCaps();
         var perfectLabel = caps.IvMax == 15 ? "6DV (perfect DVs)" : "6IV (perfect IVs)";
-        var scope = await PadMenu.ShowAsync(_hostGrid, "Presets", "Apply to which boxes?",
-            new PadOption("This box", IconPath: "box"),
-            new PadOption("All unlocked boxes", IconPath: "storage"));
+        var scope = await PadMenu.ShowAsync(_hostGrid, "Наборы", "К каким боксам применить?",
+            new PadOption("Этот бокс", IconPath: "box"),
+            new PadOption("Все открытые боксы", IconPath: "storage"));
         if (scope is null) return;
         IReadOnlyList<int>? boxes;
-        if (scope == "This box") boxes = [_viewModel.BoxIndex];
+        if (scope == "Этот бокс") boxes = [_viewModel.BoxIndex];
         else
         {
             var docId = DocumentId;
             var unlocked = Enumerable.Range(0, _viewModel.BoxCount)
                 .Where(box => docId is null || !Protection.IsBoxLocked(docId, box)).ToList();
-            if (unlocked.Count == 0) { _viewModel.Status = "Every box is locked"; return; }
+            if (unlocked.Count == 0) { _viewModel.Status = "Все боксы защищены"; return; }
             boxes = unlocked;
         }
 
-        var choice = await PadMenu.ShowAsync(_hostGrid, "Presets", "One backed-up write applies everything.",
-            new PadOption("Level 50 flat", IconPath: "level"),
-            new PadOption("Level 100", IconPath: "level"),
+        var choice = await PadMenu.ShowAsync(_hostGrid, "Наборы", "One backed-up write applies everything.",
+            new PadOption("Уровень 50 для всех", IconPath: "level"),
+            new PadOption("Уровень 100", IconPath: "level"),
             new PadOption(perfectLabel, IconPath: "stats"),
             new PadOption("0 Attack IV (special)", IconPath: "stats", Detail: "Attack IV set to 0, for special attackers."),
             new PadOption("0 Speed IV (Trick Room)", IconPath: "stats", Detail: "Speed IV set to 0, for Trick Room teams."),
-            new PadOption("Reset EVs", IconPath: "restore"),
-            new PadOption("Max friendship", IconPath: "heart"),
-            new PadOption("Hyper Train everything", IconPath: "train"),
-            new PadOption("Export box (Showdown)", IconPath: "script", Detail: "Share this box as a Showdown text file."),
-            new PadOption("Import Showdown sets to this box", IconPath: "script", Detail: "Paste Showdown sets, see their legality, then place them in empty slots."));
+            new PadOption("Сбросить EV", IconPath: "restore"),
+            new PadOption("Максимум дружбы", IconPath: "heart"),
+            new PadOption("Гипертренировка всех", IconPath: "train"),
+            new PadOption("Экспорт бокса (Showdown)", IconPath: "script", Detail: "Share this box as a Showdown text file."),
+            new PadOption("Импорт Showdown в этот бокс", IconPath: "script", Detail: "Paste Showdown sets, see their legality, then place them in empty slots."));
         if (choice is null) return;
 
-        if (choice == "Export box (Showdown)")
+        if (choice == "Экспорт бокса (Showdown)")
         {
             await ExportBoxShowdownFromEngineAsync();
             return;
         }
-        if (choice == "Import Showdown sets to this box")
+        if (choice == "Импорт Showdown в этот бокс")
         {
             await ImportShowdownSetsToBoxAsync();
             return;
@@ -1653,29 +1653,29 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
 
         IReadOnlyList<string> instructions = choice switch
         {
-            "Level 50 flat" => ["Level=50"],
-            "Level 100" => ["Level=100"],
+            "Уровень 50 для всех" => ["Level=50"],
+            "Уровень 100" => ["Level=100"],
             var perfect when perfect == perfectLabel =>
                 [.. new[] { "HP", "ATK", "DEF", "SPA", "SPD", "SPE" }.Select(stat => $"IV_{stat}={caps.IvMax}")],
             "0 Attack IV (special)" => ["IV_ATK=0"],
             "0 Speed IV (Trick Room)" => ["IV_SPE=0"],
-            "Reset EVs" => ["EV_HP=0", "EV_ATK=0", "EV_DEF=0", "EV_SPA=0", "EV_SPD=0", "EV_SPE=0"],
-            "Max friendship" => ["Friendship=255"],
-            "Hyper Train everything" => ["HyperTrain"],
+            "Сбросить EV" => ["EV_HP=0", "EV_ATK=0", "EV_DEF=0", "EV_SPA=0", "EV_SPD=0", "EV_SPE=0"],
+            "Максимум дружбы" => ["Friendship=255"],
+            "Гипертренировка всех" => ["HyperTrain"],
             _ => [],
         };
         if (instructions.Count == 0) return;
 
         var scopeText = boxes.Count == _viewModel.BoxCount ? "every unlocked box" : $"box {_viewModel.BoxIndex + 1:00}";
-        var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Apply preset?",
-            $"{choice} on {scopeText}. Backed up first.", "Apply");
+        var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Применить набор?",
+            $"{choice} on {scopeText}. Backed up first.", "Применить");
         if (!confirmed) return;
         await _viewModel.RunMutationAsync(s =>
         {
             var touched = s.BatchApply(instructions, boxes);
             return touched > 0
                 ? new GenerationOutcome(true, $"Preset applied to {touched} Pokémon.")
-                : new GenerationOutcome(false, "Nothing to edit there.");
+                : new GenerationOutcome(false, "Здесь нечего изменять.");
         }, Math.Max(0, _viewModel.SelectedSlot), refreshSlot: false, action: SaveAction.BatchEdit);
         _viewModel.RefreshAllSlots();
         _canvas.InvalidateSurface();
@@ -1686,13 +1686,13 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         var session = _sessionsFor();
         if (session is null) return;
         var text = session.ExportBoxShowdown(_viewModel.BoxIndex);
-        if (text.Length == 0) { _viewModel.Status = "This box is empty"; return; }
+        if (text.Length == 0) { _viewModel.Status = "Этот бокс пуст"; return; }
         var path = Path.Combine(FileSystem.CacheDirectory, $"box-{_viewModel.BoxIndex + 1:00}-showdown.txt");
         File.WriteAllText(path, text);
         await Share.Default.RequestAsync(new ShareFileRequest { Title = $"Box {_viewModel.BoxIndex + 1:00} Showdown", File = new ShareFile(path) });
     }
 
-    private Task ImportShowdownSetsToBoxAsync() => ImportShowdownPreviewedAsync("Import Showdown sets");
+    private Task ImportShowdownSetsToBoxAsync() => ImportShowdownPreviewedAsync("Импорт наборов Showdown");
 
     /// <summary>The speedrunner view: PID, EC, IVs, and a shiny-safe nature reroll.</summary>
     private async Task ShowRngAsync(int slot)
@@ -1703,7 +1703,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         var rng = session.GetRngInfo(box, slot);
         if (!rng.NatureRerollSupported)
         {
-            _viewModel.Status = "This generation has no natures";
+            _viewModel.Status = "В этом поколении нет характеров";
             return;
         }
 
@@ -1714,21 +1714,21 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             Spacing = 8,
             Children =
             {
-                Kit.HeaderBar("RNG / IVs"),
+                Kit.HeaderBar("RNG / IV"),
                 new Label { Text = $"PID      {current.Pid:X8}", FontFamily = DsChrome.PixelFont, FontSize = 14, TextColor = UiTokens.Ink0 },
                 new Label { Text = current.EncryptionConstant is { } ec ? $"EC       {ec:X8}" : "EC       (not in this generation)", FontFamily = DsChrome.PixelFont, FontSize = 14, TextColor = UiTokens.Ink0 },
                 new Label { Text = $"IVs      {string.Join("/", current.IVs)}", FontFamily = DsChrome.PixelFont, FontSize = 14, TextColor = UiTokens.Ink0 },
                 new Label { Text = $"Nature   {data.NatureNames[Math.Clamp(current.Nature, 0, data.NatureNames.Count - 1)]}", FontFamily = DsChrome.PixelFont, FontSize = 14, TextColor = UiTokens.Ink0 },
-                new Label { Text = $"Shiny    {(current.Shiny ? "YES" : "NO")}", FontFamily = DsChrome.PixelFont, FontSize = 14, TextColor = current.Shiny ? UiTokens.Gold : UiTokens.Ink0 },
+                new Label { Text = $"Shiny    {(current.Shiny ? "ДА" : "НЕТ")}", FontFamily = DsChrome.PixelFont, FontSize = 14, TextColor = current.Shiny ? UiTokens.Gold : UiTokens.Ink0 },
             },
         };
         var window = Kit.OverlayWindow(_hostGrid, stack);
 
-        var reroll = Kit.Capsule("Reroll nature (keeps shiny)", UiTokens.Green);
+        var reroll = Kit.Capsule("Сменить характер (сохранить шайни)", UiTokens.Green);
         // A nature reroll edits the mon, so Hardcore mode hides the affordance and leaves
         // the read-out (PID, EC, IVs) alone - viewing stays, editing does not.
         reroll.IsVisible = Guard.CanEditMon;
-        var close = Kit.Capsule("Close", UiTokens.Ink1);
+        var close = Kit.Capsule("Закрыть", UiTokens.Ink1);
         if (HardcoreMode.IsOn)
             stack.Children.Add(new Label
             {
@@ -1748,18 +1748,18 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             // and shifted every choice by one.
             var session = _sessionsFor();
             var preview = session is null ? null : NaturePicker.Service?.PreviewSlot(session, box, slot);
-            var picked = await NaturePicker.ShowAsync(overlay, data.NatureNames, current.Nature, preview, "Pick a nature");
+            var picked = await NaturePicker.ShowAsync(overlay, data.NatureNames, current.Nature, preview, "Выбери характер");
             if (picked is null) return;
             var nature = picked.Id;
             var targetBox = box;
             var targetSlot = slot;
             var ok = await _viewModel.RunMutationAsync(s => s.RerollNatureKeepShiny(targetBox, targetSlot, nature)
-                ? new GenerationOutcome(true, "Nature rerolled; shiny state kept.")
-                : new GenerationOutcome(false, "Could not find a matching PID. Try again."), targetSlot);
+                ? new GenerationOutcome(true, "Характер изменён, статус шайни сохранён.")
+                : new GenerationOutcome(false, "Подходящий PID не найден. Попробуй ещё раз."), targetSlot);
             if (ok)
             {
                 current = _sessionsFor()!.GetRngInfo(targetBox, targetSlot);
-                _viewModel.Status = $"PID {current.Pid:X8} · nature {data.NatureNames[Math.Clamp(current.Nature, 0, data.NatureNames.Count - 1)]} · shiny {(current.Shiny ? "YES" : "NO")}";
+                _viewModel.Status = $"PID {current.Pid:X8} · nature {data.NatureNames[Math.Clamp(current.Nature, 0, data.NatureNames.Count - 1)]} · shiny {(current.Shiny ? "ДА" : "НЕТ")}";
             }
             _canvas.InvalidateSurface();
         };
@@ -1775,7 +1775,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         var report = session.GetNuzlockeReport();
         if (report.Count == 0)
         {
-            _viewModel.Status = "No catch data in this save";
+            _viewModel.Status = "В сохранении нет данных встреч";
             return;
         }
 
@@ -1799,11 +1799,11 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                 });
         }
 
-        var close = Kit.Capsule("Close", UiTokens.Ink1);
+        var close = Kit.Capsule("Закрыть", UiTokens.Ink1);
         var content = new VerticalStackLayout
         {
             Spacing = 8,
-            Children = { Kit.HeaderBar("Nuzlocke report"), new ScrollView { Content = rows, MaximumHeightRequest = 420 }, close },
+            Children = { Kit.HeaderBar("Отчёт Nuzlocke"), new ScrollView { Content = rows, MaximumHeightRequest = 420 }, close },
         };
         var done = new TaskCompletionSource();
         var overlay = Kit.AttachOverlay(_hostGrid, Kit.OverlayWindow(_hostGrid, content), () => done.TrySetResult());
@@ -1817,10 +1817,10 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
     private async Task ShowLegalityCheckAsync()
     {
         var session = _sessionsFor();
-        if (session is null) { _viewModel.Status = "Open a save first."; return; }
+        if (session is null) { _viewModel.Status = "Сначала открой сохранение."; return; }
         if (!session.SupportsLegalityAnalysis)
         {
-            await PadMenu.ShowAsync(_hostGrid, "Legality check",
+            await PadMenu.ShowAsync(_hostGrid, "Проверка легальности",
                 "This save is a romhack format without offline legality tables - nothing to check here.", "OK");
             return;
         }
@@ -1832,30 +1832,30 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             var results = await _viewModel.GetLegalitySweepAsync(
                 () =>
                 {
-                    overlay = LoadingOverlay.Show(_hostGrid, "Checking legality…", "Scanning the party and every box.");
+                    overlay = LoadingOverlay.Show(_hostGrid, "Проверка легальности…", "Scanning the party and every box.");
                     overlay.Cancellation.Token.Register(cancellation.Cancel);
                 },
                 (done, total) => overlay?.Report(done, total),
                 cancellation.Token);
             if (results.Count == 0)
             {
-                _viewModel.Status = "This save stores no Pokémon.";
+                _viewModel.Status = "В сохранении нет покемонов.";
                 return;
             }
             var illegal = results.Where(r => !r.Valid).ToList();
 
             var choice = illegal.Count == 0
-                ? await PadMenu.ShowAsync(_hostGrid, "Legality check", $"All {results.Count} Pokémon are legal.", "OK")
-                : await PadMenu.ShowAsync(_hostGrid, "Legality check",
+                ? await PadMenu.ShowAsync(_hostGrid, "Проверка легальности", $"Все покемоны ({results.Count}) легальны.", "OK")
+                : await PadMenu.ShowAsync(_hostGrid, "Проверка легальности",
                     Note($"{illegal.Count} illegal of {results.Count}. The red-dotted slots in this box fail PKHeX's checks."),
-                    Menu(Allowed(SaveAction.EditMon, new("Legalize all illegal", IconPath: "fix", Detail: "Rewrite every illegal Pokémon in the save to its closest legal version.")),
-                        new PadOption("Close", IconPath: "close")));
-            if (choice == "Legalize all illegal")
+                    Menu(Allowed(SaveAction.EditMon, new("Исправить всех нелегальных", IconPath: "fix", Detail: "Rewrite every illegal Pokémon in the save to its closest legal version.")),
+                        new PadOption("Закрыть", IconPath: "close")));
+            if (choice == "Исправить всех нелегальных")
                 await LegalizeAllIllegalAsync(illegal);
         }
         catch (OperationCanceledException)
         {
-            _viewModel.Status = "Legality check cancelled.";
+            _viewModel.Status = "Проверка легальности отменена.";
         }
         finally
         {
@@ -1871,13 +1871,13 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         var legalizer = IPlatformApplication.Current?.Services.GetService<ILegalizerService>();
         if (session is null || legalizer is null) return;
 
-        var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Legalize all illegal?",
+        var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Исправить всех нелегальных?",
             $"{illegal.Count} Pokémon will be rewritten to their closest legal versions. " +
-            "The current state stays available as a restore point.", "Legalize");
+            "Текущее состояние останется доступным в точке восстановления.", "Исправить легальность");
         if (!confirmed) return;
 
         var targets = illegal.Select(v => (v.Box, v.Slot)).ToList();
-        var overlay = LoadingOverlay.Show(_hostGrid, "Legalizing…", "Repairing every flagged Pokémon in one write.");
+        var overlay = LoadingOverlay.Show(_hostGrid, "Исправление легальности…", "Repairing every flagged Pokémon in one write.");
         try
         {
             var ok = await _viewModel.RunMutationAsync(
@@ -1889,7 +1889,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             _viewModel.RefreshAllSlots();
             _canvas.InvalidateSurface();
             if (!ok)
-                await PadMenu.ShowAsync(_hostGrid, "Legalize all", _viewModel.Status, "OK");
+                await PadMenu.ShowAsync(_hostGrid, "Исправить всех", _viewModel.Status, "OK");
         }
         finally
         {
@@ -1903,10 +1903,10 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
     private async Task ShowAuditReportAsync()
     {
         var session = _sessionsFor();
-        if (session is null) { _viewModel.Status = "Open a save first."; return; }
+        if (session is null) { _viewModel.Status = "Сначала открой сохранение."; return; }
         if (!session.SupportsLegalityAnalysis)
         {
-            await PadMenu.ShowAsync(_hostGrid, "Audit report",
+            await PadMenu.ShowAsync(_hostGrid, "Отчёт аудита",
                 "This save is a romhack format without offline legality tables - nothing to audit here.", "OK");
             return;
         }
@@ -1920,7 +1920,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             sweep = await _viewModel.GetLegalitySweepAsync(
                 () =>
                 {
-                    overlay = LoadingOverlay.Show(_hostGrid, "Auditing…", "Fingerprinting every Pokémon and checking values.");
+                    overlay = LoadingOverlay.Show(_hostGrid, "Аудит…", "Fingerprinting every Pokémon and checking values.");
                     overlay.Cancellation.Token.Register(cancellation.Cancel);
                 },
                 (done, total) => overlay?.Report(done, total),
@@ -1929,7 +1929,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         }
         catch (OperationCanceledException)
         {
-            _viewModel.Status = "Audit cancelled.";
+            _viewModel.Status = "Аудит отменён.";
             overlay?.Close();
             return;
         }
@@ -1941,7 +1941,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         var clones = CollectionAudit.GroupClones(fingerprints);
         var illegal = sweep.Where(r => !r.Valid).ToList();
         _viewModel.Status = clones.Count == 0 && illegal.Count == 0
-            ? "Audit: no clones, no impossible values"
+            ? "Аудит: клонов и недопустимых значений нет"
             : $"Audit: {clones.Count} clone groups, {illegal.Count} flagged";
 
         var report = BuildAuditReport(clones, illegal, fingerprints.Count);
@@ -1959,13 +1959,13 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             });
         }
 
-        var share = Kit.Capsule("Share report", UiTokens.Cyan);
-        var close = Kit.Capsule("Close", UiTokens.Ink1);
+        var share = Kit.Capsule("Поделиться отчётом", UiTokens.Cyan);
+        var close = Kit.Capsule("Закрыть", UiTokens.Ink1);
         var buttons = new HorizontalStackLayout { Spacing = 8, HorizontalOptions = LayoutOptions.Center, Children = { share, close } };
         var content = new VerticalStackLayout
         {
             Spacing = 8,
-            Children = { Kit.HeaderBar("Audit report"), new ScrollView { Content = rows, MaximumHeightRequest = 420 }, buttons },
+            Children = { Kit.HeaderBar("Отчёт аудита"), new ScrollView { Content = rows, MaximumHeightRequest = 420 }, buttons },
         };
 
         var done = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -1998,7 +1998,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             var tid = session.GetMetInfo(summary.Box, summary.Slot).TID;
             fingerprints.Add(new MonFingerprint(
                 rng.Pid, rng.EncryptionConstant, detail.OriginalTrainer, tid,
-                summary.Box == -1 ? $"Party {summary.Slot + 1}" : $"B{summary.Box + 1}-{summary.Slot + 1}",
+                summary.Box == -1 ? $"Команда {summary.Slot + 1}" : $"B{summary.Box + 1}-{summary.Slot + 1}",
                 detail.Nickname is { Length: > 0 } ? detail.Nickname : detail.SpeciesName));
         }
         return fingerprints;
@@ -2015,7 +2015,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         };
         if (clones.Count == 0)
         {
-            lines.Add("No clones: every Pokémon has a unique identity fingerprint.");
+            lines.Add("Клонов нет: каждый покемон имеет уникальные данные личности.");
         }
         else
         {
@@ -2029,14 +2029,14 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         lines.Add(string.Empty);
         if (illegal.Count == 0)
         {
-            lines.Add("No impossible values: every Pokémon passed PKHeX's checks.");
+            lines.Add("Недопустимых значений нет: все покемоны прошли проверку PKHeX.");
         }
         else
         {
             lines.Add($"## Impossible values ({illegal.Count})");
             foreach (var verdict in illegal)
             {
-                var label = verdict.Box == -1 ? $"Party {verdict.Slot + 1}" : $"B{verdict.Box + 1}-{verdict.Slot + 1}";
+                var label = verdict.Box == -1 ? $"Команда {verdict.Slot + 1}" : $"B{verdict.Box + 1}-{verdict.Slot + 1}";
                 lines.Add($"{label} - {verdict.Problem}");
             }
         }
@@ -2074,13 +2074,13 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         var legalizer = IPlatformApplication.Current!.Services.GetRequiredService<ILegalizerService>();
         var data = IPlatformApplication.Current!.Services.GetRequiredService<IGameDataService>();
 
-        var choice = await PadMenu.ShowAsync(_hostGrid, "Egg factory", "Every egg fills an empty PC slot. One backed-up write.",
-            new PadOption("One egg of every species", IconPath: "egg"),
-            new PadOption("Pick a species…", IconPath: "pokedex"));
+        var choice = await PadMenu.ShowAsync(_hostGrid, "Фабрика яиц", "Every egg fills an empty PC slot. One backed-up write.",
+            new PadOption("По яйцу каждого вида", IconPath: "egg"),
+            new PadOption("Выбери вид…", IconPath: "pokedex"));
         if (choice is null) return;
 
         IReadOnlyList<int> species;
-        if (choice == "Pick a species…")
+        if (choice == "Выбери вид…")
         {
             var picked = await PokedexPicker.ShowAsync(_hostGrid, data, session);
             if (picked is null) return;
@@ -2097,10 +2097,10 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         var statKind = caps.IvMax == 15 ? "DVs" : "IVs";
         var maxIv = await PadMenu.ConfirmAsync(_hostGrid, $"Perfect {statKind}?",
             $"Every egg gets {caps.IvMax} {statKind} in all six stats.", $"Yes, 6{(caps.IvMax == 15 ? "DV" : "IV")}");
-        var shiny = await PadMenu.ConfirmAsync(_hostGrid, "Shiny eggs?", "Every egg hatches shiny.", "Yes, shiny");
+        var shiny = await PadMenu.ConfirmAsync(_hostGrid, "Яйца с шайни?", "Every egg hatches shiny.", "Да, шайни");
 
         var options = new Domain.EggOptions(maxIv, shiny);
-        var overlay = LoadingOverlay.Show(_hostGrid, "Generating eggs…", "The legalizer builds and egg-ifies each species offline.");
+        var overlay = LoadingOverlay.Show(_hostGrid, "Создание яиц…", "The legalizer builds and egg-ifies each species offline.");
         try
         {
             var list = species;
@@ -2118,12 +2118,12 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         if (Denied(SaveAction.BatchEdit)) return;
         var session = _sessionsFor();
         if (session is null) return;
-        var choice = await PadMenu.ShowAsync(_hostGrid, "Battle prep", "Every action is one backed-up write.",
-            new PadOption("Heal party", IconPath: "heal"),
-            new PadOption("Heal all (party + boxes)", IconPath: "heal"),
-            new PadOption("PP Max all moves", IconPath: "moves", Detail: "Max PP Ups on every move, in the party and unlocked boxes."),
-            new PadOption("Set party to Lv50 (flat rules)", IconPath: "level"),
-            new PadOption("Set all to Lv100", IconPath: "level", Detail: "The party and every unlocked box go to level 100."));
+        var choice = await PadMenu.ShowAsync(_hostGrid, "Подготовка к бою", "Перед каждым действием создаётся резервная копия.",
+            new PadOption("Вылечить команду", IconPath: "heal"),
+            new PadOption("Вылечить команду и боксы", IconPath: "heal"),
+            new PadOption("Максимум PP всех приёмов", IconPath: "moves", Detail: "Max PP Ups on every move, in the party and unlocked boxes."),
+            new PadOption("Команде уровень 50", IconPath: "level"),
+            new PadOption("Всем уровень 100", IconPath: "level", Detail: "The party and every unlocked box go to level 100."));
         if (choice is null) return;
 
         var party = new[] { -1 };
@@ -2134,19 +2134,19 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         IReadOnlyList<string> instructions;
         IReadOnlyList<int> boxes;
         string what;
-        if (choice == "Heal party")
+        if (choice == "Вылечить команду")
         {
-            instructions = ["Heal"];
+            instructions = ["Вылечить"];
             boxes = party;
             what = "the party";
         }
-        else if (choice == "Heal all (party + boxes)")
+        else if (choice == "Вылечить команду и боксы")
         {
-            instructions = ["Heal"];
+            instructions = ["Вылечить"];
             boxes = everywhere;
             what = everywhereText;
         }
-        else if (choice == "PP Max all moves")
+        else if (choice == "Максимум PP всех приёмов")
         {
             // PP Ups persist even in box storage; current PP only lives in party data,
             // so HealPP tops off the party and is a no-op write for boxed mons.
@@ -2154,7 +2154,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             boxes = everywhere;
             what = everywhereText;
         }
-        else if (choice == "Set party to Lv50 (flat rules)")
+        else if (choice == "Команде уровень 50")
         {
             instructions = ["Level=50"];
             boxes = party;
@@ -2176,7 +2176,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             var touched = s.BatchApply(instructions, boxes);
             return touched > 0
                 ? new GenerationOutcome(true, $"{choice} applied to {touched} Pokémon.")
-                : new GenerationOutcome(false, "Nothing to edit there.");
+                : new GenerationOutcome(false, "Здесь нечего изменять.");
         }, Math.Max(0, _viewModel.SelectedSlot), refreshSlot: false, action: SaveAction.BatchEdit);
         _viewModel.RefreshAllSlots();
         _canvas.InvalidateSurface();
@@ -2207,12 +2207,12 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         // Scope first. Locked boxes refuse batch edits (same rule as sort and presets).
         var scopeOptions = new List<PadOption>();
         if (_viewModel.MarkedCount > 0)
-            scopeOptions.Add(new($"Selected Pokémon ({_viewModel.MarkedCount})", IconPath: "select"));
-        scopeOptions.Add(new("This box", IconPath: "box"));
-        scopeOptions.Add(new("All boxes", IconPath: "storage"));
-        var scope = await PadMenu.ShowAsync(_hostGrid, "Batch editor", "Apply to which Pokémon?", scopeOptions.ToArray());
+            scopeOptions.Add(new($"Выбранные покемоны ({_viewModel.MarkedCount})", IconPath: "select"));
+        scopeOptions.Add(new("Этот бокс", IconPath: "box"));
+        scopeOptions.Add(new("Все боксы", IconPath: "storage"));
+        var scope = await PadMenu.ShowAsync(_hostGrid, "Массовый редактор", "К каким покемонам применить?", scopeOptions.ToArray());
         if (scope is null) return;
-        var selection = scope.StartsWith("Selected", StringComparison.Ordinal);
+        var selection = scope.StartsWith("Выбранные покемоны (", StringComparison.Ordinal);
 
         IReadOnlyList<(int Box, int Slot)>? slots = null;
         IReadOnlyList<int>? boxes = null;
@@ -2222,13 +2222,13 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             slots = _viewModel.MarkedSlots
                 .Where(m => docId is null || !Protection.IsBoxLocked(docId, m.Box))
                 .ToList();
-            if (slots.Count == 0) { _viewModel.Status = "Every marked box is locked"; return; }
+            if (slots.Count == 0) { _viewModel.Status = "Все отмеченные боксы защищены"; return; }
         }
-        else if (scope == "This box")
+        else if (scope == "Этот бокс")
         {
             if (DocumentId is { } docId && _viewModel.BoxIndex >= 0 && Protection.IsBoxLocked(docId, _viewModel.BoxIndex))
             {
-                _viewModel.Status = "This box is locked";
+                _viewModel.Status = "Этот бокс защищён";
                 return;
             }
             boxes = [_viewModel.BoxIndex];
@@ -2238,7 +2238,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             var docId = DocumentId;
             boxes = Enumerable.Range(0, _viewModel.BoxCount)
                 .Where(box => docId is null || !Protection.IsBoxLocked(docId, box)).ToList();
-            if (boxes.Count == 0) { _viewModel.Status = "Every box is locked"; return; }
+            if (boxes.Count == 0) { _viewModel.Status = "Все боксы защищены"; return; }
         }
 
         // Chip flow: each entry toggles; the menu re-opens until Apply or Cancel.
@@ -2257,19 +2257,19 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             PadOption Chip(string label, bool on, string icon) => new($"{(on ? "✓ " : "")}{label}", IconPath: icon);
             var levelChip = Chip("Level = 100", level, "level");
             var ivChip = Chip($"Max {statKind} ({caps.IvMax} everywhere)", maxIvs, "stats");
-            var evChip = new PadOption($"EV spread: {evSummary}", IconPath: "stats");
-            var healChip = Chip("Heal + PP Max", heal, "heart");
+            var evChip = new PadOption($"Распределение EV: {evSummary}", IconPath: "stats");
+            var healChip = Chip("Лечение + максимум PP", heal, "heart");
             var trainChip = Chip("Hyper Train (legal $suggest)", train, "gears");
-            var friendChip = Chip("Max friendship", friendship, "heart");
-            var nameChip = Chip("Nicknames → species names", speciesNames, "script");
-            var itemChip = Chip("Remove held items", takeItems, "item");
-            var pick = await PadMenu.ShowAsync(_hostGrid, "Batch editor", "Toggle operations, then apply.",
+            var friendChip = Chip("Максимум дружбы", friendship, "heart");
+            var nameChip = Chip("Имена → названия видов", speciesNames, "script");
+            var itemChip = Chip("Убрать предметы", takeItems, "item");
+            var pick = await PadMenu.ShowAsync(_hostGrid, "Массовый редактор", "Выбери действия, затем примени.",
                 levelChip, ivChip, evChip, healChip, trainChip, friendChip, nameChip, itemChip,
                 new PadOption("Expert instructions…", IconPath: "code", Detail: "Add your own PKHeX batch lines on top of the choices above."),
-                new PadOption("Apply", IconPath: "confirm"),
-                new PadOption("Cancel", IconPath: "close"));
-            if (pick is null or "Cancel") return;
-            if (pick == "Apply") break;
+                new PadOption("Применить", IconPath: "confirm"),
+                new PadOption("Отмена", IconPath: "close"));
+            if (pick is null or "Отмена") return;
+            if (pick == "Применить") break;
             if (pick == levelChip.Label) level = !level;
             else if (pick == ivChip.Label) maxIvs = !maxIvs;
             else if (pick == healChip.Label) heal = !heal;
@@ -2285,10 +2285,10 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                     ("Special sweeper (252 SpA / 252 Spe / 4 HP)", "SpA/Spe 252+4", ["EV_HP=4", "EV_SPA=252", "EV_SPE=252"]),
                     ("Physical wall (252 HP / 252 Def / 4 SpD)", "HP/Def 252+4", ["EV_HP=252", "EV_DEF=252", "EV_SPD=4"]),
                     ("Special wall (252 HP / 252 SpD / 4 Def)", "HP/SpD 252+4", ["EV_HP=252", "EV_SPD=252", "EV_DEF=4"]),
-                    ("Reset EVs (all zero)", "reset", ["EV_HP=0", "EV_ATK=0", "EV_DEF=0", "EV_SPA=0", "EV_SPD=0", "EV_SPE=0"]),
-                    ("Keep EVs as they are", "none", []),
+                    ("Обнулить все EV", "reset", ["EV_HP=0", "EV_ATK=0", "EV_DEF=0", "EV_SPA=0", "EV_SPD=0", "EV_SPE=0"]),
+                    ("Оставить EV как есть", "none", []),
                 };
-                var spreadPick = await PadMenu.ShowAsync(_hostGrid, "EV spread", "One spread replaces the previous choice.",
+                var spreadPick = await PadMenu.ShowAsync(_hostGrid, "Распределение EV", "One spread replaces the previous choice.",
                     spreads.Select(s => new PadOption(s.Label, IconPath: "stats")).ToArray());
                 var chosen = spreads.FirstOrDefault(s => s.Label == spreadPick);
                 if (chosen.Label is not null)
@@ -2315,14 +2315,14 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         if (heal)
         {
             // PP Ups first so Heal's built-in PP refill tops off at the raised maximum.
-            plan.AddRange(["Move1_PPUps=3", "Move2_PPUps=3", "Move3_PPUps=3", "Move4_PPUps=3", "Heal"]);
+            plan.AddRange(["Move1_PPUps=3", "Move2_PPUps=3", "Move3_PPUps=3", "Move4_PPUps=3", "Вылечить"]);
         }
         if (train) plan.Add("HyperTrain=$suggest");
         if (friendship) plan.Add("Friendship=255");
         if (speciesNames) plan.Add("IsNicknamed=false");
         if (takeItems) plan.Add("HeldItem=0");
         if (expertLines is not null) plan.AddRange(expertLines.Where(line => line.Length > 0));
-        if (plan.Count == 0) { _viewModel.Status = "No operations selected"; return; }
+        if (plan.Count == 0) { _viewModel.Status = "Действия не выбраны"; return; }
 
         var mons = 0;
         if (slots is not null)
@@ -2339,24 +2339,24 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             }
         }
         var scopeText = selection
-            ? $"{slots!.Count} selected Pokémon"
+            ? $"Выбрано покемонов: {slots!.Count}"
             : boxes!.Count == 1
                 ? (_viewModel.BoxIndex == -1 ? "the party" : $"box {boxes[0] + 1:00}")
-                : (boxes.Count == _viewModel.BoxCount ? "every box" : $"{boxes.Count} unlocked boxes");
+                : (boxes.Count == _viewModel.BoxCount ? "every box" : $"Открытых боксов: {boxes.Count}");
 
         // Dry run first: the plan runs on copies so the confirm can say what would change
         // and what would turn illegal before anything is written.
         BatchDryRun? dryRun = null;
         if (InfoPickers.Info is { } info)
         {
-            var rehearsal = LoadingOverlay.Show(_hostGrid, "Checking…", "Trying the batch edit on copies first.");
+            var rehearsal = LoadingOverlay.Show(_hostGrid, "Проверка…", "Trying the batch edit on copies first.");
             try { dryRun = await Task.Run(() => info.DryRunBatch(session, plan, boxes, slots)); }
             catch (Exception e) when (e is ArgumentException or InvalidOperationException) { }
             finally { rehearsal.Close(); }
         }
         if (dryRun is { Targeted: > 0, Affected: 0 })
         {
-            await PadMenu.ShowAsync(_hostGrid, "Nothing would change", $"The {dryRun.Targeted} Pokémon in {scopeText} already match every operation.", "OK");
+            await PadMenu.ShowAsync(_hostGrid, "Изменений не будет", $"The {dryRun.Targeted} Pokémon in {scopeText} already match every operation.", "OK");
             return;
         }
         var impact = dryRun is null
@@ -2364,17 +2364,17 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             : $"{dryRun.Affected} of {dryRun.Targeted} Pokémon in {scopeText} would change." +
               (dryRun.BecomeIllegal > 0 ? $"\n⚠ {dryRun.BecomeIllegal} would become ILLEGAL." : "\nNone would become illegal.") +
               (dryRun.AlreadyIllegal > 0 ? $"\n{dryRun.AlreadyIllegal} of them are already illegal." : "");
-        var confirmed = await PadMenu.ConfirmAsync(_hostGrid, dryRun is { BecomeIllegal: > 0 } ? "Apply? some would turn illegal" : "Apply batch edit?",
+        var confirmed = await PadMenu.ConfirmAsync(_hostGrid, dryRun is { BecomeIllegal: > 0 } ? "Применить? Некоторые станут нелегальными" : "Применить массовое изменение?",
             $"{impact}\n{string.Join(" · ", plan)}\nOne backed-up write.",
-            "Apply");
+            "Применить");
         if (!confirmed) return;
 
         var ok = await _viewModel.RunMutationAsync(s =>
         {
             var touched = slots is not null ? s.BatchApplySlots(slots, plan) : s.BatchApply(plan, boxes);
             return touched > 0
-                ? new GenerationOutcome(true, $"Batch applied to {touched} Pokémon (legality not re-checked).")
-                : new GenerationOutcome(false, "Nothing to edit in that scope.");
+                ? new GenerationOutcome(true, $"Изменено покемонов: {touched} (без повторной проверки легальности).")
+                : new GenerationOutcome(false, "В выбранной области нечего изменять.");
         }, Math.Max(0, _viewModel.SelectedSlot), refreshSlot: false, action: SaveAction.BatchEdit);
         if (ok)
             _viewModel.RefreshAllSlots();
@@ -2386,66 +2386,66 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         var session = _sessionsFor();
         if (session is null) return;
         var options = Menu(
-            new PadOption("Trainer card", IconPath: "trainer"),
-            new PadOption("Bag & items", IconPath: "bag"),
-            new PadOption("Pokédex", IconPath: "pokedex"),
-            Allowed(SaveAction.EditTrainer, new("Fashion", IconPath: "box", Detail: "Unlock every outfit this save can legally own (X, Y, Sword and Shield).")),
-            new PadOption("Trainer records", IconPath: "records", Detail: "The game's own trainer records, view only."),
-            Allowed(SaveAction.WriteRawBytes, new("Byte manipulation", IconPath: "hex", Detail: "Edit the save file's raw bytes. Written once, when you close.")),
+            new PadOption("Карточка тренера", IconPath: "trainer"),
+            new PadOption("Сумка и предметы", IconPath: "bag"),
+            new PadOption("Покедекс", IconPath: "pokedex"),
+            Allowed(SaveAction.EditTrainer, new("Одежда", IconPath: "box", Detail: "Unlock every outfit this save can legally own (X, Y, Sword and Shield).")),
+            new PadOption("Рекорды тренера", IconPath: "records", Detail: "The game's own trainer records, view only."),
+            Allowed(SaveAction.WriteRawBytes, new("Редактор байтов", IconPath: "hex", Detail: "Изменение байтов сохранения. Запись при закрытии редактора.")),
             // Viewable in Hardcore mode; the editor itself refuses writes (EditWorld).
-            Engine.EventFlagService.IsSupported(session) ? new PadOption("Event flags", IconPath: "check", Detail: "Turn story and event flags on or off, and edit event values.") : null,
-            new PadOption("Wonder cards", IconPath: "events", Detail: "Mystery Gift events and the gift cards stored in this save."),
+            Engine.EventFlagService.IsSupported(session) ? new PadOption("Флаги событий", IconPath: "check", Detail: "Turn story and event flags on or off, and edit event values.") : null,
+            new PadOption("Карточки подарков", IconPath: "events", Detail: "События Mystery Gift и карточки подарков в сохранении."),
             // Viewable in Hardcore mode; each world editor refuses writes itself.
-            WorldEventsMenu.HasAny(session) ? new PadOption("World & events", IconPath: "map", Detail: "Clocks, roaming Pokémon, one-time encounters and other world data.") : null,
-            new PadOption("Export modified save", IconPath: "export", Detail: "Share a copy of the edited save file."),
-            new PadOption("Restore points", IconPath: "history", Detail: "Backups made before each change; go back to one."),
-            new PadOption("Close save", IconPath: "quit")).ToList();
+            WorldEventsMenu.HasAny(session) ? new PadOption("Мир и события", IconPath: "map", Detail: "Часы, бродячие покемоны, разовые встречи и другие данные мира.") : null,
+            new PadOption("Экспорт сохранения", IconPath: "export", Detail: "Экспорт копии изменённого сохранения."),
+            new PadOption("Точки восстановления", IconPath: "history", Detail: "Копии перед каждым изменением. Выбери нужную для восстановления."),
+            new PadOption("Закрыть сохранение", IconPath: "quit")).ToList();
         if (session.GetGrandUndergroundItems().Count != 0 && Guard.Allows(SaveAction.EditInventory))
-            options.Insert(2, new PadOption("Grand Underground", IconPath: "underground", Detail: "The Grand Underground items, kept apart from the Bag."));
+            options.Insert(2, new PadOption("Великое подземелье", IconPath: "underground", Detail: "The Grand Underground items, kept apart from the Bag."));
         if (session.SupportsCompassSettings && Guard.Allows(SaveAction.EditTrainer))
             options.Insert(2, new PadOption("Compass settings", IconPath: "settings", Detail: "Pokémon Compass options such as exp share and level cap."));
-        var choice = await PadMenu.ShowAsync(_hostGrid, "Save data", Note(null), options.ToArray());
+        var choice = await PadMenu.ShowAsync(_hostGrid, "Данные сохранения", Note(null), options.ToArray());
         switch (choice)
         {
-            case "Trainer card": await ShowTrainerCardAsync(); return;
-            case "Export modified save": await ExportModifiedSaveAsync(session); return;
-            case "Close save": await Navigation.PopAsync(); return;
-            case "Bag & items": await ShowBagAsync(); return;
-            case "Grand Underground": await GrandUndergroundEditor.ShowAsync(_hostGrid, session, _viewModel); return;
+            case "Карточка тренера": await ShowTrainerCardAsync(); return;
+            case "Экспорт сохранения": await ExportModifiedSaveAsync(session); return;
+            case "Закрыть сохранение": await Navigation.PopAsync(); return;
+            case "Сумка и предметы": await ShowBagAsync(); return;
+            case "Великое подземелье": await GrandUndergroundEditor.ShowAsync(_hostGrid, session, _viewModel); return;
             case "Compass settings": await ShowCompassSettingsAsync(session); return;
-            case "Pokédex": await ShowDexMenuAsync(); return;
-            case "Fashion": await ShowFashionAsync(); return;
-            case "Trainer records": await ShowTrainerRecordsAsync(); return;
-            case "Byte manipulation": await HexEditorPage.ShowAsync(_hostGrid, _viewModel, session); return;
-            case "Event flags": await EventFlagsEditor.ShowAsync(_hostGrid, session, _viewModel); return;
-            case "World & events": await WorldEventsMenu.ShowAsync(_hostGrid, session, _viewModel); return;
-            case "Wonder cards":
+            case "Покедекс": await ShowDexMenuAsync(); return;
+            case "Одежда": await ShowFashionAsync(); return;
+            case "Рекорды тренера": await ShowTrainerRecordsAsync(); return;
+            case "Редактор байтов": await HexEditorPage.ShowAsync(_hostGrid, _viewModel, session); return;
+            case "Флаги событий": await EventFlagsEditor.ShowAsync(_hostGrid, session, _viewModel); return;
+            case "Мир и события": await WorldEventsMenu.ShowAsync(_hostGrid, session, _viewModel); return;
+            case "Карточки подарков":
             {
-                var wonderChoice = await PadMenu.ShowAsync(_hostGrid, "Wonder cards", Note(null),
-                    Menu(Allowed(SaveAction.InjectEvent, new PadOption("Event gallery", IconPath: "events", Detail: "Every Mystery Gift this save can receive.")),
-                        new PadOption("In-save inbox", IconPath: "inbox", Detail: "The Mystery Gift cards stored in this save, view only."),
-                        Engine.KeyItemEventService.IsSupported(session) ? new PadOption("Key item events", IconPath: "key", Detail: "Ticket events such as the Eon Ticket, Old Sea Map or Member Card.") : null,
-                        Engine.SaveBlockEditorService.IsSupported(session) ? new PadOption("Save blocks", IconPath: "blocks", Detail: "Browse save blocks and edit simple on/off and number values.") : null));
-                if (wonderChoice == "In-save inbox")
+                var wonderChoice = await PadMenu.ShowAsync(_hostGrid, "Карточки подарков", Note(null),
+                    Menu(Allowed(SaveAction.InjectEvent, new PadOption("Галерея событий", IconPath: "events", Detail: "Все подарки, доступные этому сохранению.")),
+                        new PadOption("Подарки в сохранении", IconPath: "inbox", Detail: "Карточки подарков в этом сохранении, только просмотр."),
+                        Engine.KeyItemEventService.IsSupported(session) ? new PadOption("События ключевых предметов", IconPath: "key", Detail: "Ticket events such as the Eon Ticket, Old Sea Map or Member Card.") : null,
+                        Engine.SaveBlockEditorService.IsSupported(session) ? new PadOption("Блоки сохранения", IconPath: "blocks", Detail: "Просмотр блоков сохранения, изменение переключателей и чисел.") : null));
+                if (wonderChoice == "Подарки в сохранении")
                 {
                     await MysteryGiftInboxEditor.ShowAsync(_hostGrid, session);
                     return;
                 }
-                if (wonderChoice == "Key item events")
+                if (wonderChoice == "События ключевых предметов")
                 {
                     await KeyItemEventsEditor.ShowAsync(_hostGrid, session, _viewModel);
                     return;
                 }
-                if (wonderChoice == "Save blocks")
+                if (wonderChoice == "Блоки сохранения")
                 {
                     await SaveBlockEditor.ShowAsync(_hostGrid, session, _viewModel);
                     return;
                 }
-                if (wonderChoice != "Event gallery") return;
+                if (wonderChoice != "Галерея событий") return;
                 await EventGallery.ShowAsync(_hostGrid, _viewModel, session, targetSlot: null, () => _canvas.InvalidateSurface());
                 return;
             }
-            case "Restore points": await PushAsync<BackupHistoryPage>(); return;
+            case "Точки восстановления": await PushAsync<BackupHistoryPage>(); return;
         }
     }
 
@@ -2467,14 +2467,14 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             await File.WriteAllBytesAsync(path, session.Serialize().ToArray());
             await Share.Default.RequestAsync(new ShareFileRequest
             {
-                Title = "Export modified save",
+                Title = "Экспорт сохранения",
                 File = new ShareFile(path),
             });
-            _viewModel.Status = $"Exported {Path.GetFileName(path)}";
+            _viewModel.Status = $"Экспортировано: {Path.GetFileName(path)}";
         }
         catch (Exception error)
         {
-            _viewModel.Status = $"Save export failed: {error.Message}";
+            _viewModel.Status = $"Ошибка экспорта сохранения: {error.Message}";
         }
     }
 
@@ -2496,11 +2496,11 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
 
             var options = settings
                 .Select(setting => new PadOption($"{setting.Name}: {setting.Choices[setting.Selected]}", IconPath: "settings"))
-                .Append(new PadOption("Close", IconPath: "close"))
+                .Append(new PadOption("Закрыть", IconPath: "close"))
                 .ToArray();
             var choice = await PadMenu.ShowAsync(_hostGrid, "Compass settings",
                 "Pokemon Compass options. One backed-up write per change.", options);
-            if (choice is null or "Close") return;
+            if (choice is null or "Закрыть") return;
 
             var setting = settings.FirstOrDefault(s => choice.StartsWith(s.Name + ":", StringComparison.Ordinal));
             if (setting is null) return;
@@ -2536,7 +2536,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         await _viewModel.RunMutationAsync(s =>
         {
             s.SetTrainer(updated);
-            return new GenerationOutcome(true, "Trainer card updated.");
+            return new GenerationOutcome(true, "Карточка тренера обновлена.");
         }, Math.Max(0, _viewModel.SelectedSlot), action: SaveAction.EditTrainer);
     }
 
@@ -2547,7 +2547,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         if (session is null) return;
         if (!session.SupportsLegalFashionUnlock)
         {
-            await EditorMenu.ShowAsync(_hostGrid, "Fashion",
+            await EditorMenu.ShowAsync(_hostGrid, "Одежда",
                 "Legal wardrobe unlocks are available for Pokémon X, Y, Sword and Shield only.", "OK");
             return;
         }
@@ -2557,7 +2557,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             return;
         }
         var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Unlock legal fashion?",
-            "Unlock every outfit this Sword or Shield save can legitimately own. A restore point is created first.", "Unlock");
+            "Unlock every outfit this Sword or Shield save can legitimately own. A restore point is created first.", "Снять защиту");
         if (!confirmed) return;
         await _viewModel.RunMutationAsync(s =>
         {
@@ -2568,14 +2568,14 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
 
     private async Task ShowFashionXYAsync(ISaveEngineSession session)
     {
-        var choice = await PadMenu.ShowAsync(_hostGrid, "Fashion", Note(null),
+        var choice = await PadMenu.ShowAsync(_hostGrid, "Одежда", Note(null),
             new PadOption("Unlock all clothes", IconPath: "box", Detail: "Every outfit and accessory your trainer can wear."),
             new PadOption("Max Style", IconPath: "trainer", Detail: $"Style is {session.GetStylePoints()} of {byte.MaxValue}. High Style opens the Lumiose boutiques and restaurants."));
         switch (choice)
         {
             case "Unlock all clothes":
                 if (!await PadMenu.ConfirmAsync(_hostGrid, "Unlock all clothes?",
-                    "Unlock every outfit this X or Y save can own. A restore point is created first.", "Unlock")) return;
+                    "Unlock every outfit this X or Y save can own. A restore point is created first.", "Снять защиту")) return;
                 await _viewModel.RunMutationAsync(s =>
                 {
                     s.UnlockAllLegalFashion();
@@ -2610,29 +2610,29 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         {
             var profiles = store.Profiles;
             var options = Menu(
-                new("Save current trainer as profile", IconPath: "profile"),
+                new("Сохранить тренера в профиль", IconPath: "profile"),
                 _viewModel.SelectedSlot >= 0 && profiles.Count > 0
-                    ? Allowed(SaveAction.EditMon, new("Apply profile to selected Pokémon", IconPath: "profile", Detail: "Make a saved profile this Pokémon's original trainer."))
+                    ? Allowed(SaveAction.EditMon, new("Применить профиль к выбранным покемонам", IconPath: "profile", Detail: "Make a saved profile this Pokémon's original trainer."))
                     : null,
-                profiles.Count > 0 ? new("Delete a profile", IconPath: "delete") : null,
+                profiles.Count > 0 ? new("Удалить профиль", IconPath: "delete") : null,
                 new(store.UseCurrentTrainerForGeneration
-                    ? "Generated Pokémon obey trainer: ON"
-                    : "Generated Pokémon obey trainer: OFF", IconPath: "profile", Detail: "ON makes Pokémon you create belong to the open save's trainer.")).ToList();
+                    ? "Подчинение тренеру: ВКЛ"
+                    : "Подчинение тренеру: ВЫКЛ", IconPath: "profile", Detail: "Созданные покемоны будут принадлежать тренеру из открытого сохранения.")).ToList();
 
-            var choice = await PadMenu.ShowAsync(_hostGrid, "Trainer profiles",
-                Note(profiles.Count == 0 ? "No named profiles yet." : string.Join('\n', profiles.Select(ProfileSummary))),
+            var choice = await PadMenu.ShowAsync(_hostGrid, "Профили тренера",
+                Note(profiles.Count == 0 ? "Профилей пока нет." : string.Join('\n', profiles.Select(ProfileSummary))),
                 options.ToArray());
             if (choice is null) return;
 
-            if (choice == "Save current trainer as profile")
+            if (choice == "Сохранить тренера в профиль")
             {
-                var name = await TextPopup.ShowLineAsync(_hostGrid, "Profile name", "Profile name");
+                var name = await TextPopup.ShowLineAsync(_hostGrid, "Имя профиля", "Имя профиля");
                 if (string.IsNullOrWhiteSpace(name)) continue;
                 store.Save(name, session.GetTrainer());
-                _viewModel.Status = $"Trainer profile '{name.Trim()}' saved.";
+                _viewModel.Status = $"Профиль тренера \u00AB{name.Trim()}\u00BB сохранён.";
                 continue;
             }
-            if (choice.StartsWith("Generated Pokémon obey trainer:", StringComparison.Ordinal))
+            if (choice.StartsWith("Подчинение тренеру:", StringComparison.Ordinal))
             {
                 store.SetUseCurrentTrainerForGeneration(!store.UseCurrentTrainerForGeneration);
                 continue;
@@ -2640,13 +2640,13 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
 
             var labels = profiles.Select(ProfileSummary).ToArray();
             var selected = await PadMenu.ShowAsync(_hostGrid,
-                choice == "Delete a profile" ? "DELETE PROFILE" : "APPLY TRAINER PROFILE", null, labels);
+                choice == "Удалить профиль" ? "УДАЛИТЬ ПРОФИЛЬ" : "ПРИМЕНИТЬ ПРОФИЛЬ ТРЕНЕРА", null, labels);
             var index = Array.IndexOf(labels, selected);
             if (index < 0) continue;
             var profile = profiles[index];
-            if (choice == "Delete a profile")
+            if (choice == "Удалить профиль")
             {
-                var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Delete profile?", profile.DisplayName, "Delete");
+                var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Удалить профиль?", profile.DisplayName, "Удалить");
                 if (confirmed) store.Delete(profile.Id);
                 continue;
             }
@@ -2669,11 +2669,11 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         var data = IPlatformApplication.Current!.Services.GetRequiredService<IGameDataService>();
         if (session.GetPokeBeans().Count != 0)
         {
-            var choice = await PadMenu.ShowAsync(_hostGrid, "Bag & items", null,
-                new PadOption("Bag", IconPath: "bag"),
-                new PadOption("Poké Beans", IconPath: "item"));
+            var choice = await PadMenu.ShowAsync(_hostGrid, "Сумка и предметы", null,
+                new PadOption("Сумка", IconPath: "bag"),
+                new PadOption("Покебобы", IconPath: "item"));
             if (choice is null) return;
-            if (choice == "Poké Beans")
+            if (choice == "Покебобы")
             {
                 await PokeBeansEditor.ShowAsync(_hostGrid, session, _viewModel);
                 return;
@@ -2737,7 +2737,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                     PksmIcons.Icon("bag", 22, PksmIcons.White),
                     new Label
                     {
-                        Text = "Bag",
+                        Text = "Сумка",
                         FontFamily = DsChrome.PixelFont,
                         FontSize = UiTokens.TextHeading,
                         TextColor = UiTokens.Ink0,
@@ -2792,7 +2792,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             _bag = _session.GetBag();
             if (_bag.Count == 0)
             {
-                _viewModel.Status = "This game exposes no editable bag.";
+                _viewModel.Status = "Сумка этой игры недоступна для редактирования.";
                 await CloseAsync();
                 return;
             }
@@ -2842,7 +2842,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         private async Task PickPouchAsync()
         {
             var pouches = _bag.Select((p, i) => new PadOption($"{p.Name} ({p.Items.Count})", IconPath: "bag")).ToArray();
-            var choice = await PadMenu.ShowAsync(_host, "Pouch", null, pouches);
+            var choice = await PadMenu.ShowAsync(_host, "Карман", null, pouches);
             if (choice is null) return;
             var index = Array.FindIndex(pouches, o => o.Label == choice);
             if (index >= 0) { _pouchIndex = index; _cursor = 0; Rebuild(); }
@@ -2903,7 +2903,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                 _rows.Children.Add(row);
             }
 
-            var add = Kit.Capsule("+  Add item", UiTokens.BagCyan);
+            var add = Kit.Capsule("+  Добавить предмет", UiTokens.BagCyan);
             add.FontSize = 14;
             add.Margin = new Thickness(4, 6, 4, 2);
             add.IsEnabled = canEdit;
@@ -2911,7 +2911,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             _addRow = add;
             _rows.Children.Add(_addRow);
 
-            var presets = Kit.Capsule("Item presets", UiTokens.BagCyan);
+            var presets = Kit.Capsule("Наборы предметов", UiTokens.BagCyan);
             presets.FontSize = 14;
             presets.Margin = new Thickness(4, 2, 4, 2);
             presets.IsEnabled = canEdit;
@@ -2940,7 +2940,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             await FlushPendingAsync();
             var name = ItemName(item.Id);
             var current = _session.GetBag().SelectMany(p => p.Items).FirstOrDefault(i => i.Id == item.Id)?.Count ?? item.Count;
-            var count = await StatsPopup.ShowSingleAsync(_host, $"{name} - quantity", current, 999);
+            var count = await StatsPopup.ShowSingleAsync(_host, $"{name} — количество", current, 999);
             if (count is null) return;
             await WriteAsync(item.Id, count.Value);
         }
@@ -2983,7 +2983,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                         s.SetItemCount(change.Pouch, change.Item, change.Count);
                     return new GenerationOutcome(true, $"Updated {changes.Length} item{(changes.Length == 1 ? "" : "s")}.");
                 }, _slotSeed, refreshSlot: false, action: SaveAction.EditInventory);
-                Report(outcome ? "Item quantity saved to file - restart the game to load it" : "Write failed - see status");
+                Report(outcome ? "Количество записано в файл — перезапусти игру" : "Ошибка записи — см. сообщение");
                 Rebuild();
                 return outcome;
             }
@@ -3005,7 +3005,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                 stored = s.SetItemCount(pouchName, itemId, count);
                 return new GenerationOutcome(true, stored == 0 ? $"{name} removed." : $"{name} ×{stored}");
             }, _slotSeed, refreshSlot: false, action: SaveAction.EditInventory);
-            Report(outcome ? $"SAVED TO FILE: {(stored == 0 ? $"{name} REMOVED" : $"{name} x{stored}")} - RESTART GAME" : "WRITE FAILED - SEE STATUS");
+            Report(outcome ? $"SAVED TO FILE: {(stored == 0 ? $"{name} УДАЛЕНО" : $"{name} x{stored}")} - RESTART GAME" : "ОШИБКА ЗАПИСИ — СМ. СООБЩЕНИЕ");
             Rebuild();
         }
 
@@ -3049,8 +3049,8 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                 Report($"Picker failed: {ex.GetType().Name}: {ex.Message}");
                 return;
             }
-            if (picked is null) { Report("Cancelled"); return; }
-            var count = await StatsPopup.ShowSingleAsync(_host, $"{ItemName(picked.Id)} - quantity", 0, 999);
+            if (picked is null) { Report("Отменено"); return; }
+            var count = await StatsPopup.ShowSingleAsync(_host, $"{ItemName(picked.Id)} — количество", 0, 999);
             if (count is null) return;
             await WriteAsync(picked.Id, count.Value);
         }
@@ -3074,43 +3074,43 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         private async Task ShowPresetsAsync()
         {
             if (!await FlushPendingAsync()) return;
-            var choice = await PadMenu.ShowAsync(_host, "Item presets", "Only items legal in this game are changed.",
-                new PadOption("Save current bag as preset", IconPath: "preset", Detail: "Store what your bag holds now, to apply again later."),
-                new PadOption("My item presets", IconPath: "preset", Detail: "Apply, update, rename or delete your saved bags."),
-                new PadOption("Refill this pouch to 99", IconPath: "fill"),
+            var choice = await PadMenu.ShowAsync(_host, "Наборы предметов", "Only items legal in this game are changed.",
+                new PadOption("Сохранить сумку как набор", IconPath: "preset", Detail: "Store what your bag holds now, to apply again later."),
+                new PadOption("Мои наборы предметов", IconPath: "preset", Detail: "Apply, update, rename or delete your saved bags."),
+                new PadOption("Пополнить этот карман до 99", IconPath: "fill"),
                 new PadOption("Give every Poké Ball x50", IconPath: "ball"),
                 new PadOption("Healing supplies x20", IconPath: "heal", Detail: "20 of each potion, drink, revive and status heal."),
                 new PadOption("Nuzlocke starter supplies", IconPath: "skull", Detail: "10 Poké Balls, 10 Potions, 3 Antidotes, 3 Paralyze Heals, 2 Escape Ropes."),
-                new PadOption("Remove every item in this pouch", IconPath: "clear"));
+                new PadOption("Удалить все предметы из кармана", IconPath: "clear"));
             if (choice is null) return;
 
-            if (choice is "Save current bag as preset" or "My item presets")
+            if (choice is "Сохранить сумку как набор" or "Мои наборы предметов")
             {
                 try
                 {
                     var store = new PKForge.Infrastructure.ItemPresetStore(Path.Combine(FileSystem.AppDataDirectory, "item-presets.json"));
-                    if (choice == "Save current bag as preset") await SavePersonalPresetAsync(store);
+                    if (choice == "Сохранить сумку как набор") await SavePersonalPresetAsync(store);
                     else await ShowPersonalPresetsAsync(store);
                 }
                 catch (Exception ex)
                 {
                     Report($"Preset error: {ex.Message}");
-                    await PadMenu.ShowAsync(_host, "Item preset error", ex.Message, "OK");
+                    await PadMenu.ShowAsync(_host, "Ошибка набора предметов", ex.Message, "OK");
                 }
                 return;
             }
 
-            if (choice == "Remove every item in this pouch")
+            if (choice == "Удалить все предметы из кармана")
             {
-                var confirmed = await PadMenu.ConfirmAsync(_host, "Empty this pouch?",
-                    $"Every item in {_bag[_pouchIndex].Name} is removed. A restore point is created first.", "Empty");
+                var confirmed = await PadMenu.ConfirmAsync(_host, "Очистить этот карман?",
+                    $"Every item in {_bag[_pouchIndex].Name} is removed. A restore point is created first.", "Пусто");
                 if (!confirmed) return;
             }
 
             var changes = BuildPreset(choice);
             if (changes.Count == 0)
             {
-                Report("No compatible items for this preset");
+                Report("Нет совместимых предметов для набора");
                 return;
             }
 
@@ -3120,7 +3120,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                     s.SetItemCount(change.Pouch, change.Item, change.Count);
                 return new GenerationOutcome(true, $"Preset changed {changes.Count} items.");
             }, _slotSeed, refreshSlot: false, action: SaveAction.EditInventory);
-            Report(ok ? $"Preset applied - {changes.Count} items" : "Preset failed - see status");
+            Report(ok ? $"Набор применён — предметов: {changes.Count}" : "Ошибка набора — см. сообщение");
             Rebuild();
         }
 
@@ -3134,13 +3134,13 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                 .Select(item => new ItemPresetEntry(pouch.Name, item.Id, names[item.Id], item.Count))).ToArray();
             if (entries.Length == 0)
             {
-                Report("No compatible items to save in a preset");
+                Report("Нет предметов для сохранения в набор");
                 return;
             }
-            var name = existing?.Name ?? await TextPopup.ShowLineAsync(_host, "Preset name", "Name your bag preset (60 characters max)");
+            var name = existing?.Name ?? await TextPopup.ShowLineAsync(_host, "Название набора", "Название набора (до 60 символов)");
             if (string.IsNullOrWhiteSpace(name)) return;
             store.Save(new ItemPreset(existing?.Id ?? Guid.NewGuid().ToString("N"), name, _session.Generation, entries));
-            Report($"Preset saved - {entries.Length} items");
+            Report($"Набор сохранён — предметов: {entries.Length}");
         }
 
         private async Task ShowPersonalPresetsAsync(PKForge.Infrastructure.ItemPresetStore store)
@@ -3150,46 +3150,46 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                 var presets = store.Read();
                 if (presets.Count == 0)
                 {
-                    await PadMenu.ShowAsync(_host, "My item presets", "Adjust your bag, then choose Save current bag as preset.", "OK");
+                    await PadMenu.ShowAsync(_host, "Мои наборы предметов", "Adjust your bag, then choose Save current bag as preset.", "OK");
                     return;
                 }
                 var labels = presets.Select(p => $"{p.Name} (Gen {p.Generation})").ToArray();
-                var selected = await PadMenu.ShowAsync(_host, "My item presets", "Presets set saved quantities. Other items stay in your bag.", labels);
+                var selected = await PadMenu.ShowAsync(_host, "Мои наборы предметов", "Presets set saved quantities. Other items stay in your bag.", labels);
                 var index = Array.IndexOf(labels, selected);
                 if (index < 0) return;
                 var preset = presets[index];
                 var action = await PadMenu.ShowAsync(_host, preset.Name,
                     $"{preset.Items.Count} items. Compatible items apply within Gen {preset.Generation}.",
-                    new PadOption("Apply preset", IconPath: "confirm"),
-                    new PadOption("Update from current bag", IconPath: "refresh", Detail: "Replace this preset with what your bag holds now."),
-                    new PadOption("Rename", IconPath: "rename"),
-                    new PadOption("Delete", IconPath: "delete"));
-                if (action == "Rename")
+                    new PadOption("Применить набор", IconPath: "confirm"),
+                    new PadOption("Обновить из текущей сумки", IconPath: "refresh", Detail: "Replace this preset with what your bag holds now."),
+                    new PadOption("Переименовать", IconPath: "rename"),
+                    new PadOption("Удалить", IconPath: "delete"));
+                if (action == "Переименовать")
                 {
-                    var name = await TextPopup.ShowLineAsync(_host, "Rename preset", "Preset name", preset.Name);
+                    var name = await TextPopup.ShowLineAsync(_host, "Переименовать набор", "Название набора", preset.Name);
                     if (!string.IsNullOrWhiteSpace(name)) store.Save(preset with { Name = name });
                 }
-                else if (action == "Delete")
+                else if (action == "Удалить")
                 {
-                    if (await PadMenu.ConfirmAsync(_host, "Delete preset?", preset.Name, "Delete")) store.Delete(preset.Id);
+                    if (await PadMenu.ConfirmAsync(_host, "Удалить набор?", preset.Name, "Удалить")) store.Delete(preset.Id);
                 }
-                else if (action == "Update from current bag")
+                else if (action == "Обновить из текущей сумки")
                 {
-                    if (await PadMenu.ConfirmAsync(_host, "Update preset?", "Replace this preset with the current bag and its generation?", "Update"))
+                    if (await PadMenu.ConfirmAsync(_host, "Обновить набор?", "Replace this preset with the current bag and its generation?", "Update"))
                         await SavePersonalPresetAsync(store, preset);
                 }
-                else if (action == "Apply preset")
+                else if (action == "Применить набор")
                 {
                     var pouches = _session.GetBag().Select(p => p.Name).ToHashSet(StringComparer.Ordinal);
                     var changes = preset.CompatibleItems(_session.Generation, _session.GetItemNames(),
                         pouch => pouches.Contains(pouch) ? _session.GetPouchLegalItems(pouch) : []);
                     if (changes.Count == 0)
                     {
-                        await PadMenu.ShowAsync(_host, "No compatible items", $"This preset was saved for Gen {preset.Generation}. Only matching legal items can be applied.", "OK");
+                        await PadMenu.ShowAsync(_host, "Нет совместимых предметов", $"This preset was saved for Gen {preset.Generation}. Only matching legal items can be applied.", "OK");
                         continue;
                     }
-                    if (!await PadMenu.ConfirmAsync(_host, "Apply item preset?",
-                        $"Set quantities for {changes.Count} items; skip {preset.Items.Count - changes.Count} incompatible items. Game quantity limits apply. Other items are kept.", "Apply")) continue;
+                    if (!await PadMenu.ConfirmAsync(_host, "Применить набор предметов?",
+                        $"Set quantities for {changes.Count} items; skip {preset.Items.Count - changes.Count} incompatible items. Game quantity limits apply. Other items are kept.", "Применить")) continue;
                     var ok = await _viewModel.RunMutationAsync(s =>
                     {
                         var original = s.GetBag().SelectMany(pouch => pouch.Items.Select(item =>
@@ -3213,7 +3213,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                         }
                         return new GenerationOutcome(true, $"Preset changed {changes.Count} items.");
                     }, _slotSeed, refreshSlot: false, action: SaveAction.EditInventory);
-                    Report(ok ? $"Preset applied - {changes.Count} items" : "Preset failed - see status");
+                    Report(ok ? $"Набор применён — предметов: {changes.Count}" : "Ошибка набора — см. сообщение");
                     Rebuild();
                     return;
                 }
@@ -3222,9 +3222,9 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
 
         private List<(string Pouch, int Item, int Count)> BuildPreset(string choice)
         {
-            if (choice == "Refill this pouch to 99")
+            if (choice == "Пополнить этот карман до 99")
                 return _bag[_pouchIndex].Items.Select(i => (_bag[_pouchIndex].Name, i.Id, 99)).ToList();
-            if (choice == "Remove every item in this pouch")
+            if (choice == "Удалить все предметы из кармана")
                 return _bag[_pouchIndex].Items.Select(i => (_bag[_pouchIndex].Name, i.Id, 0)).ToList();
 
             var desired = choice switch
@@ -3459,7 +3459,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                 Children.Add(CountDisc(minus: false, () => Tapped?.Invoke()));
                 Children.Add(new Label
                 {
-                    Text = "Add item",
+                    Text = "Добавить предмет",
                     FontFamily = DsChrome.PixelFont,
                     FontSize = UiTokens.TextBody,
                     TextColor = UiTokens.Ink0,
@@ -3751,7 +3751,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         {
             var report = legality.Analyze(session, _viewModel.BoxIndex, slot);
             return new SlotLegality(_viewModel.BoxIndex, slot, report.Valid,
-                report.Valid ? string.Empty : report.Lines.FirstOrDefault() ?? "Illegal.", report.Lines);
+                report.Valid ? string.Empty : report.Lines.FirstOrDefault() ?? "Нелегален.", report.Lines);
         });
     }
 
@@ -3774,7 +3774,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             i => i < slots.Count && slots[i].Species is not null,
             slot,
             (i, legality) => SummaryLoaders.FromSlot(session, summaries, box, i, legality),
-            box == -1 ? "Party" : $"Box {box + 1:00}",
+            box == -1 ? "Команда" : $"Бокс {box + 1:00}",
             CanEdit: true,
             Icon: i => i < slots.Count && slots[i].Species is int species ? new SlotIcon(species, slots[i].Form, slots[i].IsShiny, slots[i].HasItem, slots[i].Traits) : null,
             Moved: i =>
@@ -3800,46 +3800,46 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         var options = new List<PadOption>();
         if (verdict is { Valid: false })
         {
-            options.Add(new("Explain legality", IconPath: "info", Detail: "Why this Pokémon is flagged, with fixes when there are any."));
+            options.Add(new("Объяснить легальность", IconPath: "info", Detail: "Причины нелегальности и возможные исправления."));
             options.AddRange(Menu(
-                Allowed(SaveAction.EditMon, new("Legalize this one", IconPath: "fix", Detail: "Rewrite it to its closest legal version.")),
-                Allowed(SaveAction.EditMon, new("Legalize all illegal", IconPath: "fix", Detail: "Rewrite every illegal Pokémon in the save to its closest legal version."))));
+                Allowed(SaveAction.EditMon, new("Исправить этого покемона", IconPath: "fix", Detail: "Rewrite it to its closest legal version.")),
+                Allowed(SaveAction.EditMon, new("Исправить всех нелегальных", IconPath: "fix", Detail: "Rewrite every illegal Pokémon in the save to its closest legal version."))));
         }
         options.AddRange(Menu(
-            new PadOption("Summary", IconPath: "info"),
-            new PadOption("Edit", IconPath: "editor"),
-            Allowed(SaveAction.EditMon, new("Evolve…", IconPath: "evolve")),
-            new PadOption("Send to Poképark", IconPath: "park", Detail: "Adds it to the Poképark visitors. The save is not changed."),
-            new PadOption("Move", IconPath: "move", Detail: "Pick it up and carry it to another slot."),
-            Allowed(SaveAction.Duplicate, new("Duplicate", IconPath: "copy", Detail: "Clone it into the next empty slot here.")),
-            new PadOption("Send to Bank", IconPath: "bank", Detail: "It leaves this save and is stored in the Bank."),
-            Allowed(SaveAction.Duplicate, new("Copy to Bank", IconPath: "copy", Detail: "A copy goes to the Bank; the original stays here.")),
-            new PadOption("Send to another game…", IconPath: "send", Detail: "It leaves this save and joins another linked game."),
-            Allowed(SaveAction.Duplicate, new("Copy to another game…", IconPath: "copy", Detail: "A copy joins another linked game; the original stays here.")),
-            new PadOption("Export .pk file", IconPath: "export", Detail: "Share this Pokémon as a file."),
-            new PadOption("Show as Showdown set", IconPath: "script", Detail: "Its set as Showdown text you can copy."),
-            new PadOption("Show as QR code", IconPath: "qr", Detail: "Its Showdown set as a QR code."),
-            new PadOption("Show as .pk QR", IconPath: "qr", Detail: "The whole Pokémon as a QR code that PKForge can scan into the Bank."),
-            new PadOption("RNG / IVs", IconPath: "dice", Detail: "See its PID and IVs, and change its nature without losing shininess."),
-            new PadOption("Lock / Unlock release", IconPath: "padlock", Detail: "A locked Pokémon cannot be released."),
-            new PadOption("Release", IconPath: "release"),
-            new PadOption("Release to the Wilds", IconPath: "release", Detail: "It leaves the save and lives on in the wild lands around the Poképark. It may come back to visit.")));
+            new PadOption("Сводка", IconPath: "info"),
+            new PadOption("Изменить", IconPath: "editor"),
+            Allowed(SaveAction.EditMon, new("Эволюционировать…", IconPath: "evolve")),
+            new PadOption("Отправить в Покепарк", IconPath: "park", Detail: "Adds it to the Poképark visitors. The save is not changed."),
+            new PadOption("Переместить", IconPath: "move", Detail: "Взять и перенести в другую ячейку."),
+            Allowed(SaveAction.Duplicate, new("Дублировать", IconPath: "copy", Detail: "Clone it into the next empty slot here.")),
+            new PadOption("Отправить в банк", IconPath: "bank", Detail: "It leaves this save and is stored in the Bank."),
+            Allowed(SaveAction.Duplicate, new("Копировать в банк", IconPath: "copy", Detail: "A copy goes to the Bank; the original stays here.")),
+            new PadOption("Отправить в другую игру…", IconPath: "send", Detail: "It leaves this save and joins another linked game."),
+            Allowed(SaveAction.Duplicate, new("Копировать в другую игру…", IconPath: "copy", Detail: "A copy joins another linked game; the original stays here.")),
+            new PadOption("Экспорт файла .pk", IconPath: "export", Detail: "Share this Pokémon as a file."),
+            new PadOption("Показать набор Showdown", IconPath: "script", Detail: "Its set as Showdown text you can copy."),
+            new PadOption("Показать QR-код", IconPath: "qr", Detail: "Its Showdown set as a QR code."),
+            new PadOption("Показать .pk QR", IconPath: "qr", Detail: "The whole Pokémon as a QR code that PKForge can scan into the Bank."),
+            new PadOption("RNG / IV", IconPath: "dice", Detail: "See its PID and IVs, and change its nature without losing shininess."),
+            new PadOption("Защита от выпуска", IconPath: "padlock", Detail: "Защищённого покемона нельзя выпустить."),
+            new PadOption("Выпустить", IconPath: "release"),
+            new PadOption("Выпустить на волю", IconPath: "release", Detail: "It leaves the save and lives on in the wild lands around the Poképark. It may come back to visit.")));
         var choice = await PadMenu.ShowAsync(_hostGrid, nickname,
             Note(verdict is { Valid: false } ? verdict.Problem : null), options.ToArray());
         switch (choice)
         {
-            case "Explain legality":
+            case "Объяснить легальность":
             {
                 if (await TryShowLegalityFixesAsync()) return;
                 var detail = string.IsNullOrWhiteSpace(_viewModel.LegalityText)
-                    ? verdict?.Problem ?? "No legality details were reported."
+                    ? verdict?.Problem ?? "Подробности проверки отсутствуют."
                     : _viewModel.LegalityText;
                 await ShowLegalityReportAsync(detail);
                 return;
             }
-            case "Legalize this one":
+            case "Исправить этого покемона":
             {
-                var overlay = LoadingOverlay.Show(_hostGrid, "Legalizing…", "Finding the closest real, legal version of this Pokémon.");
+                var overlay = LoadingOverlay.Show(_hostGrid, "Исправление легальности…", "Finding the closest real, legal version of this Pokémon.");
                 try
                 {
                     await _viewModel.RunLegalizerAsync((service, s) => service.LegalizeSlot(s, _viewModel.BoxIndex, slot), slot, SaveAction.EditMon);
@@ -3848,44 +3848,44 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                 finally { overlay.Close(); }
                 return;
             }
-            case "Send to Poképark":
+            case "Отправить в Покепарк":
                 _viewModel.Status = IPlatformApplication.Current!.Services.GetRequiredService<PokeparkService>().AddSaveVisitor(_viewModel.BoxIndex, slot);
                 return;
-            case "Summary":
+            case "Сводка":
                 await OpenSummaryAsync(slot);
                 return;
-            case "Edit":
+            case "Изменить":
                 EnterEditorFocusMode();
                 return;
-            case "Move":
+            case "Переместить":
                 if (_viewModel.BeginCarry()) _canvas.InvalidateSurface();
                 return;
-            case "Duplicate":
+            case "Дублировать":
                 await DuplicateSlotAsync(slot);
                 return;
-            case "Evolve…":
+            case "Эволюционировать…":
                 await EvolveSlotAsync(slot);
                 return;
-            case "Send to Bank":
+            case "Отправить в банк":
                 await SendToBankAsync(slot, nickname);
                 return;
-            case "Copy to Bank":
+            case "Копировать в банк":
                 await SendToBankAsync(slot, nickname, copyInsteadOfMove: true);
                 return;
-            case "Send to another game…":
+            case "Отправить в другую игру…":
                 await SendSlotToAnotherGameAsync(slot, nickname);
                 return;
-            case "Copy to another game…":
+            case "Копировать в другую игру…":
                 await SendSlotToAnotherGameAsync(slot, nickname, copyInsteadOfMove: true);
                 return;
-            case "Legalize all illegal":
+            case "Исправить всех нелегальных":
             {
                 var overlay = default(LoadingOverlay);
                 IReadOnlyList<SlotLegality> sweep;
                 try
                 {
                     sweep = await _viewModel.GetLegalitySweepAsync(
-                        () => overlay = LoadingOverlay.Show(_hostGrid, "Checking legality…", "Scanning the party and every box."),
+                        () => overlay = LoadingOverlay.Show(_hostGrid, "Проверка легальности…", "Scanning the party and every box."),
                         (done, total) => overlay?.Report(done, total));
                 }
                 finally
@@ -3893,11 +3893,11 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                     overlay?.Close();
                 }
                 var illegal = sweep.Where(r => !r.Valid).ToList();
-                if (illegal.Count == 0) { _viewModel.Status = "Nothing else is flagged."; return; }
+                if (illegal.Count == 0) { _viewModel.Status = "Других замечаний нет."; return; }
                 await LegalizeAllIllegalAsync(illegal);
                 return;
             }
-            case "Show as .pk QR":
+            case "Показать .pk QR":
             {
                 var session = _sessionsFor();
                 if (session is null) return;
@@ -3914,19 +3914,19 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                     Services.QrEntityService.MakePayload(export.Data, session.Generation, detail.SpeciesName));
                 return;
             }
-            case "Show as Showdown set":
+            case "Показать набор Showdown":
                 await ShowShowdownAsync(slot);
                 return;
-            case "Export .pk file":
+            case "Экспорт файла .pk":
                 await ExportSlotAsync(slot);
                 return;
-            case "Show as QR code":
+            case "Показать QR-код":
                 await ShowQrAsync(slot);
                 return;
-            case "RNG / IVs":
+            case "RNG / IV":
                 await ShowRngAsync(slot);
                 return;
-            case "Lock / Unlock release":
+            case "Защита от выпуска":
             {
                 var docId = DocumentId;
                 var session = _sessionsFor();
@@ -3935,13 +3935,13 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                 var locked = Protection.ToggleMon(docId, _viewModel.BoxIndex, slot, pid);
                 RefreshLockedSlots();
                 _canvas.InvalidateSurface();
-                _viewModel.Status = locked ? "Mon locked - release blocked" : "Mon unlocked";
+                _viewModel.Status = locked ? "Покемон защищён от выпуска" : "Защита покемона снята";
                 return;
             }
-            case "Release":
+            case "Выпустить":
                 await ReleaseSlotAsync(slot, nickname);
                 return;
-            case "Release to the Wilds":
+            case "Выпустить на волю":
                 await ReleaseSlotAsync(slot, nickname, toWilds: true);
                 return;
             default:
@@ -3962,9 +3962,9 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         var request = await EvolutionCard.RunAsync(_hostGrid, session, box, slot);
         if (request is null) return;
         var ok = await _viewModel.RunMutationAsync(s => service.Evolve(s, box, slot, request), slot,
-            changeDescription: "Evolve", action: SaveAction.EditMon);
+            changeDescription: "Эволюционировать", action: SaveAction.EditMon);
         _canvas.InvalidateSurface();
-        await PadMenu.ShowAsync(_hostGrid, ok ? "Congratulations!" : "Evolution failed", _viewModel.Status, "OK");
+        await PadMenu.ShowAsync(_hostGrid, ok ? "Поздравляем!" : "Эволюция не удалась", _viewModel.Status, "OK");
     }
 
     /// <summary>Clone the mon in place: party clones append (cap 6), box clones fill the
@@ -3982,17 +3982,17 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             : _viewModel.VisibleSlots.Select(x => x.Slot).FirstOrDefault(i => session.ReadEntity(box, i).IsEmpty, -1);
         if (destination < 0 || (box == -1 && destination >= 6))
         {
-            _viewModel.Status = box == -1 ? "The party is full - no room to duplicate." : "This box is full - no room to duplicate.";
-            await PadMenu.ShowAsync(_hostGrid, "Duplicate", _viewModel.Status, "OK");
+            _viewModel.Status = box == -1 ? "Команда заполнена — нет места для копии." : "Бокс заполнен — нет места для копии.";
+            await PadMenu.ShowAsync(_hostGrid, "Дублировать", _viewModel.Status, "OK");
             return;
         }
         var ok = await _viewModel.RunMutationAsync(s =>
             s.DuplicateSlot(box, slot, box, destination)
-                ? new GenerationOutcome(true, $"{name} duplicated.")
-                : new GenerationOutcome(false, "Could not duplicate into that slot."), destination, action: SaveAction.Duplicate);
+                ? new GenerationOutcome(true, $"{name} продублирован.")
+                : new GenerationOutcome(false, "Не удалось создать копию в этой ячейке."), destination, action: SaveAction.Duplicate);
         if (!ok)
         {
-            await PadMenu.ShowAsync(_hostGrid, "Duplicate failed", _viewModel.Status, "OK");
+            await PadMenu.ShowAsync(_hostGrid, "Не удалось дублировать", _viewModel.Status, "OK");
             return;
         }
         _viewModel.RefreshAllSlots(includeEmptyPartySlots: box == -1);
@@ -4012,20 +4012,20 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         if (session is null) return;
 
         var scope = _viewModel.MarkedCount > 0
-            ? await PadMenu.ShowAsync(_hostGrid, "Apply to…", null,
-                $"Marked Pokémon ({_viewModel.MarkedCount})", "This box", "All boxes", "Cancel")
-            : await PadMenu.ShowAsync(_hostGrid, "Apply to…", null, "This box", "All boxes", "Cancel");
-        if (scope is null or "Cancel") return;
+            ? await PadMenu.ShowAsync(_hostGrid, "Применить к…", null,
+                $"Отмеченные покемоны ({_viewModel.MarkedCount})", "Этот бокс", "Все боксы", "Отмена")
+            : await PadMenu.ShowAsync(_hostGrid, "Применить к…", null, "Этот бокс", "Все боксы", "Отмена");
+        if (scope is null or "Отмена") return;
 
-        var op = await PadMenu.ShowAsync(_hostGrid, "Which operation?", null,
-            "Reset nicknames to species names",
-            "Set OT to mine (adopt my trainer ID)",
-            "Cancel");
-        if (op is null or "Cancel") return;
+        var op = await PadMenu.ShowAsync(_hostGrid, "Какое действие?", null,
+            "Заменить имена названиями видов",
+            "Назначить моего тренера исходным",
+            "Отмена");
+        if (op is null or "Отмена") return;
 
         var marked = _viewModel.MarkedSlots.ToArray();
-        var slots = scope.StartsWith("Marked", StringComparison.Ordinal) ? marked
-            : scope == "This box"
+        var slots = scope.StartsWith("Отмеченные покемоны (", StringComparison.Ordinal) ? marked
+            : scope == "Этот бокс"
                 ? _viewModel.Save?.Slots.Where(x => x.Box == _viewModel.BoxIndex)
                     .Select(x => x.Slot).Distinct().OrderBy(x => x)
                     .Select(s => (_viewModel.BoxIndex, Slot: s)).ToArray()
@@ -4033,15 +4033,15 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                 : null; // all boxes: the engine walks every slot itself
         var affected = slots?.Length ?? -1;
 
-        var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Apply to every matching Pokémon?",
+        var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Применить ко всем подходящим покемонам?",
             $"{op} · {(affected < 0 ? "party + every box" : $"{affected} slot(s)")}\n" +
-            "Nickname and OT changes are NOT legality-re-checked afterwards.", "Apply");
+            "Nickname and OT changes are NOT legality-re-checked afterwards.", "Применить");
         if (!confirmed) return;
 
-        var overlay = LoadingOverlay.Show(_hostGrid, "Applying…", "One write, one restore point.");
+        var overlay = LoadingOverlay.Show(_hostGrid, "Применение…", "Одна запись — одна точка восстановления.");
         try
         {
-            if (op.StartsWith("Reset nicknames", StringComparison.Ordinal))
+            if (op == "Заменить имена названиями видов")
             {
                 await _viewModel.RunMutationAsync(s =>
                 {
@@ -4082,9 +4082,9 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         var legalizer = services?.GetService<ILegalizerService>();
         if (session is null || data is null || legalizer is null) return;
 
-        var countChoice = await PadMenu.ShowAsync(_hostGrid, "Team size", null, "1", "2", "3", "4", "5", "6");
+        var countChoice = await PadMenu.ShowAsync(_hostGrid, "Размер команды", null, "1", "2", "3", "4", "5", "6");
         if (countChoice is null || !int.TryParse(countChoice, out var count)) return;
-        var levelChoice = await PadMenu.ShowAsync(_hostGrid, "Level band", null,
+        var levelChoice = await PadMenu.ShowAsync(_hostGrid, "Диапазон уровней", null,
             "Lv 50", "Lv 100", "Wild card (5-70)");
         if (levelChoice is null) return;
         var (lo, hi) = levelChoice switch
@@ -4093,8 +4093,8 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             "Lv 100" => (100, 100),
             _ => (5, 70),
         };
-        var filters = await PadMenu.ShowAsync(_hostGrid, "Filters", null,
-            "No restrictions", "No legendaries", "No duplicates", "No legendaries, no duplicates");
+        var filters = await PadMenu.ShowAsync(_hostGrid, "Фильтры", null,
+            "Без ограничений", "Без легендарных", "Без повторов", "Без легендарных и повторов");
         if (filters is null) return;
         var noLegendaries = filters.Contains("legendary", StringComparison.OrdinalIgnoreCase);
         var noDuplicates = filters.Contains("duplicate", StringComparison.OrdinalIgnoreCase);
@@ -4109,11 +4109,11 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         var team = RandomTeamPlanner.Plan(pool, new HashSet<int>(), options, Random.Shared);
 
         var roster = string.Join(", ", team.Select(t => $"{data.SpeciesNames[t.Species]} Lv{t.Level}"));
-        var placement = await PadMenu.ShowAsync(_hostGrid, "Roll this team?",
-            roster + "\nEach mon is generated legal for this game.", "Into the party", "Into first empty box slots", "Cancel");
-        if (placement is null or "Cancel") return;
+        var placement = await PadMenu.ShowAsync(_hostGrid, "Создать эту команду?",
+            roster + "\nEach mon is generated legal for this game.", "В команду", "В первые свободные ячейки", "Отмена");
+        if (placement is null or "Отмена") return;
 
-        var overlay = LoadingOverlay.Show(_hostGrid, "Generating team…", "The offline legalizer is at work.");
+        var overlay = LoadingOverlay.Show(_hostGrid, "Создание команды…", "Выполняется исправление легальности без сети.");
         try
         {
             var generated = new List<(byte[] Data, int Level, string Name, string? Format)>();
@@ -4125,7 +4125,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             }
             if (generated.Count == 0) { _viewModel.Status = "The legalizer could not build this team."; return; }
 
-            if (placement == "Into the party")
+            if (placement == "В команду")
             {
                 var ok = await _viewModel.RunMutationAsync(s =>
                 {
@@ -4141,7 +4141,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                     .Select(x => (x.Box, x.Slot)).Take(generated.Count).ToArray();
                 if (empties is null || empties.Length < generated.Count)
                 {
-                    _viewModel.Status = $"Not enough empty box slots ({generated.Count} needed).";
+                    _viewModel.Status = $"Недостаточно свободных ячеек (нужно {generated.Count}).";
                     return;
                 }
                 var ok = await _viewModel.RunMutationAsync(s =>
@@ -4176,15 +4176,15 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
 
         var currentDoc = IPlatformApplication.Current?.Services.GetService<ISaveSessionService>()?.Current?.Document.DocumentId;
         var target = await SavePickerSheet.PickAsync(_hostGrid, picker.Saves,
-            "Send to game", $"{nickname} → pick the destination (the mon leaves this box)", currentDoc);
+            "Отправить в игру", $"{nickname} → pick the destination (the mon leaves this box)", currentDoc);
         if (target is null)
         {
             if (picker.Saves.Count == 0)
-                _viewModel.Status = "No other games linked. Link another emulator or save on Home.";
+                _viewModel.Status = "Других игр нет. Подключи ещё один эмулятор или сохранение.";
             return;
         }
 
-        var verb = copyInsteadOfMove ? "Copy" : "Move";
+        var verb = copyInsteadOfMove ? "Копировать" : "Переместить";
         var confirm = await PadMenu.ConfirmAsync(_hostGrid, $"{verb} to another game?",
             copyInsteadOfMove
                 ? $"A copy of {nickname} joins {target.GameLabel}; the original stays here."
@@ -4203,7 +4203,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         await _viewModel.RunMutationAsync(s =>
         {
             s.ReleaseSlot(_viewModel.BoxIndex, slot);
-            return new GenerationOutcome(true, $"{nickname} moved to {target.GameLabel}.");
+            return new GenerationOutcome(true, $"{nickname} перемещён в {target.GameLabel}.");
         }, slot, action: SaveAction.Move);
     }
 
@@ -4222,11 +4222,11 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                 Title = export.FileName,
                 File = new ShareFile(path),
             });
-            _viewModel.Status = $"Exported {export.FileName}";
+            _viewModel.Status = $"Экспортировано: {export.FileName}";
         }
         catch (Exception error)
         {
-            _viewModel.Status = $"Export failed: {error.Message}";
+            _viewModel.Status = $"Ошибка экспорта: {error.Message}";
         }
     }
 
@@ -4235,11 +4235,11 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         var session = _sessionsFor();
         if (session is null) return;
         var text = session.GetShowdownText(_viewModel.BoxIndex, slot);
-        var choice = await PadMenu.ShowAsync(_hostGrid, "Showdown set", text, "Copy to clipboard", "Close");
-        if (choice == "Copy to clipboard")
+        var choice = await PadMenu.ShowAsync(_hostGrid, "Набор Showdown", text, "Копировать в буфер", "Закрыть");
+        if (choice == "Копировать в буфер")
         {
             await Clipboard.Default.SetTextAsync(text);
-            _viewModel.Status = "Set copied to clipboard.";
+            _viewModel.Status = "Набор скопирован в буфер.";
         }
     }
 
@@ -4248,7 +4248,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         var session = _sessionsFor();
         if (session is null) return;
         var text = session.GetShowdownText(_viewModel.BoxIndex, slot);
-        await QrPopup.ShowAsync(_hostGrid, "Showdown set · QR", text);
+        await QrPopup.ShowAsync(_hostGrid, "Набор Showdown · QR", text);
     }
 
     /// <summary>
@@ -4276,7 +4276,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         if (copyInsteadOfMove)
         {
             bank.Add(export.Data, info);
-            _viewModel.Status = $"{nickname} copied to the Bank. The original stays in the game.";
+            _viewModel.Status = $"{nickname} скопирован в банк. Оригинал остался в игре.";
             return;
         }
 
@@ -4286,7 +4286,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             async () => await _viewModel.RunMutationAsync(s =>
             {
                 s.ReleaseSlot(box, slot);
-                return new GenerationOutcome(true, $"{nickname} deposited in the Bank.");
+                return new GenerationOutcome(true, $"{nickname} помещён в банк.");
             }, slot, changeDescription: $"Deposit {nickname} in the Bank ({BoxBrowserViewModel.SlotLabel(box, slot)})",
                 action: SaveAction.Move) ? null : _viewModel.Status);
         if (outcome.Success) _canvas.InvalidateSurface();
@@ -4311,7 +4311,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         Task<bool> Release() => _viewModel.RunMutationAsync(session =>
         {
             session.ReleaseSlot(box, slot);
-            return new GenerationOutcome(true, toWilds ? $"{nickname} went to live in the Wilds." : $"{nickname} was released. Bye-bye!");
+            return new GenerationOutcome(true, toWilds ? $"{nickname} went to live in the Wilds." : $"{nickname} выпущен. До встречи!");
         }, slot, action: SaveAction.Release);
         if (toWilds && session is not null && WildFriendOf(session, box, slot) is { } friend)
         {
@@ -4325,9 +4325,9 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             _canvas.InvalidateSurface();
             return;
         }
-        var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Release?",
-            $"Release {nickname} back into the wild? The current save state is kept as a restore point.",
-            "Release");
+        var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Выпустить?",
+            $"Выпустить {nickname} на волю? Текущее состояние сохранится в точке восстановления.",
+            "Выпустить");
         if (!confirmed) return;
         await Release();
         _canvas.InvalidateSurface();
@@ -4410,21 +4410,21 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         View? levelRow = null;
         View? otRow = null;
 
-        var species = FocusBorder(NamedPicker("SPECIES", nameof(BoxBrowserViewModel.EditSpecies), data.SpeciesNames, null,
-            openPokedex: true, shaded: true), "Species", async () =>
+        var species = FocusBorder(NamedPicker("ВИД", nameof(BoxBrowserViewModel.EditSpecies), data.SpeciesNames, null,
+            openPokedex: true, shaded: true), "Вид", async () =>
         {
             var session = _sessionsFor();
             if (session is null) return;
             var picked = await PokedexPicker.ShowAsync(_hostGrid, data, session);
             if (picked is not null) SetVmString(nameof(BoxBrowserViewModel.EditSpecies), picked.Id.ToString());
         });
-        var nickname = FocusBorder(FieldRow("Nickname", nameof(BoxBrowserViewModel.EditNickname), shaded: false), "NICKNAME", () =>
+        var nickname = FocusBorder(FieldRow("Имя покемона", nameof(BoxBrowserViewModel.EditNickname), shaded: false), "ИМЯ ПОКЕМОНА", () =>
         {
             if (nicknameRow is not null) FocusEntry(nicknameRow);
             return Task.CompletedTask;
         });
         nicknameRow = nickname;
-        var level = FocusBorder(FieldRow("Level", nameof(BoxBrowserViewModel.EditLevel), shaded: false), "LEVEL", () =>
+        var level = FocusBorder(FieldRow("Уровень", nameof(BoxBrowserViewModel.EditLevel), shaded: false), "УРОВЕНЬ", () =>
         {
             if (levelRow is not null) FocusEntry(levelRow);
             return Task.CompletedTask;
@@ -4433,28 +4433,28 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         // Friendship (0-255): what friendship evolutions wait for (Golbat, Eevee, Riolu...).
         // Gen 1 keeps none, so the row would edit nothing there.
         View? friendshipRow = null;
-        var friendship = FocusBorder(FieldRow("Friendship", nameof(BoxBrowserViewModel.EditFriendship), shaded: false), "FRIENDSHIP", () =>
+        var friendship = FocusBorder(FieldRow("Дружба", nameof(BoxBrowserViewModel.EditFriendship), shaded: false), "ДРУЖБА", () =>
         {
             if (friendshipRow is not null) FocusEntry(friendshipRow);
             return Task.CompletedTask;
         }, nameof(BoxBrowserViewModel.EditFriendship));
         friendshipRow = friendship;
         friendship.IsVisible = (_sessionsFor()?.Generation ?? 3) >= 2;
-        var nature = FocusBorder(NamedPicker("NATURE", nameof(BoxBrowserViewModel.EditNature), NaturePicker.DisplayNames(data.NatureNames),
-            null, shaded: true, open: () => OpenNaturePickerAsync(data)), "Nature", () => OpenNaturePickerAsync(data));
+        var nature = FocusBorder(NamedPicker("ХАРАКТЕР", nameof(BoxBrowserViewModel.EditNature), NaturePicker.DisplayNames(data.NatureNames),
+            null, shaded: true, open: () => OpenNaturePickerAsync(data)), "Характер", () => OpenNaturePickerAsync(data));
         // Gen 1/2 have no natures: the row would edit nothing.
         nature.IsVisible = (_sessionsFor()?.Generation ?? 3) >= 3;
-        var ability = FocusBorder(NamedPicker("ABILITY", nameof(BoxBrowserViewModel.EditAbility), data.AbilityNames,
-            AbilityItems, shaded: false), "ABILITY", async () => await OpenNamedPickerAsync("ABILITY", nameof(BoxBrowserViewModel.EditAbility), AbilityItems));
-        var item = FocusBorder(NamedPicker("HELD ITEM", nameof(BoxBrowserViewModel.EditHeldItem), new LiveNames(() => SaveItemNames(data)),
-            () => ItemsWithIcons(SaveItemNames(data)), shaded: true, open: OpenItem), "Held item", OpenItem);
+        var ability = FocusBorder(NamedPicker("СПОСОБНОСТЬ", nameof(BoxBrowserViewModel.EditAbility), data.AbilityNames,
+            AbilityItems, shaded: false), "СПОСОБНОСТЬ", async () => await OpenNamedPickerAsync("СПОСОБНОСТЬ", nameof(BoxBrowserViewModel.EditAbility), AbilityItems));
+        var item = FocusBorder(NamedPicker("ПРЕДМЕТ", nameof(BoxBrowserViewModel.EditHeldItem), new LiveNames(() => SaveItemNames(data)),
+            () => ItemsWithIcons(SaveItemNames(data)), shaded: true, open: OpenItem), "Предмет", OpenItem);
         // Abilities start in Gen 3 and held items in Gen 2; Gen 1 stores neither.
         ability.IsVisible = (_sessionsFor()?.Generation ?? 3) >= 3;
         item.IsVisible = (_sessionsFor()?.Generation ?? 3) >= 2;
         Border Move(int index, bool dark)
         {
             var property = $"EditMove{index + 1}";
-            var caption = $"MOVE {index + 1}";
+            var caption = $"ПРИЁМ {index + 1}";
             Task Open() => OpenMove(caption, property);
             return (Border)FocusBorder(MoveRow(index, property, data, dark, Open), caption, Open);
         }
@@ -4466,8 +4466,8 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         {
             var caps = _sessionsFor()?.GetTrainingCaps();
             var classic = caps?.IvMax == 15;
-            var ivs = classic ? "Edit DVs" : "Edit IVs";
-            var evs = classic ? "Edit stat experience" : "Edit EVs";
+            var ivs = classic ? "Изменить DV" : "Изменить IV";
+            var evs = classic ? "Изменить опыт характеристик" : "Изменить EV";
             var choice = await PadMenu.ShowAsync(_hostGrid, stat, null, ivs, evs);
             if (choice == ivs) await OpenStatsEditorAsync("IVS", nameof(BoxBrowserViewModel.EditIvs), () => _sessionsFor()?.GetTrainingCaps().IvMax ?? 31);
             else if (choice == evs) await OpenStatsEditorAsync("EVS", nameof(BoxBrowserViewModel.EditEvs), () => _sessionsFor()?.GetTrainingCaps().EvMax ?? 252);
@@ -4475,7 +4475,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         var statLines = Enumerable.Range(0, 6)
             .Select(i => FocusBorder(StatLine(i, i % 2 == 0, EditTraining), StatNames[i], () => EditTraining(StatNames[i])))
             .ToArray();
-        var ball = FocusBorder(NamedPicker("BALL", nameof(BoxBrowserViewModel.EditBall), data.BallNames, BallItems, shaded: true, leading: BallIcon()), "BALL", async () => await OpenNamedPickerAsync("BALL", nameof(BoxBrowserViewModel.EditBall), BallItems));
+        var ball = FocusBorder(NamedPicker("ПОКЕБОЛ", nameof(BoxBrowserViewModel.EditBall), data.BallNames, BallItems, shaded: true, leading: BallIcon()), "ПОКЕБОЛ", async () => await OpenNamedPickerAsync("ПОКЕБОЛ", nameof(BoxBrowserViewModel.EditBall), BallItems));
         // Gen 1 and 2 Pokémon do not record the ball they were caught in.
         ball.IsVisible = (_sessionsFor()?.Generation ?? 3) >= 3;
         var ot = FocusBorder(FieldRow("OT", nameof(BoxBrowserViewModel.EditOt), shaded: false), "OT", () =>
@@ -4486,20 +4486,20 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         otRow = ot;
         // Gender and shiny sit in one band, right under the nickname.
         var (genderShiny, genderHalf, shinyHalf) = GenderShinyRow();
-        FocusBorder(genderHalf, "GENDER", OpenGenderPickerAsync);
-        FocusBorder(shinyHalf, "Shiny", () =>
+        FocusBorder(genderHalf, "ПОЛ", OpenGenderPickerAsync);
+        FocusBorder(shinyHalf, "Шайни", () =>
         {
             _viewModel.EditShiny = !_viewModel.EditShiny;
             return Task.CompletedTask;
         });
-        var legalityLine = FocusBorder(LegalityLine(), "LEGALITY", OpenLegalityReportAsync);
+        var legalityLine = FocusBorder(LegalityLine(), "ЛЕГАЛЬНОСТЬ", OpenLegalityReportAsync);
 
-        var legalize = FocusButton(EditorTool("Legalize"), "LEGALIZE");
+        var legalize = FocusButton(EditorTool("Исправить легальность"), "ИСПРАВИТЬ");
         legalize.Clicked += async (_, _) =>
         {
             var slot = _viewModel.SelectedSlot;
             if (slot < 0) return;
-            var overlay = LoadingOverlay.Show(_hostGrid, "Legalizing…", "Finding the closest real, legal version of this Pokémon.");
+            var overlay = LoadingOverlay.Show(_hostGrid, "Исправление легальности…", "Finding the closest real, legal version of this Pokémon.");
             try
             {
                 await _viewModel.RunLegalizerAsync((service, s) => service.LegalizeSlot(s, _viewModel.BoxIndex, slot), slot, SaveAction.EditMon);
@@ -4508,7 +4508,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             finally { overlay.Close(); }
         };
 
-        var makeMine = FocusButton(EditorTool("Make mine"), "MAKE MINE");
+        var makeMine = FocusButton(EditorTool("Сделать своим"), "СДЕЛАТЬ СВОИМ");
         makeMine.Clicked += async (_, _) =>
         {
             var slot = _viewModel.SelectedSlot;
@@ -4519,45 +4519,45 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
 
         var showdown = FocusButton(EditorTool("Showdown"), "SHOWDOWN");
         showdown.Clicked += async (_, _) => { if (_viewModel.SelectedSlot >= 0) await ShowShowdownAsync(_viewModel.SelectedSlot); };
-        var exportPk = FocusButton(EditorTool("Export .PK"), "EXPORT .PK");
+        var exportPk = FocusButton(EditorTool("Экспорт .PK"), "ЭКСПОРТ .PK");
         exportPk.Clicked += async (_, _) => { if (_viewModel.SelectedSlot >= 0) await ExportSlotAsync(_viewModel.SelectedSlot); };
         var qr = FocusButton(EditorTool("QR"), "QR");
         qr.Clicked += async (_, _) => { if (_viewModel.SelectedSlot >= 0) await ShowQrAsync(_viewModel.SelectedSlot); };
 
-        var save = FocusButton(EditorTool("Save changes", primary: true), "SAVE CHANGES");
+        var save = FocusButton(EditorTool("Сохранить изменения", primary: true), "СОХРАНИТЬ");
         save.Margin = new Thickness(Design(28), Design(8), Design(28), Design(8));
         save.SetBinding(Button.CommandProperty, nameof(BoxBrowserViewModel.SaveEditCommand));
 
-        var met = FocusButton(EditorTool("Met / origin"), "MET / ORIGIN");
-        met.Clicked += async (_, _) => await RunSubEditorAsync(MetOriginEditor.ShowAsync, "Met / origin updated");
-        var moveDetails = FocusButton(EditorTool("Move details"), "MOVE DETAILS");
-        moveDetails.Clicked += async (_, _) => await RunSubEditorAsync(MoveDetailsEditor.ShowAsync, "Move details updated");
-        var moveShop = FocusButton(EditorTool("Move shop"), "MOVE SHOP");
-        moveShop.Clicked += async (_, _) => await RunSubEditorAsync(MoveShopEditor.ShowAsync, "Move Shop updated");
-        var potential = FocusButton(EditorTool("Potential"), "POTENTIAL");
-        potential.Clicked += async (_, _) => await RunSubEditorAsync(PotentialEditor.ShowAsync, "Potential updated");
-        var cosmetics = FocusButton(EditorTool("Cosmetics"), "COSMETICS");
-        cosmetics.Clicked += async (_, _) => await RunSubEditorAsync(CosmeticsEditor.ShowAsync, "Cosmetics updated");
-        var awards = FocusButton(EditorTool("Awards"), "AWARDS");
-        awards.Clicked += async (_, _) => await RunSubEditorAsync(AwardsEditor.ShowAsync, "Awards updated");
-        var ribbonAlbum = FocusButton(EditorTool("Ribbon album"), "RIBBON ALBUM");
+        var met = FocusButton(EditorTool("Встреча / происхождение"), "ВСТРЕЧА / ПРОИСХОЖДЕНИЕ");
+        met.Clicked += async (_, _) => await RunSubEditorAsync(MetOriginEditor.ShowAsync, "Данные встречи обновлены");
+        var moveDetails = FocusButton(EditorTool("Параметры приёмов"), "ПАРАМЕТРЫ ПРИЁМОВ");
+        moveDetails.Clicked += async (_, _) => await RunSubEditorAsync(MoveDetailsEditor.ShowAsync, "Параметры приёмов обновлены");
+        var moveShop = FocusButton(EditorTool("Магазин приёмов"), "МАГАЗИН ПРИЁМОВ");
+        moveShop.Clicked += async (_, _) => await RunSubEditorAsync(MoveShopEditor.ShowAsync, "Магазин приёмов обновлён");
+        var potential = FocusButton(EditorTool("Потенциал"), "ПОТЕНЦИАЛ");
+        potential.Clicked += async (_, _) => await RunSubEditorAsync(PotentialEditor.ShowAsync, "Потенциал обновлён");
+        var cosmetics = FocusButton(EditorTool("Внешность"), "COSMETICS");
+        cosmetics.Clicked += async (_, _) => await RunSubEditorAsync(CosmeticsEditor.ShowAsync, "Внешность обновлена");
+        var awards = FocusButton(EditorTool("Награды"), "НАГРАДЫ");
+        awards.Clicked += async (_, _) => await RunSubEditorAsync(AwardsEditor.ShowAsync, "Награды обновлены");
+        var ribbonAlbum = FocusButton(EditorTool("Альбом лент"), "АЛЬБОМ ЛЕНТ");
         ribbonAlbum.Clicked += async (_, _) => await RunSubEditorAsync(
-            (host, session, box, slot) => ShowRibbonAlbumAsync(host, session, box, slot), "Ribbon album updated");
-        var formShiny = FocusButton(EditorTool("Form & shiny"), "FORM & SHINY");
-        formShiny.Clicked += async (_, _) => await RunSubEditorAsync(MonFieldsEditor.FormAndShinyAsync, "Form & shiny updated");
-        var trainers = FocusButton(EditorTool("Trainers"), "TRAINERS");
-        trainers.Clicked += async (_, _) => await RunSubEditorAsync(MonFieldsEditor.TrainersAsync, "Trainers updated");
-        var techRecords = FocusButton(EditorTool("Tech records"), "TECH RECORDS");
-        techRecords.Clicked += async (_, _) => await RunSubEditorAsync(MonFieldsEditor.TechRecordsAsync, "Tech records updated");
+            (host, session, box, slot) => ShowRibbonAlbumAsync(host, session, box, slot), "Альбом лент обновлён");
+        var formShiny = FocusButton(EditorTool("Форма и шайни"), "ФОРМА И ШАЙНИ");
+        formShiny.Clicked += async (_, _) => await RunSubEditorAsync(MonFieldsEditor.FormAndShinyAsync, "Форма и шайни обновлены");
+        var trainers = FocusButton(EditorTool("Тренеры"), "ТРЕНЕРЫ");
+        trainers.Clicked += async (_, _) => await RunSubEditorAsync(MonFieldsEditor.TrainersAsync, "Тренеры обновлены");
+        var techRecords = FocusButton(EditorTool("Технические записи"), "ТЕХНИЧЕСКИЕ ЗАПИСИ");
+        techRecords.Clicked += async (_, _) => await RunSubEditorAsync(MonFieldsEditor.TechRecordsAsync, "Технические записи обновлены");
 
         // The D-pad walks the stops in the order the panel shows them.
         string[] visualOrder =
         [
-            "Species", "NICKNAME", "GENDER", "Shiny", "LEVEL",
-            "Nature", "ABILITY", "Held item", "FRIENDSHIP", "BALL", "OT",
-            "MOVE 1", "MOVE 2", "MOVE 3", "MOVE 4",
+            "Вид", "ИМЯ ПОКЕМОНА", "ПОЛ", "Шайни", "УРОВЕНЬ",
+            "Характер", "СПОСОБНОСТЬ", "Предмет", "ДРУЖБА", "ПОКЕБОЛ", "OT",
+            "ПРИЁМ 1", "ПРИЁМ 2", "ПРИЁМ 3", "ПРИЁМ 4",
             .. StatNames,
-            "LEGALITY", "SAVE CHANGES",
+            "ЛЕГАЛЬНОСТЬ", "СОХРАНИТЬ",
         ];
         EditorFocusTargets = [.. EditorFocusTargets
             .Select((target, created) => (target, created))
@@ -4566,14 +4566,14 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
 
         var lastFieldIndex = Array.FindLastIndex(EditorFocusTargets, target => target.Neighbors is null && target.View is Border);
         int IndexOfCaption(string caption) => Array.FindIndex(EditorFocusTargets, target => target.Caption == caption);
-        var saveIndex = IndexOfCaption("SAVE CHANGES");
+        var saveIndex = IndexOfCaption("СОХРАНИТЬ");
         // Secondary actions: one equal 2-column grid; D-pad neighbours follow the grid.
         const int ActionColumns = 2;
         string[] actionCaptions =
         [
-            "LEGALIZE", "MAKE MINE", "SHOWDOWN", "EXPORT .PK", "QR", "MET / ORIGIN",
-            "MOVE DETAILS", "MOVE SHOP", "POTENTIAL", "COSMETICS", "AWARDS", "RIBBON ALBUM",
-            "FORM & SHINY", "TRAINERS", "TECH RECORDS",
+            "ИСПРАВИТЬ", "СДЕЛАТЬ СВОИМ", "SHOWDOWN", "ЭКСПОРТ .PK", "QR", "ВСТРЕЧА / ПРОИСХОЖДЕНИЕ",
+            "ПАРАМЕТРЫ ПРИЁМОВ", "МАГАЗИН ПРИЁМОВ", "ПОТЕНЦИАЛ", "COSMETICS", "НАГРАДЫ", "АЛЬБОМ ЛЕНТ",
+            "ФОРМА И ШАЙНИ", "ТРЕНЕРЫ", "ТЕХНИЧЕСКИЕ ЗАПИСИ",
         ];
         var actionIndices = actionCaptions.Select(IndexOfCaption).ToArray();
         var legalizeIndex = actionIndices[0];
@@ -4581,7 +4581,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         EditorFocusTargets = EditorFocusTargets
             .Select((target, index) =>
             {
-                if (target.Caption == "SAVE CHANGES")
+                if (target.Caption == "СОХРАНИТЬ")
                     return target with { Neighbors = new EditorFocusNeighbors(index, index, lastFieldIndex, legalizeIndex) };
                 var at = Array.IndexOf(actionCaptions, target.Caption);
                 if (at < 0) return target;
@@ -4631,17 +4631,17 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             {
                 hardcoreNote,
                 species, nickname, genderShiny, level, LevelInfoCard(),
-                EditorSection("PKMN Info"),
+                EditorSection("Данные покемона"),
                 nature, ability, item, friendship, ball, ot,
-                EditorSection("PKMN Moves"),
+                EditorSection("Приёмы покемона"),
                 move1, move2, move3, move4,
-                EditorSection("Stats"),
+                EditorSection("Характеристики"),
             },
         };
         foreach (var line in statLines) panel.Children.Add(line);
-        panel.Children.Add(EditorSection("Legality"));
+        panel.Children.Add(EditorSection("Легальность"));
         panel.Children.Add(legalityLine);
-        panel.Children.Add(EditorSection("Tools"));
+        panel.Children.Add(EditorSection("Инструменты"));
         panel.Children.Add(save);
         panel.Children.Add(monActions);
         return panel;
@@ -4664,7 +4664,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             Spacing = 10,
             Children =
             {
-                Kit.HeaderBar("Illegality report"),
+                Kit.HeaderBar("Отчёт о нелегальности"),
                 new ScrollView
                 {
                     HeightRequest = 220,
@@ -4676,7 +4676,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                         LineBreakMode = LineBreakMode.WordWrap,
                     },
                 },
-                Kit.WindowHints(("B", "Back", Close)),
+                Kit.WindowHints(("B", "Назад", Close)),
             },
         };
 
@@ -4694,12 +4694,12 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         var ribbons = session.GetRibbons(box, slot);
         if (ribbons.Count == 0)
         {
-            await EditorMenu.ShowAsync(host, "Ribbon album", "This Pokémon format stores no ribbons or marks.", "OK");
+            await EditorMenu.ShowAsync(host, "Альбом лент", "В этом формате нет лент и меток.", "OK");
             return false;
         }
 
         // Ribbon legality runs a full PKHeX analysis per Pokémon: keep it off the UI thread.
-        var loading = LoadingOverlay.Show(host, "Ribbon album", "Checking which ribbons this Pokémon can legally earn…");
+        var loading = LoadingOverlay.Show(host, "Альбом лент", "Checking which ribbons this Pokémon can legally earn…");
         IReadOnlyDictionary<string, int> maxima;
         try
         {
@@ -4839,29 +4839,29 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             markRow.Children.Add(chip);
         }
 
-        var awardAll = Kit.Capsule("Award all obtainable", UiTokens.Green);
+        var awardAll = Kit.Capsule("Выдать все доступные", UiTokens.Green);
         awardAll.Clicked += (_, _) =>
         {
             var changed = session.AwardAllObtainableRibbons(box, slot);
             if (changed > 0) dirty = true;
             summary.Text = changed > 0
                 ? $"Awarded {changed} more ribbons."
-                : "Nothing more this Pokémon can legally earn.";
+                : "Больше нет легально доступных наград.";
             Rebuild();
         };
-        var close = Kit.Capsule("Done", UiTokens.Ink1);
+        var close = Kit.Capsule("Готово", UiTokens.Ink1);
 
         var content = new VerticalStackLayout
         {
             Spacing = 8,
             Children =
             {
-                Kit.HeaderBar("Ribbon album"),
+                Kit.HeaderBar("Альбом лент"),
                 summary,
                 new ScrollView { Content = tiles, MaximumHeightRequest = 260 },
                 markings.Count > 0 ? markRow : new BoxView { HeightRequest = 0 },
                 new HorizontalStackLayout { Spacing = 8, HorizontalOptions = LayoutOptions.Center, Children = { awardAll, close } },
-                Kit.WindowHints(("TAP", "Toggle ribbon", null), ("B", "Back", Close)),
+                Kit.WindowHints(("TAP", "Переключить ленту", null), ("B", "Назад", Close)),
             },
         };
 
@@ -4910,11 +4910,11 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
 
     private async Task OpenGenderPickerAsync()
     {
-        var choice = await PadMenu.ShowAsync(_hostGrid, "Gender", null,
-            new PadOption("Male", IconPath: "male"),
-            new PadOption("Female", IconPath: "female"),
-            new PadOption("Genderless", IconPath: "genderless"));
-        var gender = choice switch { "Male" => 0, "Female" => 1, "Genderless" => 2, _ => (int?)null };
+        var choice = await PadMenu.ShowAsync(_hostGrid, "Пол", null,
+            new PadOption("Самец", IconPath: "male"),
+            new PadOption("Самка", IconPath: "female"),
+            new PadOption("Бесполый", IconPath: "genderless"));
+        var gender = choice switch { "Самец" => 0, "Самка" => 1, "Бесполый" => 2, _ => (int?)null };
         if (gender is { } value)
         {
             SetVmString(nameof(BoxBrowserViewModel.EditGender), value.ToString());
@@ -4926,15 +4926,15 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
     {
         foreach (var target in EditorFocusTargets)
         {
-            if (target.Caption != "GENDER" || target.View is not Border { Content: Grid grid }) continue;
+            if (target.Caption != "ПОЛ" || target.View is not Border { Content: Grid grid }) continue;
             foreach (var child in grid.Children)
-                if (child is Label { Text: not ("GENDER" or "Gender") } label)
+                if (child is Label { Text: not ("ПОЛ" or "Пол") } label)
                 {
                     label.Text = GetVmString(nameof(BoxBrowserViewModel.EditGender)) switch
                     {
-                        "0" => "Male",
-                        "1" => "Female",
-                        _ => "Genderless",
+                        "0" => "Самец",
+                        "1" => "Самка",
+                        _ => "Бесполый",
                     };
                     return;
                 }
@@ -5086,7 +5086,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             var changed = facts.Level != selected.Level && facts.StatsNow.Count == 6 && facts.StatsAtLevel.Count == 6;
             grid.IsVisible = changed;
             if (changed) grid.Show(facts.StatsNow, facts.StatsAtLevel);
-            warn.Text = facts.BelowMetLevel ? $"Below its met level ({facts.MetLevel}): this would be illegal." : null;
+            warn.Text = facts.BelowMetLevel ? $"Ниже уровня встречи ({facts.MetLevel}): покемон станет нелегальным." : null;
             warn.IsVisible = facts.BelowMetLevel;
             card.IsVisible = changed || facts.BelowMetLevel;
         }
@@ -5123,7 +5123,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             var cached = System.IO.Path.Combine(directory, ItemArt.Slug(names[id]) + ".png");
             return File.Exists(cached) ? cached : placeholder;
         }
-        var picked = await InfoPickers.ShowHeldItemsAsync(_hostGrid, "Held item", data, _sessionsFor(),
+        var picked = await InfoPickers.ShowHeldItemsAsync(_hostGrid, "Предмет", data, _sessionsFor(),
             ParseInt(GetVmString(nameof(BoxBrowserViewModel.EditHeldItem))), Icon);
         if (picked is not null)
             SetVmString(nameof(BoxBrowserViewModel.EditHeldItem), picked.Id.ToString());
@@ -5173,7 +5173,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
     /// <summary>Item pick list with sprites for everything already in the icon cache (misses warm in the background).</summary>
     private static List<PickItem> ItemsWithIcons(IReadOnlyList<string> names)
     {
-        var items = new List<PickItem>(names.Count) { new(0, "(none)") };
+        var items = new List<PickItem>(names.Count) { new(0, "(нет)") };
         var directory = System.IO.Path.Combine(FileSystem.AppDataDirectory, "items");
         for (var id = 1; id < names.Count; id++)
         {
@@ -5324,7 +5324,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
     private async Task PushAsync<TPage>() where TPage : Page
     {
         var services = IPlatformApplication.Current?.Services
-            ?? throw new InvalidOperationException("MAUI services are unavailable.");
+            ?? throw new InvalidOperationException("Службы приложения недоступны.");
         await Navigation.PushAsync(services.GetRequiredService<TPage>());
     }
 
@@ -5444,20 +5444,20 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         // Every way in this sheet fabricates a Pokémon, so Hardcore mode refuses the
         // whole sheet - with the reason on screen instead of an empty menu.
         if (await DeniedAsync(SaveAction.CreateMon)) return;
-        var choice = await PadMenu.ShowAsync(_hostGrid, $"Add a Pokémon · slot {slot + 1}", null,
-            new PadOption("Create a Pokémon", IconPath: "create", Detail: "Pick a species and details; it is built legal for this game."),
-            new PadOption("Paste a Showdown set", IconPath: "script", Detail: "Turn a Showdown set into a legal Pokémon in this slot."),
-            new PadOption("Import .pk file", IconPath: "import", Detail: "Load a Pokémon file into this slot."),
+        var choice = await PadMenu.ShowAsync(_hostGrid, $"Добавить покемона · ячейка {slot + 1}", null,
+            new PadOption("Создать покемона", IconPath: "create", Detail: "Выбери вид и параметры. Покемон будет создан легальным для этой игры."),
+            new PadOption("Вставить набор Showdown", IconPath: "script", Detail: "Turn a Showdown set into a legal Pokémon in this slot."),
+            new PadOption("Импорт файла .pk", IconPath: "import", Detail: "Load a Pokémon file into this slot."),
             new PadOption("From event database", IconPath: "events", Detail: "Put a Mystery Gift Pokémon in this slot."));
         switch (choice)
         {
-            case "Create a Pokémon":
+            case "Создать покемона":
                 await RunGenerateWizardAsync(slot);
                 return;
-            case "Paste a Showdown set":
+            case "Вставить набор Showdown":
                 await RunShowdownPasteAsync(slot);
                 return;
-            case "Import .pk file":
+            case "Импорт файла .pk":
             {
                 var picker = IPlatformApplication.Current?.Services.GetService<IDocumentPicker>();
                 var access = IPlatformApplication.Current?.Services.GetService<ISaveFileAccess>();
@@ -5467,8 +5467,8 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                 var bytes = (await access.ReadAsync(document.DocumentId)).ToArray();
                 await _viewModel.RunMutationAsync(session =>
                     session.ImportSlot(_viewModel.BoxIndex, slot, bytes, document.DisplayName) // extension names the format
-                        ? new GenerationOutcome(true, $"Imported {document.DisplayName}.")
-                        : new GenerationOutcome(false, "That file is not a recognizable Pokémon."), slot, action: SaveAction.CreateMon);
+                        ? new GenerationOutcome(true, $"Импортировано: {document.DisplayName}.")
+                        : new GenerationOutcome(false, "Файл не распознан как покемон."), slot, action: SaveAction.CreateMon);
                 _canvas.InvalidateSurface();
                 return;
             }
@@ -5496,7 +5496,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         var request = await GenerateWizard.RunAsync(_hostGrid, data, session);
         if (request is null) return;
 
-        var overlay = LoadingOverlay.Show(_hostGrid, "CREATING YOUR POKéMON…",
+        var overlay = LoadingOverlay.Show(_hostGrid, "СОЗДАНИЕ ПОКЕМОНА…",
             "The offline legalizer is finding a real, legal way for this Pokémon to exist.");
         try
         {
@@ -5513,11 +5513,11 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
     private async Task RunShowdownPasteAsync(int slot)
     {
         if (Denied(SaveAction.CreateMon)) return;
-        var text = await TextPopup.ShowAsync(_hostGrid, "Paste a Showdown set",
-            "Paste the set exactly as exported from Pokémon Showdown.");
+        var text = await TextPopup.ShowAsync(_hostGrid, "Вставить набор Showdown",
+            "Вставь набор в формате экспорта Pokémon Showdown.");
         if (string.IsNullOrWhiteSpace(text)) return;
 
-        var overlay = LoadingOverlay.Show(_hostGrid, "Reading the set…",
+        var overlay = LoadingOverlay.Show(_hostGrid, "Чтение набора…",
             "The offline legalizer is building a legal Pokémon from your set.");
         try
         {

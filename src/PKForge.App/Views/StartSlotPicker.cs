@@ -9,7 +9,7 @@ namespace PKForge.App.Views;
 /// </summary>
 public static class StartSlotPicker
 {
-    private const string FirstFree = "First free space";
+    private const string FirstFree = "Первая свободная ячейка";
 
     /// <summary>The player's choice: <see cref="Start"/> is null for "first free space".</summary>
     public sealed record Choice(SlotRef? Start);
@@ -24,7 +24,7 @@ public static class StartSlotPicker
         foreach (var box in boxes)
         {
             var free = box.Count(s => s.Species is null);
-            options.Add(new PadOption($"Box {box.Key + 1:00}", IconPath: "box", Detail: free == 0 ? "Full" : $"{free} free"));
+            options.Add(new PadOption($"Бокс {box.Key + 1:00}", IconPath: "box", Detail: free == 0 ? "Заполнено" : $"{free} free"));
         }
 
         var boxChoice = await PadMenu.ShowAsync(host, title, $"{count} Pokémon. Pick where they start.", [.. options]);
@@ -34,7 +34,7 @@ public static class StartSlotPicker
 
         var boxSlots = boxes.First(g => g.Key == boxIndex).OrderBy(s => s.Slot).ToList();
         var slotOptions = boxSlots
-            .Select(s => new PadOption($"Slot {s.Slot + 1:00}", Detail: s.Species is null ? "Free" : "Taken, skipped"))
+            .Select(s => new PadOption($"Ячейка {s.Slot + 1:00}", Detail: s.Species is null ? "Свободно" : "Taken, skipped"))
             .ToArray();
         var slotChoice = await PadMenu.ShowAsync(host, $"Box {boxIndex + 1:00}: start at which slot?",
             "They fill the free slots from here on, then the next boxes. Taken slots are skipped.", slotOptions);

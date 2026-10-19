@@ -24,12 +24,12 @@ public static class MauiProgram
         builder.UseMauiApp<App>().UseSkiaSharp()
             .ConfigureFonts(fonts =>
             {
-                fonts.AddFont("MPLUSRounded1c-Regular.ttf", "Rounded");
-                fonts.AddFont("MPLUSRounded1c-Bold.ttf", "RoundedBold");
-                fonts.AddFont("MPLUSRounded1c-ExtraBold.ttf", "RoundedBlack");
+                fonts.AddFont("NotoSans.ttf", "Rounded");
+                fonts.AddFont("NotoSans.ttf", "RoundedBold");
+                fonts.AddFont("NotoSans.ttf", "RoundedBlack");
                 // The DS-menu voice: NDS12, a recreation of the Nintendo DS system font.
                 // Best displayed at font-size 16 or multiples (it is a pixel font).
-                fonts.AddFont("NDS12.ttf", "PixelUI");
+                fonts.AddFont("NotoSans.ttf", "PixelUI");
             });
         builder.Services.AddSingleton<ISaveEngine, SaveEngine>();
         builder.Services.AddSingleton<IGameDataService, GameDataService>();
@@ -96,6 +96,16 @@ public static class MauiProgram
         builder.Services.AddSingleton<IFolderPicker, AndroidFolderPicker>();
         builder.Services.AddSingleton<IFolderFileAccess, AndroidFolderFileAccess>();
         builder.Services.AddSingleton<IEmulatorDetectionService, AndroidEmulatorScanner>();
+#endif
+#if WINDOWS
+        builder.Services.AddSingleton<ISaveFileAccess, LocalSaveFileAccess>();
+        builder.Services.AddSingleton<IDocumentPicker, WindowsDocumentPicker>();
+        builder.Services.AddSingleton<IFolderPicker, WindowsFolderPicker>();
+        builder.Services.AddSingleton<IFolderFileAccess, LocalFolderFileAccess>();
+        builder.Services.AddSingleton<IEmulatorDetectionService, LocalEmulatorScanner>();
+        builder.Services.AddSingleton<ISecondaryDisplayHost, DesktopSecondaryDisplayHost>();
+        builder.Services.AddSingleton<Platforms.Windows.DesktopMusicPlayer>();
+        builder.Services.AddSingleton<IMusicPlayer>(sp => sp.GetRequiredService<Platforms.Windows.DesktopMusicPlayer>());
 #endif
         builder.Services.AddSingleton<IWatchedRootStore, PreferencesWatchedRootStore>();
         builder.Services.AddSingleton<BoxBrowserViewModel>();

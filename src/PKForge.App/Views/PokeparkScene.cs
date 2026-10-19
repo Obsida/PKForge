@@ -514,7 +514,7 @@ public sealed class PokeparkScene(ISpriteService sprites, PokeparkSpriteService 
             // A released Pokémon back from the Wilds keeps its form and its colors.
             var friend = _life.OldFriendOf(actor.Resident.Id);
             _visitors[actor.Resident.Id] = look = new ParkPokemon(actor.Resident.Id, actor.Resident.Species, friend?.Form ?? 0, friend?.Shiny ?? actor.Resident.Shiny,
-                actor.Resident.Name, ParkLife.IsKeeper(actor.Resident.Id) ? "Daycare" : friend is null ? "Wild" : "Old friend");
+                actor.Resident.Name, ParkLife.IsKeeper(actor.Resident.Id) ? "Пансион" : friend is null ? "Wild" : "Old friend");
             walking.Warm(look.Species, look.Form, look.Shiny, static () => { });
             sprites.Warm(look.Species, look.Form, look.Shiny, static () => { });
         }

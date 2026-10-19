@@ -12,9 +12,9 @@ namespace PKForge.App.Views;
 /// </summary>
 public static class MetOriginEditor
 {
-    private const string SuggestMet = "Suggest met data";
-    private const string SuggestBall = "Suggest ball";
-    private const string SuggestEgg = "Suggest egg data";
+    private const string SuggestMet = "Подобрать данные встречи";
+    private const string SuggestBall = "Подобрать покебол";
+    private const string SuggestEgg = "Подобрать данные яйца";
 
     public static async Task<bool> ShowAsync(Grid host, ISaveEngineSession session, int box, int slot)
     {
@@ -23,7 +23,7 @@ public static class MetOriginEditor
         {
             MetInfo m;
             try { m = session.GetMetInfo(box, slot); }
-            catch (Exception error) { await EditorMenu.ShowAsync(host, "Met / origin", error.Message, "OK"); return dirty; }
+            catch (Exception error) { await EditorMenu.ShowAsync(host, "Встреча / происхождение", error.Message, "OK"); return dirty; }
 
             var options = new List<PadOption>();
             if (session.SupportsLegalityAnalysis)
@@ -37,24 +37,24 @@ public static class MetOriginEditor
             }
             options.AddRange(new PadOption[]
             {
-                new($"Origin game · {m.VersionName}"),
-                new($"Met location · {m.MetLocationName}"),
-                new($"Met level · {m.MetLevel}"),
-                new($"Met date · {(m.MetDate.Length == 0 ? "unset" : m.MetDate)}"),
+                new($"Игра происхождения · {m.VersionName}"),
+                new($"Место встречи · {m.MetLocationName}"),
+                new($"Уровень при встрече · {m.MetLevel}"),
+                new($"Дата встречи · {(m.MetDate.Length == 0 ? "unset" : m.MetDate)}"),
             });
             if (m.SupportsWasEgg && !m.IsEgg)
-                options.Add(new($"Hatched from egg · {(m.WasEgg ? "yes" : "no")}"));
+                options.Add(new($"Вылупился из яйца · {(m.WasEgg ? "yes" : "no")}"));
             if (m.IsEgg || m.WasEgg)
             {
-                options.Add(new($"Egg location · {m.EggLocationName}"));
-                options.Add(new($"Egg date · {(m.EggDate.Length == 0 ? "unset" : m.EggDate)}"));
+                options.Add(new($"Место получения яйца · {m.EggLocationName}"));
+                options.Add(new($"Дата получения яйца · {(m.EggDate.Length == 0 ? "unset" : m.EggDate)}"));
             }
-            options.Add(new($"Language · {m.LanguageName}"));
-            options.Add(new($"Fateful encounter · {(m.Fateful ? "yes" : "no")}"));
-            options.Add(new($"Trainer ID · {m.TID:00000}"));
-            options.Add(new($"Secret ID · {m.SID:00000}"));
+            options.Add(new($"Язык · {m.LanguageName}"));
+            options.Add(new($"Судьбоносная встреча · {(m.Fateful ? "yes" : "no")}"));
+            options.Add(new($"ID тренера · {m.TID:00000}"));
+            options.Add(new($"Секретный ID · {m.SID:00000}"));
 
-            var choice = await EditorMenu.ShowAsync(host, "Met / origin", null, options.ToArray());
+            var choice = await EditorMenu.ShowAsync(host, "Встреча / происхождение", null, options.ToArray());
             if (choice is null) return dirty;
 
             if (choice is SuggestMet or SuggestBall or SuggestEgg)
@@ -62,57 +62,57 @@ public static class MetOriginEditor
                 var fix = choice switch { SuggestMet => LegalityFix.MetInfo, SuggestBall => LegalityFix.Ball, _ => LegalityFix.EggLocation };
                 if (await LegalityAssistUi.OfferAsync(host, session, box, slot, fix)) dirty = true;
             }
-            else if (choice.StartsWith("Origin game", StringComparison.Ordinal))
+            else if (choice.StartsWith("Игра происхождения", StringComparison.Ordinal))
             {
-                var pick = await PickChoiceAsync(host, "Origin game", session.GetVersionChoices(), m.Version);
+                var pick = await PickChoiceAsync(host, "Игра происхождения", session.GetVersionChoices(), m.Version);
                 if (pick is { } v) { session.ApplyMetEdit(box, slot, new MetEdit(Version: v)); dirty = true; }
             }
-            else if (choice.StartsWith("Met location", StringComparison.Ordinal))
+            else if (choice.StartsWith("Место встречи", StringComparison.Ordinal))
             {
-                var pick = await PickChoiceAsync(host, "Met location", session.GetLocationChoices(box, slot, egg: false), m.MetLocation);
+                var pick = await PickChoiceAsync(host, "Место встречи", session.GetLocationChoices(box, slot, egg: false), m.MetLocation);
                 if (pick is { } v) { session.ApplyMetEdit(box, slot, new MetEdit(MetLocation: v)); dirty = true; }
             }
-            else if (choice.StartsWith("Met level", StringComparison.Ordinal))
+            else if (choice.StartsWith("Уровень при встрече", StringComparison.Ordinal))
             {
-                var lv = await StatsPopup.ShowSingleAsync(host, "Met level", m.MetLevel, 100);
+                var lv = await StatsPopup.ShowSingleAsync(host, "Уровень при встрече", m.MetLevel, 100);
                 if (lv is { } v) { session.ApplyMetEdit(box, slot, new MetEdit(MetLevel: v)); dirty = true; }
             }
-            else if (choice.StartsWith("Met date", StringComparison.Ordinal))
+            else if (choice.StartsWith("Дата встречи", StringComparison.Ordinal))
             {
-                if (await EditDateAsync(host, "Met date", m.MetDate) is { } d) { session.ApplyMetEdit(box, slot, new MetEdit(MetDate: d)); dirty = true; }
+                if (await EditDateAsync(host, "Дата встречи", m.MetDate) is { } d) { session.ApplyMetEdit(box, slot, new MetEdit(MetDate: d)); dirty = true; }
             }
-            else if (choice.StartsWith("Hatched from egg", StringComparison.Ordinal))
+            else if (choice.StartsWith("Вылупился из яйца", StringComparison.Ordinal))
             {
                 session.ApplyMetEdit(box, slot, new MetEdit(WasEgg: !m.WasEgg));
                 dirty = true;
             }
-            else if (choice.StartsWith("Egg location", StringComparison.Ordinal))
+            else if (choice.StartsWith("Место получения яйца", StringComparison.Ordinal))
             {
-                var pick = await PickChoiceAsync(host, "Egg location", session.GetLocationChoices(box, slot, egg: true), m.EggLocation);
+                var pick = await PickChoiceAsync(host, "Место получения яйца", session.GetLocationChoices(box, slot, egg: true), m.EggLocation);
                 if (pick is { } v) { session.ApplyMetEdit(box, slot, new MetEdit(EggLocation: v)); dirty = true; }
             }
-            else if (choice.StartsWith("Egg date", StringComparison.Ordinal))
+            else if (choice.StartsWith("Дата получения яйца", StringComparison.Ordinal))
             {
-                if (await EditDateAsync(host, "Egg date", m.EggDate) is { } d) { session.ApplyMetEdit(box, slot, new MetEdit(EggDate: d)); dirty = true; }
+                if (await EditDateAsync(host, "Дата получения яйца", m.EggDate) is { } d) { session.ApplyMetEdit(box, slot, new MetEdit(EggDate: d)); dirty = true; }
             }
-            else if (choice.StartsWith("Language", StringComparison.Ordinal))
+            else if (choice.StartsWith("Язык", StringComparison.Ordinal))
             {
-                var pick = await PickChoiceAsync(host, "Language", session.GetLanguageChoices(box, slot), m.Language);
+                var pick = await PickChoiceAsync(host, "Язык", session.GetLanguageChoices(box, slot), m.Language);
                 if (pick is { } v) { session.ApplyMetEdit(box, slot, new MetEdit(Language: v)); dirty = true; }
             }
-            else if (choice.StartsWith("Fateful", StringComparison.Ordinal))
+            else if (choice.StartsWith("Судьбоносная встреча", StringComparison.Ordinal))
             {
                 session.ApplyMetEdit(box, slot, new MetEdit(Fateful: !m.Fateful));
                 dirty = true;
             }
-            else if (choice.StartsWith("Trainer ID", StringComparison.Ordinal))
+            else if (choice.StartsWith("ID тренера", StringComparison.Ordinal))
             {
-                var id = await StatsPopup.ShowSingleAsync(host, "Trainer ID (TID)", m.TID, 65535);
+                var id = await StatsPopup.ShowSingleAsync(host, "ID тренера (TID)", m.TID, 65535);
                 if (id is { } v) { session.ApplyMetEdit(box, slot, new MetEdit(TID: v)); dirty = true; }
             }
-            else if (choice.StartsWith("Secret ID", StringComparison.Ordinal))
+            else if (choice.StartsWith("Секретный ID", StringComparison.Ordinal))
             {
-                var id = await StatsPopup.ShowSingleAsync(host, "Secret ID (SID)", m.SID, 65535);
+                var id = await StatsPopup.ShowSingleAsync(host, "Секретный ID (SID)", m.SID, 65535);
                 if (id is { } v) { session.ApplyMetEdit(box, slot, new MetEdit(SID: v)); dirty = true; }
             }
         }
@@ -128,7 +128,7 @@ public static class MetOriginEditor
     /// <summary>Date entry as yyyy-MM-dd; blank keeps it unchanged, "clear" empties it.</summary>
     private static async Task<string?> EditDateAsync(Grid host, string title, string current)
     {
-        var text = await TextPopup.ShowAsync(host, title, "Type a date as YYYY-MM-DD, or 'clear' to unset.");
+        var text = await TextPopup.ShowAsync(host, title, "Введи дату ГГГГ-ММ-ДД или «clear» для очистки.");
         if (text is null) return null;
         text = text.Trim();
         if (text.Length == 0) return null;
@@ -163,7 +163,7 @@ internal sealed class EditorMenu : IPadHandler
     /// <summary>Two-option confirm box; true when the user picks <paramref name="confirmLabel"/>.</summary>
     public static async Task<bool> ConfirmAsync(Grid host, string title, string message, string confirmLabel = "OK")
     {
-        var choice = await ShowAsync(host, title, message, confirmLabel, "Cancel");
+        var choice = await ShowAsync(host, title, message, confirmLabel, "Отмена");
         return choice == confirmLabel;
     }
 
@@ -198,7 +198,7 @@ internal sealed class EditorMenu : IPadHandler
             });
         }
         content.Children.Add(grid);
-        content.Children.Add(Kit.WindowHints(("A", "Choose", () => OnPadButton(PadButton.A)), ("B", "Cancel", () => Close(null))));
+        content.Children.Add(Kit.WindowHints(("A", "Выбрать", () => OnPadButton(PadButton.A)), ("B", "Отмена", () => Close(null))));
 
         var window = Kit.OverlayWindow(host, content, preferredMaxWidth: 460);
         _overlay = Kit.AttachOverlay(host, window, () => Close(null));

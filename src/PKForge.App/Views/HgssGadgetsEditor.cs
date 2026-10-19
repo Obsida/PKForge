@@ -12,8 +12,8 @@ namespace PKForge.App.Views;
 /// </summary>
 public static class HgssGadgetsEditor
 {
-    private const string AllApricorns = "Fill every Apricorn (99)";
-    private const string NoApricorns = "Empty the Apricorn Box";
+    private const string AllApricorns = "Пополнить все априкорны (99)";
+    private const string NoApricorns = "Очистить коробку априкорнов";
 
     private const string Steps = "Set steps…";
     private const string Watts = "Set watts…";
@@ -119,7 +119,7 @@ public static class HgssGadgetsEditor
         var detail = (course.IsSpecial
                 ? "Special course: it was handed out by events, not unlocked by earning watts."
                 : "Unlocked on the Pokéwalker by earning watts.") + Environment.NewLine +
-            "Pokémon you can catch here:" + Environment.NewLine + string.Join(Environment.NewLine, course.Encounters) +
+            "Покемоны, которых здесь можно поймать:" + Environment.NewLine + string.Join(Environment.NewLine, course.Encounters) +
             (course.AvailableForLanguage ? "" : Environment.NewLine + "Your game's language never received this course.");
         if (blocked || (!course.AvailableForLanguage && !course.Unlocked))
         {

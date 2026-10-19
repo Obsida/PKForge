@@ -27,7 +27,7 @@ public static class CollectionCenter
         {
             var (path, title) = trail.Peek();
             IReadOnlyList<CommunityNode> nodes;
-            var loading = LoadingOverlay.Show(host, "Collection center",
+            var loading = LoadingOverlay.Show(host, "Центр коллекции",
                 "Fetching the community shelf from RoC's PC. Visited folders are kept offline.");
             try
             {
@@ -40,7 +40,7 @@ public static class CollectionCenter
             catch (Exception error)
             {
                 loading.Close();
-                await PadMenu.ShowAsync(host, "Collection center", error.Message, "OK");
+                await PadMenu.ShowAsync(host, "Центр коллекции", error.Message, "OK");
                 return;
             }
             finally
@@ -95,16 +95,16 @@ public static class CollectionCenter
     {
         if (HardcoreMode.Blocks(SaveAction.CreateMon, out var hardcoreStatus))
         {
-            await PadMenu.ShowAsync(host, "Hardcore mode", hardcoreStatus, "OK");
+            await PadMenu.ShowAsync(host, "Режим Hardcore", hardcoreStatus, "OK");
             return false;
         }
         var boxes = (files.Count + FileBankService.SlotsPerBox - 1) / FileBankService.SlotsPerBox;
-        var confirmed = await PadMenu.ConfirmAsync(host, "Deposit in the bank",
+        var confirmed = await PadMenu.ConfirmAsync(host, "Поместить в банк",
             $"\"{boxName}\" holds {files.Count} Pokémon. They will arrive in {(boxes == 1 ? "a fresh Bank box" : $"{boxes} fresh Bank boxes")}.",
-            "Deposit");
+            "Поместить");
         if (!confirmed) return false;
 
-        var overlay = LoadingOverlay.Show(host, "Depositing…",
+        var overlay = LoadingOverlay.Show(host, "Помещение в банк…",
             $"Downloading {boxName} into your Bank. Cancelling deposits nothing.");
         var deposits = new List<BankDeposit>(files.Count);
         var deposited = false;
@@ -141,7 +141,7 @@ public static class CollectionCenter
             overlay.Close();
         }
 
-        await PadMenu.ShowAsync(host, "Collection center", summary, "OK");
+        await PadMenu.ShowAsync(host, "Центр коллекции", summary, "OK");
         return deposited;
     }
 }

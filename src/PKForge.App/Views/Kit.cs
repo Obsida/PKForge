@@ -160,8 +160,8 @@ public static class Kit
     private static readonly Dictionary<string, string> Proper = new(StringComparer.Ordinal)
     {
         ["PKFORGE"] = "PKForge", ["SHOWDOWN"] = "Showdown", ["POKÉMON"] = "Pokémon", ["POKéMON"] = "Pokémon",
-        ["POKEMON"] = "Pokémon", ["POKÉPARK"] = "Poképark", ["POKéPARK"] = "Poképark", ["POKÉDEX"] = "Pokédex",
-        ["POKéDEX"] = "Pokédex", ["PKHEX"] = "PKHeX", ["NUZLOCKE"] = "Nuzlocke", ["POKÉRUS"] = "Pokérus", ["POKéRUS"] = "Pokérus",
+        ["POKEMON"] = "Pokémon", ["POKÉPARK"] = "Покепарк", ["POKéPARK"] = "Покепарк", ["POKÉDEX"] = "Покедекс",
+        ["POKéDEX"] = "Покедекс", ["PKHEX"] = "PKHeX", ["NUZLOCKE"] = "Nuzlocke", ["POKÉRUS"] = "Pokérus", ["POKéRUS"] = "Pokérus",
     };
 
     /// <summary>

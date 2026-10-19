@@ -172,20 +172,20 @@ public sealed class DexEntryView : SKCanvasView
 
         if (_stats is { } stats)
         {
-            Section("Base stats");
-            string[] names = ["HP", "Attack", "Defense", "Sp. Atk", "Sp. Def", "Speed"];
+            Section("Базовые характеристики");
+            string[] names = ["HP", "Атака", "Защита", "Спец. атака", "Спец. защита", "Скорость"];
             int[] values = [stats.Hp, stats.Atk, stats.Def, stats.SpA, stats.SpD, stats.Spe];
             for (var i = 0; i < 6; i++) Row(names[i], values[i].ToString());
-            Row("Total", values.Sum().ToString(), Pksm.Ink);
+            Row("Всего", values.Sum().ToString(), Pksm.Ink);
         }
         if (_card is { } card && y < height - 200)
         {
-            Section("Abilities");
+            Section("Способности");
             foreach (var ability in card.Abilities)
             {
                 if (y > height - 80) break;
                 var name = (uint)ability.Id < (uint)_abilityNames.Count ? _abilityNames[ability.Id] : $"#{ability.Id}";
-                Row(ability.Slot == "Hidden" ? "Hidden" : $"Slot {ability.Slot}", name, ability.Slot == "Hidden" ? Pksm.ShinyGold : null);
+                Row(ability.Slot == "Hidden" ? "Hidden" : $"Ячейка {ability.Slot}", name, ability.Slot == "Hidden" ? Pksm.ShinyGold : null);
             }
             if (card.Gender is { } gender && y <= height - 80)
                 SummaryInk.Draw(c, SummaryInk.Fit(gender.Label, 30, right - left - 20), (left + right) / 2, SummaryInk.Center(y + 30, 30), 30, SubInk, align: SKTextAlign.Center);

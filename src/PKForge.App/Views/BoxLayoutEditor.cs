@@ -15,8 +15,8 @@ namespace PKForge.App.Views;
 /// </summary>
 public static class BoxLayoutEditor
 {
-    public const string RenameLabel = "Rename box…";
-    public const string WallpaperLabel = "Box wallpaper…";
+    public const string RenameLabel = "Переименовать бокс…";
+    public const string WallpaperLabel = "Обои бокса…";
 
     private const SaveAction Action = SaveAction.EditTrainer;
 
@@ -29,10 +29,10 @@ public static class BoxLayoutEditor
         }
         var current = BoxLayoutService.GetBox(session, box);
         var max = BoxLayoutService.GetNameMaxLength(session);
-        var name = await TextPopup.ShowLineAsync(host, $"Rename box {box + 1:00}", $"Up to {max} characters", current.Name);
+        var name = await TextPopup.ShowLineAsync(host, $"Переименовать бокс {box + 1:00}", $"До {max} символов", current.Name);
         if (string.IsNullOrWhiteSpace(name) || name == current.Name) return false;
         return await WorldEventsMenu.WriteAsync(viewModel, s =>
-            $"Box {box + 1:00} is now \"{BoxLayoutService.Rename(s, box, name).Name}\".", Action);
+            $"Бокс {box + 1:00} теперь называется \u00AB{BoxLayoutService.Rename(s, box, name).Name}\u00BB.", Action);
     }
 
     public static async Task<bool> PickWallpaperAsync(Grid host, ISaveEngineSession session, BoxBrowserViewModel viewModel, int box)
@@ -93,7 +93,7 @@ public static class BoxLayoutEditor
                 {
                     Kit.HeaderBar(title),
                     _scroll,
-                    Kit.WindowHints(("A", "Choose", () => OnPadButton(PadButton.A)), ("B", "Cancel", () => Close(null))),
+                    Kit.WindowHints(("A", "Выбрать", () => OnPadButton(PadButton.A)), ("B", "Отмена", () => Close(null))),
                 },
             };
             var window = Kit.OverlayWindow(host, content, preferredMaxWidth: 560, scroll: false);

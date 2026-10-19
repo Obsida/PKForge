@@ -13,8 +13,8 @@ namespace PKForge.App.Views;
 /// </summary>
 public static class RoamerEditor
 {
-    private const string Reroll = "Reroll PID and IVs";
-    private const string RerollShiny = "Reroll until shiny (legal)";
+    private const string Reroll = "Перегенерировать PID и IV";
+    private const string RerollShiny = "Генерировать до шайни (легально)";
     private const string SetState = "Set roam state…";
     private const string Times = "Times encountered…";
 
@@ -26,7 +26,7 @@ public static class RoamerEditor
             var options = roamers.Select(r => new PadOption($"{r.Label} · {r.State}",
                 Accent: r.IsShiny ? UiTokens.Gold : null, IconPath: r.IsShiny ? "shiny" : "rarity",
                 Detail: r.Species == 0 ? null : $"{r.SpeciesName} Lv.{r.Level}")).ToArray();
-            var choice = await EditorMenu.ShowAsync(host, "Roaming legendaries", null, options);
+            var choice = await EditorMenu.ShowAsync(host, "Бродячие легендарные покемоны", null, options);
             var index = Array.FindIndex(options, o => o.Label == choice);
             if (index < 0) return;
             if (!await ShowRoamerAsync(host, session, viewModel, roamers[index])) return;
@@ -41,7 +41,7 @@ public static class RoamerEditor
         var actions = new List<PadOption>();
         if (roamer.CanReroll)
         {
-            actions.Add(new PadOption(Reroll, IconPath: "dice", Detail: "New random PID and IVs, made the way the game makes them."));
+            actions.Add(new PadOption(Reroll, IconPath: "dice", Detail: "Случайные PID и IV по алгоритму игры."));
             actions.Add(new PadOption(RerollShiny, IconPath: "shiny", Accent: UiTokens.Gold, Detail: "Rerolls until it comes out shiny; it stays legal to catch."));
         }
         if (roamer.Generation == 6)

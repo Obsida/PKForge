@@ -285,47 +285,47 @@ public sealed class BankBoxOverview : IPadPagingHandler
         var count = Occupied(box);
         var options = new List<PadOption>
         {
-            new("Open this box", IconPath: "box"),
+            new("Открыть этот бокс", IconPath: "box"),
             new("Pick it up to move it", IconPath: "move"),
-            new("Rename…", IconPath: "rename"),
-            new("Wallpaper…", IconPath: "fashion"),
-            new("Insert a new box before it", IconPath: "create"),
-            new("Insert a new box after it", IconPath: "create"),
+            new("Переименовать…", IconPath: "rename"),
+            new("Обои…", IconPath: "fashion"),
+            new("Вставить новый бокс перед этим", IconPath: "create"),
+            new("Вставить новый бокс после этого", IconPath: "create"),
         };
-        if (_boxes.Length > 1) options.Add(new PadOption("Delete this box…", IconPath: "delete"));
+        if (_boxes.Length > 1) options.Add(new PadOption("Удалить этот бокс…", IconPath: "delete"));
 
         _busy = true;
         string? choice;
         try
         {
             choice = await PadMenu.ShowAsync(_host, BankBoxDecor.Label(box),
-                count == 0 ? "Empty box." : $"{count} / {Slots} Pokémon.", [.. options]);
+                count == 0 ? "Пустой бокс." : $"{count} / {Slots} Pokémon.", [.. options]);
         }
         finally { _busy = false; }
 
         switch (choice)
         {
-            case "Open this box":
+            case "Открыть этот бокс":
                 Close(box);
                 return;
             case "Pick it up to move it":
                 PickUp(box);
                 return;
-            case "Rename…":
+            case "Переименовать…":
                 await RunAsync(() => _page.RenameBoxAsync(box));
                 return;
-            case "Wallpaper…":
+            case "Обои…":
                 await RunAsync(() => _page.PickWallpaperAsync(box));
                 return;
-            case "Insert a new box before it":
+            case "Вставить новый бокс перед этим":
                 await AddBoxAsync(box);
                 return;
-            case "Insert a new box after it":
+            case "Вставить новый бокс после этого":
                 await AddBoxAsync(box + 1);
                 _cursor = box + 1;
                 Retarget();
                 return;
-            case "Delete this box…":
+            case "Удалить этот бокс…":
                 // One reload, mapped from the layout before the delete, so the rest close ranks.
                 await RunAsync(() => _page.DeleteBoxAsync(box), BankBoxRemap.Remove(_boxes.Length, box));
                 Retarget();
@@ -500,7 +500,7 @@ public sealed class BankBoxOverview : IPadPagingHandler
         using var small = new SKFont(_face, 15 * _density);
         var total = _boxes.Sum(b => b.Count(e => e is not null));
         var heading = _held is { } h
-            ? $"{(_carry == Carry.Swap ? "Swapping" : "Moving")} {BankBoxDecor.Label(h)}"
+            ? $"{(_carry == Carry.Swap ? "Обмен местами" : "Перемещение")} {BankBoxDecor.Label(h)}"
             : $"All boxes · {_boxes.Length} boxes · {total} Pokémon";
         PksmPaint.CenterText(canvas, heading, 16 * _density, 24 * _density, title, ColorTheme.Current.Bright, Pksm.LogoVoid);
 
@@ -551,9 +551,9 @@ public sealed class BankBoxOverview : IPadPagingHandler
 
         var hintBar = new SKRect(0, info.Height - HintHeight * _density, info.Width, info.Height);
         (string Key, string Label, PadButton Button)[] hints = _held is null
-            ? [("A", "Open", PadButton.A), ("Y", "Pick up", PadButton.Y), ("X", "Box menu", PadButton.X),
-               ("+", "New box", PadButton.Start), ("R", "Page", PadButton.R), ("B", "Close", PadButton.B)]
-            : [("A", "Drop here", PadButton.A), ("X", _carry == Carry.Swap ? "Move instead" : "Swap instead", PadButton.X), ("B", "Cancel", PadButton.B)];
+            ? [("A", "Открыть", PadButton.A), ("Y", "Взять", PadButton.Y), ("X", "Меню бокса", PadButton.X),
+               ("+", "Новый бокс", PadButton.Start), ("R", "Страница", PadButton.R), ("B", "Закрыть", PadButton.B)]
+            : [("A", "Поместить сюда", PadButton.A), ("X", _carry == Carry.Swap ? "Переместить вместо обмена" : "Поменять местами", PadButton.X), ("B", "Отмена", PadButton.B)];
         var prompts = hints.Select(h => (h.Key, h.Label)).ToArray();
         PksmPaint.HintBar(canvas, hintBar, prompts, small);
         // Every prompt is a button for touch: the same action as its pad key.
@@ -620,7 +620,7 @@ public sealed class BankBoxOverview : IPadPagingHandler
         var name = BankBoxDecor.Label(box);
         PksmPaint.CenterText(canvas, Fit(name, font, rect.Width - 58 * _density), rect.Left + 8 * _density, band.MidY, font, SKColors.White, SKColors.Black);
         var count = Occupied(box);
-        PksmPaint.CenterText(canvas, count == Slots ? "FULL" : $"{count}/{Slots}", rect.Right - 8 * _density, band.MidY, font,
+        PksmPaint.CenterText(canvas, count == Slots ? "ПОЛНО" : $"{count}/{Slots}", rect.Right - 8 * _density, band.MidY, font,
             count == Slots ? Pksm.ShinyGold : SKColors.White, SKColors.Black, SKTextAlign.Right);
 
         // The 30 slots, every Pokémon drawn small: the box reads like the real one.

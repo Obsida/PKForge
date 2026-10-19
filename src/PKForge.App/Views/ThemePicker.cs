@@ -108,7 +108,7 @@ public sealed class ThemePicker : IPadPagingHandler
 
         using var title = new SKFont(_face, 22 * _density);
         using var small = new SKFont(_face, 15 * _density);
-        PksmPaint.CenterText(canvas, "Color scheme", 16 * _density, 24 * _density, title, ColorTheme.Current.Bright, Pksm.LogoVoid);
+        PksmPaint.CenterText(canvas, "Цветовая тема", 16 * _density, 24 * _density, title, ColorTheme.Current.Bright, Pksm.LogoVoid);
 
         var hint = 40 * _density;
         var area = new SKRect(0, 44 * _density, info.Width, info.Height - hint);
@@ -152,7 +152,7 @@ public sealed class ThemePicker : IPadPagingHandler
         canvas.Restore();
 
         var hintBar = new SKRect(0, info.Height - hint, info.Width, info.Height);
-        (string, string)[] prompts = [("A", "Choose"), ("B", "Cancel")];
+        (string, string)[] prompts = [("A", "Выбрать"), ("B", "Отмена")];
         PksmPaint.HintBar(canvas, hintBar, prompts, small);
         PadButton[] buttons = [PadButton.A, PadButton.B];
         _hintHits = [.. PksmPaint.HintBarHitRects(hintBar, prompts, small).Select((r, i) => (r, buttons[i]))];

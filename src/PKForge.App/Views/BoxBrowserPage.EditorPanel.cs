@@ -117,13 +117,13 @@ public sealed partial class BoxBrowserPage
         var gender = EditorBand(new HorizontalStackLayout
         {
             Spacing = 8,
-            Children = { EditorCaption("Gender", Design(144)), genderValue },
+            Children = { EditorCaption("Пол", Design(144)), genderValue },
         }, dark: true);
         var star = EditorValueLabel();
         var shiny = EditorBand(new HorizontalStackLayout
         {
             Spacing = 10,
-            Children = { EditorCaption("Shiny", Design(128)), star },
+            Children = { EditorCaption("Шайни", Design(128)), star },
         }, dark: true);
 
         void Refresh()
@@ -280,7 +280,7 @@ public sealed partial class BoxBrowserPage
         var grid = new Grid
         {
             ColumnDefinitions = [new(new GridLength(Design(214))), new(GridLength.Star), new(GridLength.Auto)],
-            Children = { EditorCaption("Status"), value, report },
+            Children = { EditorCaption("Статус"), value, report },
         };
         Grid.SetColumn(value, 1);
         Grid.SetColumn(report, 2);
@@ -290,10 +290,10 @@ public sealed partial class BoxBrowserPage
             var supported = _sessionsFor()?.SupportsLegalityAnalysis ?? true;
             (value.Text, value.TextColor) = _viewModel.LegalityBadge switch
             {
-                "✓" => ("Legal", Pksm.Legal.ToMauiColor()),
-                "✗" => ("Illegal", Pksm.Illegal.ToMauiColor()),
-                _ when !supported => ("Not checked for this ROM hack", EditorValue),
-                _ => ("Checking…", EditorValue),
+                "✓" => ("Легален", Pksm.Legal.ToMauiColor()),
+                "✗" => ("Нелегален", Pksm.Illegal.ToMauiColor()),
+                _ when !supported => ("Проверка этого ROM-хака недоступна", EditorValue),
+                _ => ("Проверка…", EditorValue),
             };
             report.IsVisible = _viewModel.LegalityBadge == "✗";
         }
@@ -314,7 +314,7 @@ public sealed partial class BoxBrowserPage
     private Task OpenLegalityReportAsync()
     {
         if (_viewModel.LegalityBadge != "✗") return Task.CompletedTask;
-        var detail = string.IsNullOrWhiteSpace(_viewModel.LegalityText) ? "No legality details were reported." : _viewModel.LegalityText;
+        var detail = string.IsNullOrWhiteSpace(_viewModel.LegalityText) ? "Подробности проверки отсутствуют." : _viewModel.LegalityText;
         return ShowLegalityReportAsync(detail);
     }
 

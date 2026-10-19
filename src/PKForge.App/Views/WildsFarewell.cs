@@ -13,13 +13,13 @@ public static class WildsFarewell
     {
         var confirmed = await PadMenu.ConfirmAsync(host, "Release to the Wilds?",
             $"{friend.Name} leaves your {(string.IsNullOrEmpty(friend.Game) ? "box" : friend.Game)} for good and goes to live in the Wilds, the wild lands around the Poképark. It will remember you, and it may come back to visit.",
-            "Release");
+            "Выпустить");
         if (!confirmed || !await release()) return false;
         var services = IPlatformApplication.Current?.Services;
         services?.GetService<PokeparkWildsStore>()?.Remember(friend);
         var portraits = services?.GetService<PokeparkSpriteService>();
         await PokeparkCardOverlay.ShowDialogueAsync(host, friend.Name, ParkWilds.Farewell(friend, Random.Shared),
-            portraits is null ? null : () => portraits.GetPortrait(friend.Species, friend.Form, friend.Shiny, friend.Hearts >= 4 ? "Teary-Eyed" : "Happy"));
+            portraits is null ? null : () => portraits.GetPortrait(friend.Species, friend.Form, friend.Shiny, friend.Hearts >= 4 ? "Teary-Eyed" : "Радостный"));
         return true;
     }
 }

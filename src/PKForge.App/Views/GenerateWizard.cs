@@ -32,7 +32,7 @@ public static class GenerateWizard
         for (var index = 0; index < forms.Count; index++)
         {
             if (index != 0 && forms[index].Length == 0) continue;
-            var label = index == 0 || forms[index].Length == 0 ? "Standard" : forms[index];
+            var label = index == 0 || forms[index].Length == 0 ? "Стандартный" : forms[index];
             formOptions.Add(new PadOption(label, IconPath: await FormSpritePathAsync(species.Id, index)));
         }
         if (formOptions.Count > 1)
@@ -181,28 +181,28 @@ public static class GenerateWizard
             card.SetShiny(shiny);
         }
         RefreshStar();
-        var shinyHalf = EditorBand(new HorizontalStackLayout { Spacing = Design(20), Children = { EditorCaption("Shiny", Design(128)), star } }, dark: true);
+        var shinyHalf = EditorBand(new HorizontalStackLayout { Spacing = Design(20), Children = { EditorCaption("Шайни", Design(128)), star } }, dark: true);
         var shinyTap = new TapGestureRecognizer();
         shinyTap.Tapped += (_, _) => { shiny = !shiny; RefreshStar(); };
         shinyHalf.GestureRecognizers.Add(shinyTap);
-        var levelHalf = EditorBand(new HorizontalStackLayout { Spacing = Design(20), Children = { EditorCaption("Level", Design(128)), level } }, dark: true);
+        var levelHalf = EditorBand(new HorizontalStackLayout { Spacing = Design(20), Children = { EditorCaption("Уровень", Design(128)), level } }, dark: true);
         level.WidthRequest = Design(160);
         var levelShiny = new Grid { ColumnDefinitions = [new(GridLength.Star), new(GridLength.Star)], Children = { levelHalf, shinyHalf } };
         Grid.SetColumn(shinyHalf, 1);
 
-        var natureRow = Chooser("Nature", false, NatureItems, () => nature, v => nature = v, OpenNature);
+        var natureRow = Chooser("Характер", false, NatureItems, () => nature, v => nature = v, OpenNature);
         natureRow.IsVisible = session.Generation >= 3; // Gen 1/2 have no natures
-        var abilityRow = Chooser("Ability", true, AbilityItems, () => ability, v => ability = v);
-        var ballRow = Chooser("Ball", false, BallItems, () => ball, v => ball = v,
+        var abilityRow = Chooser("Способность", true, AbilityItems, () => ability, v => ability = v);
+        var ballRow = Chooser("Покебол", false, BallItems, () => ball, v => ball = v,
             leading: id => id is { } b && sprites is not null ? BallArt(sprites, b) : null);
         var moveRows = new View[4];
         for (var i = 0; i < 4; i++)
         {
             var index = i;
             // The species' learnable moves first, with the Legal (Y) and type (X) filters.
-            Task<PickItem?> OpenMove(int? current) => InfoPickers.ShowMovesAsync(host, $"Move {index + 1}", data, session,
+            Task<PickItem?> OpenMove(int? current) => InfoPickers.ShowMovesAsync(host, $"Приём {index + 1}", data, session,
                 IMonInfoService.NoSlot, 0, current, species.Id, form);
-            moveRows[i] = Chooser($"Move {i + 1}", i % 2 == 0, MoveItems, () => moves[index], v => moves[index] = v, OpenMove,
+            moveRows[i] = Chooser($"Приём {i + 1}", i % 2 == 0, MoveItems, () => moves[index], v => moves[index] = v, OpenMove,
                 leading: id => id is { } m && InfoPickers.Info?.GetMove(session, m) is { } facts ? InfoKit.TypeBadge(facts.Type, Design(128)) : null);
         }
 
@@ -216,7 +216,7 @@ public static class GenerateWizard
 
         var generate = EditorTool("Generate", primary: true);
         generate.Clicked += (_, _) => Generate();
-        var cancel = EditorTool("Cancel");
+        var cancel = EditorTool("Отмена");
         cancel.Clicked += (_, _) => Close(null);
         var buttons = new Grid
         {
@@ -240,8 +240,8 @@ public static class GenerateWizard
         {
             Children =
             {
-                EditorSection("Features"), note, levelShiny, natureRow, abilityRow, ballRow,
-                EditorSection("Moves"), moveRows[0], moveRows[1], moveRows[2], moveRows[3],
+                EditorSection("Возможности"), note, levelShiny, natureRow, abilityRow, ballRow,
+                EditorSection("Приёмы"), moveRows[0], moveRows[1], moveRows[2], moveRows[3],
                 buttons,
             },
         };
@@ -401,7 +401,7 @@ public static class GenerateWizard
                 SummaryInk.Draw(c, names[i], left, SummaryInk.Center(cy, 30), 30, labelInk);
                 SummaryInk.Draw(c, values[i].ToString(), left + 180, SummaryInk.Center(cy, 30), 30, valueInk, align: SKTextAlign.Right);
             }
-            SummaryInk.Draw(c, $"Total {card.Total}", DesignWidth / 2, SummaryInk.Center(640, 30), 30, valueInk, align: SKTextAlign.Center);
+            SummaryInk.Draw(c, $"Всего {card.Total}", DesignWidth / 2, SummaryInk.Center(640, 30), 30, valueInk, align: SKTextAlign.Center);
 
             // Abilities by slot, then the gender ratio.
             var y = 700f;
@@ -409,7 +409,7 @@ public static class GenerateWizard
             {
                 if (y > height - 40) break;
                 var name = (uint)choice.Id < (uint)_data.AbilityNames.Count ? _data.AbilityNames[choice.Id] : $"#{choice.Id}";
-                var slot = choice.Slot == "Hidden" ? "Hidden" : $"Slot {choice.Slot}";
+                var slot = choice.Slot == "Hidden" ? "Hidden" : $"Ячейка {choice.Slot}";
                 SummaryInk.Draw(c, SummaryInk.Fit(name, 30, 330), 40, SummaryInk.Center(y, 30), 30, valueInk);
                 SummaryInk.Draw(c, slot, DesignWidth - 40, SummaryInk.Center(y, 26), 26, choice.Slot == "Hidden" ? Pksm.ShinyGold : EditorPaint.ExpInk, align: SKTextAlign.Right);
                 y += 44;

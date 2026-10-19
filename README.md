@@ -2,6 +2,8 @@
 
 <p align="center"><b>A Pokémon save editor and bank for Android, with support for dual-screen handhelds.</b></p>
 
+> This local fork adds a Windows x64 build and a Russian UI. See [README.ru.md](README.ru.md) for launch instructions, build steps, and current limitations.
+
 <p align="center">
   <a href="https://discord.gg/bMtzZmTDfu"><img src="https://img.shields.io/badge/Discord-Join%20the%20server-5865F2?logo=discord&logoColor=white" alt="Discord" /></a>
   <a href="https://github.com/sofianeelhor/PKForge/releases"><img src="https://img.shields.io/badge/Download-APK-2B4E95" alt="Download" /></a>

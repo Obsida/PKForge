@@ -44,7 +44,7 @@ public sealed class EventFlagsEditor : IPadHandler
     {
         if (EventFlagService.UnsupportedReason(session) is { } reason)
         {
-            await EditorMenu.ShowAsync(host, "Event flags", reason, "OK");
+            await EditorMenu.ShowAsync(host, "Флаги событий", reason, "OK");
             return;
         }
         var catalog = await Task.Run(() => EventFlagService.Load(session));
@@ -97,7 +97,7 @@ public sealed class EventFlagsEditor : IPadHandler
         tabs.Children.Add(pager);
 
         var search = Kit.TextField();
-        search.Placeholder = "Search label or number…";
+        search.Placeholder = "Поиск по названию или номеру…";
         search.TextChanged += (_, args) =>
         {
             _query = args.NewTextValue ?? "";
@@ -113,7 +113,7 @@ public sealed class EventFlagsEditor : IPadHandler
         // highlighted row toggles it too.
         _empty = new Label
         {
-            Text = "Nothing here. Try Y to show unlabeled entries, or another section.",
+            Text = "Здесь пусто. Нажми Y для показа неизвестных записей или выбери другой раздел.",
             TextColor = UiTokens.InkSoft, FontSize = UiTokens.TextSmall, IsVisible = false,
             HorizontalTextAlignment = TextAlignment.Center, VerticalOptions = LayoutOptions.Center,
         };
@@ -123,8 +123,8 @@ public sealed class EventFlagsEditor : IPadHandler
             TextColor = UiTokens.InkSoft, FontSize = UiTokens.TextSmall, MaxLines = 2,
             LineBreakMode = LineBreakMode.TailTruncation, HorizontalTextAlignment = TextAlignment.Center,
         };
-        var hints = Kit.WindowHints(("A", "Change", () => { if (Current is { } row) _ = ActivateAsync(row); }),
-            ("L", "R  Section", () => Page(1)), ("B", "Close", Close));
+        var hints = Kit.WindowHints(("A", "Изменить", () => { if (Current is { } row) _ = ActivateAsync(row); }),
+            ("L", "R  Section", () => Page(1)), ("B", "Закрыть", Close));
 
         var body = new Grid { Children = { _list, _empty } };
         var content = new Grid
@@ -177,7 +177,7 @@ public sealed class EventFlagsEditor : IPadHandler
         Kit.SetTab(_workTab, _kind == EventEntryKind.Work);
         Kit.SetTab(_unlabeledChip, _showUnlabeled);
         Kit.SetTab(_changedChip, _changedOnly);
-        _section.Text = Kit.Tidy(category is null ? $"All sections ({_categories.Count})" : $"{category} · {_category}/{_categories.Count}");
+        _section.Text = Kit.Tidy(category is null ? $"Все разделы ({_categories.Count})" : $"{category} · {_category}/{_categories.Count}");
         UpdateFooter();
         Highlight();
     }
@@ -235,7 +235,7 @@ public sealed class EventFlagsEditor : IPadHandler
         {
             if (HardcoreMode.Blocks(SaveAction.EditWorld, out var blocked))
             {
-                await EditorMenu.ShowAsync(_host, "Hardcore mode", $"{blocked}\nFlags stay viewable.", "OK");
+                await EditorMenu.ShowAsync(_host, "Режим Hardcore", $"{blocked}\nFlags stay viewable.", "OK");
                 return;
             }
             var entry = row.Entry;
@@ -254,9 +254,9 @@ public sealed class EventFlagsEditor : IPadHandler
     private async Task ToggleFlagAsync(EventRow row, EventEntry entry)
     {
         var next = !entry.IsOn;
-        var confirmed = await PadMenu.ConfirmAsync(_host, next ? "Set flag?" : "Clear flag?",
+        var confirmed = await PadMenu.ConfirmAsync(_host, next ? "Установить флаг?" : "Сбросить флаг?",
             $"{entry.DisplayName}\n#{entry.Id} · {entry.Category} · {OnOff(entry.IsOn)} → {OnOff(next)}\n{Warning(entry)}A restore point is created first.",
-            next ? "Set ON" : "Set OFF");
+            next ? "Включить" : "Выключить");
         if (!confirmed) return;
         var (bank, index) = (entry.Bank, entry.Index);
         if (await Write(s => EventFlagService.SetFlag(s, bank, index, next)))
@@ -265,7 +265,7 @@ public sealed class EventFlagsEditor : IPadHandler
 
     private async Task EditWorkAsync(EventRow row, EventEntry entry)
     {
-        const string Custom = "Enter a number…";
+        const string Custom = "Введи число…";
         var presets = entry.Presets.Where(p => p.Value >= entry.Min && p.Value <= entry.Max).ToList();
         long value;
         if (presets.Count != 0)
@@ -289,7 +289,7 @@ public sealed class EventFlagsEditor : IPadHandler
         if (!long.TryParse(text.Trim(), NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out value)
             || value < entry.Min || value > entry.Max)
         {
-            await EditorMenu.ShowAsync(_host, "Out of range", $"Work #{entry.Id} holds a whole number from {entry.Min} to {entry.Max}.", "OK");
+            await EditorMenu.ShowAsync(_host, "Вне допустимого диапазона", $"Work #{entry.Id} holds a whole number from {entry.Min} to {entry.Max}.", "OK");
             return;
         }
         await ConfirmWorkAsync(row, entry, value);
@@ -299,7 +299,7 @@ public sealed class EventFlagsEditor : IPadHandler
     {
         if (value == entry.Value) return;
         var confirmed = await PadMenu.ConfirmAsync(_host, "Change work?",
-            $"{entry.DisplayName}\n#{entry.Id} · {entry.Value} → {value}\n{Warning(entry)}A restore point is created first.", "Write");
+            $"{entry.DisplayName}\n#{entry.Id} · {entry.Value} → {value}\n{Warning(entry)}A restore point is created first.", "Записать");
         if (!confirmed) return;
         var index = entry.Index;
         if (await Write(s => EventFlagService.SetWork(s, index, value)))
@@ -321,7 +321,7 @@ public sealed class EventFlagsEditor : IPadHandler
         ? "⚠ Story-critical (PKHeX tags this story progress/system). Changing it can soft-lock the game.\n"
         : entry.Labeled ? "" : "Unlabeled: PKHeX does not know what this does.\n";
 
-    private static string OnOff(bool on) => on ? "ON" : "OFF";
+    private static string OnOff(bool on) => on ? "ВКЛ" : "ВЫКЛ";
 
     private static readonly Dictionary<bool, byte[]> CheckboxPng = [];
 
@@ -398,8 +398,8 @@ public sealed class EventFlagsEditor : IPadHandler
                 Name = "CommonStates",
                 States =
                 {
-                    new VisualState { Name = "Normal", Setters = { new Setter { Property = Border.StrokeProperty, Value = Colors.Transparent } } },
-                    new VisualState { Name = "Selected", Setters = {
+                    new VisualState { Name = "Обычный", Setters = { new Setter { Property = Border.StrokeProperty, Value = Colors.Transparent } } },
+                    new VisualState { Name = "Выбрано", Setters = {
                         new Setter { Property = Border.StrokeProperty, Value = UiTokens.Rim },
                         new Setter { Property = Border.BackgroundColorProperty, Value = UiTokens.SelectFill } } },
                 },
@@ -432,7 +432,7 @@ public sealed class EventFlagsEditor : IPadHandler
             {
                 check.IsVisible = true;
                 check.Source = CheckboxSource(e.IsOn);
-                valueText.Text = e.IsOn ? "On" : "Off";
+                valueText.Text = e.IsOn ? "On" : "Выкл";
                 valueText.TextColor = e.IsOn ? UiTokens.TextTone(UiTokens.Green) : UiTokens.InkSoft;
             }
             else

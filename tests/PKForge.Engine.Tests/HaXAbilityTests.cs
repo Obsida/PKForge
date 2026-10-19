@@ -55,16 +55,17 @@ public sealed class HaXAbilityTests
             directory = directory.Parent;
         var savePath = Path.Combine(directory!.FullName, "external", "PKHeX", "Tests", "PKHeX.Core.Tests", "TestData", "SM Project 802.main");
 
+        using var serialized = new MemoryStream();
         using (var session = new SaveEngineSession(File.ReadAllBytes(savePath)))
         {
             var slot = session.Snapshot.Slots.First(s => s.Box >= 0 && s.Species is not null);
             session.ApplyEdit(slot.Box, slot.Slot, new EntityEdit(Ability: Drought));
             Assert.Equal(Drought, session.ReadEntity(slot.Box, slot.Slot).Ability);
-            File.WriteAllBytes("/tmp/hax-save.main", session.Serialize().ToArray());
+            serialized.Write(session.Serialize().Span);
         }
 
         // Reload from disk bytes: the save file itself must carry the edit.
-        using (var reloaded = new SaveEngineSession(File.ReadAllBytes("/tmp/hax-save.main")))
+        using (var reloaded = new SaveEngineSession(serialized.ToArray()))
         {
             var slot = reloaded.Snapshot.Slots.First(s => s.Box >= 0 && s.Species is not null);
             Assert.Equal(Drought, reloaded.ReadEntity(slot.Box, slot.Slot).Ability);

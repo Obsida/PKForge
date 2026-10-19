@@ -32,7 +32,7 @@ public static class BankEntryEditor
         // rewrite it. Its Summary stays available.
         if (PKForge.Engine.EntityBytes.RomHackGame(entry.Info.Format) is { } hack)
         {
-            await EditorMenu.ShowAsync(host, "Can't edit",
+            await EditorMenu.ShowAsync(host, "Редактирование недоступно",
                 $"Pokémon from {hack} can only be edited in their own game.", "OK");
             return false;
         }
@@ -45,13 +45,13 @@ public static class BankEntryEditor
         }
         catch (Exception error)
         {
-            await EditorMenu.ShowAsync(host, "Can't edit", error.Message, "OK");
+            await EditorMenu.ShowAsync(host, "Редактирование недоступно", error.Message, "OK");
             return false;
         }
         if (session is null)
         {
-            await EditorMenu.ShowAsync(host, "Can't edit",
-                "The stored bytes aren't a Pokémon PKForge can edit.", "OK");
+            await EditorMenu.ShowAsync(host, "Редактирование недоступно",
+                "Данные не распознаны как доступный для редактирования покемон.", "OK");
             return false;
         }
 
@@ -64,14 +64,14 @@ public static class BankEntryEditor
             }
             catch (Exception error)
             {
-                await EditorMenu.ShowAsync(host, "Edit error", error.Message, "OK");
+                await EditorMenu.ShowAsync(host, "Ошибка редактирования", error.Message, "OK");
                 return false;
             }
 
             var saved = await window.Completion;
             if (window.Failure is { } failure)
             {
-                await EditorMenu.ShowAsync(host, "Edit error", failure.Message, "OK");
+                await EditorMenu.ShowAsync(host, "Ошибка редактирования", failure.Message, "OK");
                 return false;
             }
             return saved;
@@ -93,7 +93,7 @@ public static class BankEntryEditor
     private static List<PickItem> ItemIcons(IReadOnlyList<string> names)
     {
         var directory = System.IO.Path.Combine(FileSystem.AppDataDirectory, "items");
-        var items = new List<PickItem> { new(0, "(none)") };
+        var items = new List<PickItem> { new(0, "(нет)") };
         for (var id = 1; id < names.Count; id++)
         {
             if (names[id].Length == 0) continue;
@@ -199,18 +199,18 @@ public static class BankEntryEditor
 
             // ── Info: the identity rows, then the quick tools.
             var identity = new VerticalStackLayout();
-            AddRow(identity, _infoSlots, "nickname", "Nickname", EditNicknameAsync);
-            AddRow(identity, _infoSlots, "species", "Species", EditSpeciesAsync);
-            AddRow(identity, _infoSlots, "level", "Level", EditLevelAsync);
-            AddRow(identity, _infoSlots, "nature", "Nature", EditNatureAsync);
-            AddRow(identity, _infoSlots, "ability", "Ability", EditAbilityAsync);
-            AddRow(identity, _infoSlots, "item", "Held item", EditItemAsync);
-            AddRow(identity, _infoSlots, "ball", "Ball", EditBallAsync);
-            AddRow(identity, _infoSlots, "gender", "Gender", EditGenderAsync);
-            AddRow(identity, _infoSlots, "friendship", "Friendship", EditFriendshipAsync);
-            AddRow(identity, _infoSlots, "ot", "Trainer", EditOtAsync);
-            AddRow(identity, _infoSlots, "shiny", "Shiny", ToggleShinyAsync);
-            identity.Add(ToolRow(_infoSlots, ("Lv 100", Level100Async), ("Make mine", MakeMineAsync), ("QR", QrAsync)));
+            AddRow(identity, _infoSlots, "nickname", "Имя покемона", EditNicknameAsync);
+            AddRow(identity, _infoSlots, "species", "Вид", EditSpeciesAsync);
+            AddRow(identity, _infoSlots, "level", "Уровень", EditLevelAsync);
+            AddRow(identity, _infoSlots, "nature", "Характер", EditNatureAsync);
+            AddRow(identity, _infoSlots, "ability", "Способность", EditAbilityAsync);
+            AddRow(identity, _infoSlots, "item", "Предмет", EditItemAsync);
+            AddRow(identity, _infoSlots, "ball", "Покебол", EditBallAsync);
+            AddRow(identity, _infoSlots, "gender", "Пол", EditGenderAsync);
+            AddRow(identity, _infoSlots, "friendship", "Дружба", EditFriendshipAsync);
+            AddRow(identity, _infoSlots, "ot", "Тренер", EditOtAsync);
+            AddRow(identity, _infoSlots, "shiny", "Шайни", ToggleShinyAsync);
+            identity.Add(ToolRow(_infoSlots, ("Lv 100", Level100Async), ("Сделать своим", MakeMineAsync), ("QR", QrAsync)));
             _infoPage = identity;
 
             // ── Stats: its own page, the table drawn, then the spread editors.
@@ -224,25 +224,25 @@ public static class BankEntryEditor
             };
             var stats = new VerticalStackLayout { Children = { _statsTable } };
             AddRow(stats, _statsSlots, "ivs", classicTraining ? "DVs" : "IVs", EditIvsAsync);
-            AddRow(stats, _statsSlots, "evs", classicTraining ? "Stat exp" : "EVs", EditEvsAsync);
-            stats.Add(ToolRow(_statsSlots, (classicTraining ? "Max DV" : "Max IV", MaxIvsAsync), (classicTraining ? "0 Exp" : "0 EV", ClearEvsAsync)));
+            AddRow(stats, _statsSlots, "evs", classicTraining ? "Опыт характеристик" : "EVs", EditEvsAsync);
+            stats.Add(ToolRow(_statsSlots, (classicTraining ? "Максимум DV" : "Максимум IV", MaxIvsAsync), (classicTraining ? "0 Exp" : "0 EV", ClearEvsAsync)));
             _statsPage = stats;
             _statsPage.IsVisible = false;
             _scroll.Content = new Grid { Children = { _infoPage, _statsPage } };
 
             // ── The side list: the two pages, then every sub-editor.
             var side = new VerticalStackLayout { Spacing = EditorRows.Design(10) };
-            _infoTab = SideItem(side, "Info", "info", () => { ShowPage(stats: false); return Task.CompletedTask; });
-            _statsTab = SideItem(side, "Stats", "stats", () => { ShowPage(stats: true); return Task.CompletedTask; });
+            _infoTab = SideItem(side, "Информация", "info", () => { ShowPage(stats: false); return Task.CompletedTask; });
+            _statsTab = SideItem(side, "Характеристики", "stats", () => { ShowPage(stats: true); return Task.CompletedTask; });
             side.Add(new BoxView { HeightRequest = EditorRows.Design(12), Color = Colors.Transparent });
-            SideItem(side, "Moves", "moves", EditMovesAsync);
-            SideItem(side, "Met / origin", "map", EditMetAsync);
-            SideItem(side, "Potential", "stats", EditPotentialAsync);
-            SideItem(side, "Awards", "ribbons", EditAwardsAsync);
-            SideItem(side, "Legalize", "fix", LegalizeAsync);
-            SideItem(side, "Form & shiny", "shiny", () => SubEditorAsync(MonFieldsEditor.FormAndShinyAsync));
-            SideItem(side, "Trainers", "trainer", () => SubEditorAsync(MonFieldsEditor.TrainersAsync));
-            SideItem(side, "Tech records", "moves", () => SubEditorAsync(MonFieldsEditor.TechRecordsAsync));
+            SideItem(side, "Приёмы", "moves", EditMovesAsync);
+            SideItem(side, "Встреча / происхождение", "map", EditMetAsync);
+            SideItem(side, "Потенциал", "stats", EditPotentialAsync);
+            SideItem(side, "Награды", "ribbons", EditAwardsAsync);
+            SideItem(side, "Исправить легальность", "fix", LegalizeAsync);
+            SideItem(side, "Форма и шайни", "shiny", () => SubEditorAsync(MonFieldsEditor.FormAndShinyAsync));
+            SideItem(side, "Тренеры", "trainer", () => SubEditorAsync(MonFieldsEditor.TrainersAsync));
+            SideItem(side, "Технические записи", "moves", () => SubEditorAsync(MonFieldsEditor.TechRecordsAsync));
 
             var right = new Grid
             {
@@ -265,10 +265,10 @@ public static class BankEntryEditor
                 RowDefinitions = [new(GridLength.Auto), new(GridLength.Star), new(GridLength.Auto)],
                 HeightRequest = host.Height > 0 ? host.Height - 60 : -1,
             };
-            content.Add(EditorRows.EditorSection("Pokémon information"));
+            content.Add(EditorRows.EditorSection("Данные покемона"));
             content.Add(body);
             Grid.SetRow(body, 1);
-            var hints = Kit.WindowHints(("A", "Open", () => OnPadButton(PadButton.A)), ("X", "Save", () => Run(SaveAsync)), ("B", "Close", RequestClose));
+            var hints = Kit.WindowHints(("A", "Открыть", () => OnPadButton(PadButton.A)), ("X", "Сохранить", () => Run(SaveAsync)), ("B", "Закрыть", RequestClose));
             content.Add(hints);
             Grid.SetRow(hints, 2);
 
@@ -333,7 +333,7 @@ public static class BankEntryEditor
             var d = _detail;
             var species = NameOf(_data.SpeciesNames, d.Species);
             var name = string.IsNullOrWhiteSpace(d.Nickname) ? species : d.Nickname;
-            var from = string.IsNullOrWhiteSpace(_entry.Info.SourceName) ? null : $"From {_entry.Info.SourceName}";
+            var from = string.IsNullOrWhiteSpace(_entry.Info.SourceName) ? null : $"Из {_entry.Info.SourceName}";
             var unit = Math.Min(args.Info.Width / EditorPaint.DesignWidth, args.Info.Height / EditorPaint.DesignHeaderHeight);
             var accent = d.Types is { Count: > 0 } types ? InfoKit.TypeColor(types[0]).ToSKColor() : (SKColor?)null;
             EditorPaint.PaintHeader(canvas, new SKRect(0, 0, EditorPaint.DesignWidth * unit, args.Info.Height),
@@ -368,7 +368,7 @@ public static class BankEntryEditor
             string[] names = ["HP", "Atk", "Def", "SpA", "SpD", "Spe"];
             float[] columns = [250, 450, 650, 850, 1030];
             const float rowH = 60, text = 32;
-            var head = new[] { "Base", classic ? "DV" : "IV", classic ? "Exp" : "EV", "Value" };
+            var head = new[] { "Базовые", classic ? "DV" : "IV", classic ? "Exp" : "EV", "Значение" };
             using (var band = new SKPaint { Color = EditorPaint.ChipTop }) c.DrawRoundRect(new SKRect(200, 0, 1100, rowH), 10, 10, band);
             for (var i = 0; i < head.Length; i++)
                 SummaryInk.Draw(c, head[i], (columns[i] + columns[i + 1]) / 2 - 100 + 100, SummaryInk.Center(rowH / 2, text), text, EditorPaint.ChipInk, align: SKTextAlign.Center);
@@ -391,14 +391,14 @@ public static class BankEntryEditor
             }
             var totalY = rowH * 7 + 12;
             using (var band = new SKPaint { Color = EditorPaint.ChipTop }) c.DrawRoundRect(new SKRect(0, totalY, 1100, totalY + rowH), 10, 10, band);
-            SummaryInk.Draw(c, "Total", 40, SummaryInk.Center(totalY + rowH / 2, text), text, EditorPaint.ChipInk);
+            SummaryInk.Draw(c, "Всего", 40, SummaryInk.Center(totalY + rowH / 2, text), text, EditorPaint.ChipInk);
             string[] totals = [bases.Sum().ToString(), d.IVs.Sum().ToString(), d.EVs.Sum().ToString(), d.Stats is { Count: 6 } all ? all.Sum().ToString() : "-"];
             for (var k = 0; k < totals.Length; k++)
                 SummaryInk.Draw(c, totals[k], (columns[k] + columns[k + 1]) / 2, SummaryInk.Center(totalY + rowH / 2, text), text, Pksm.ShinyGold, align: SKTextAlign.Center);
 
             // Hidden Power and the IV stars under the table.
             var extraY = totalY + rowH + 40;
-            SummaryInk.Draw(c, "Hidden Power", 40, SummaryInk.Center(extraY, text), text, EditorPaint.Label);
+            SummaryInk.Draw(c, "Скрытая сила", 40, SummaryInk.Center(extraY, text), text, EditorPaint.Label);
             if (InfoPickers.Info?.GetHiddenPowerType(_session, d.IVs) is { } hp && TypeFacts.IsValid(hp))
                 TypePlates.Paint(c, new SKRect(300, extraY - 22, 460, extraY + 22), hp);
             else SummaryInk.Draw(c, "—", 300, SummaryInk.Center(extraY, text), text, EditorPaint.Value);
@@ -412,7 +412,7 @@ public static class BankEntryEditor
                     3 => Pksm.Legal,
                     _ => Pksm.SignalBlue,
                 };
-                SummaryInk.Draw(c, "IV rank", 600, SummaryInk.Center(extraY, text), text, EditorPaint.Label);
+                SummaryInk.Draw(c, "Рейтинг IV", 600, SummaryInk.Center(extraY, text), text, EditorPaint.Label);
                 SummaryInk.Draw(c, new string('★', stars) + new string('☆', 4 - stars), 760, SummaryInk.Center(extraY, 38), 38, color);
             }
         }
@@ -440,15 +440,15 @@ public static class BankEntryEditor
             _rows["ability"].Value = NameOf(_data.AbilityNames, d.Ability);
             _rows["item"].Value = d.HeldItem == 0 ? "none" : NameOf(_data.ItemNames, d.HeldItem);
             _rows["ball"].Value = NameOf(_data.BallNames, d.Ball);
-            _rows["gender"].Value = d.Gender switch { 0 => "♂ Male", 1 => "♀ Female", _ => "Genderless" };
+            _rows["gender"].Value = d.Gender switch { 0 => "♂ Male", 1 => "♀ Female", _ => "Бесполый" };
             _rows["friendship"].Value = d.Friendship.ToString();
             _rows["ot"].Value = d.OriginalTrainer;
             _rows["shiny"].Value = d.IsShiny ? "★ Yes" : "☆ No";
             var caps = _session.GetTrainingCaps();
-            _rows["ivs"].Value = $"Total {d.IVs.Sum()}";
+            _rows["ivs"].Value = $"Всего {d.IVs.Sum()}";
             _rows["evs"].Value = caps.EvMax == 65535
                 ? "Max 65535 per stat"
-                : $"Total {d.EVs.Sum()}/510";
+                : $"Всего {d.EVs.Sum()}/510";
             _header.InvalidateSurface();
             _statsTable.InvalidateSurface();
         }
@@ -494,9 +494,9 @@ public static class BankEntryEditor
                 Close(false);
                 return;
             }
-            const string save = "Save", discard = "Discard", keep = "Keep editing";
-            var choice = await EditorMenu.ShowAsync(_host, "Save your changes?",
-                "This Pokémon has edits that are not in the bank yet.", save, discard, keep);
+            const string save = "Сохранить", discard = "Отменить изменения", keep = "Продолжить редактирование";
+            var choice = await EditorMenu.ShowAsync(_host, "Сохранить изменения?",
+                "Изменения этого покемона ещё не сохранены в банке.", save, discard, keep);
             if (choice == save) Run(SaveAsync);
             else if (choice == discard) Close(false);
         }
@@ -565,7 +565,7 @@ public static class BankEntryEditor
 
         private async Task EditNicknameAsync()
         {
-            var text = await TextPopup.ShowAsync(_host, "Nickname", "Rename this Pokémon.");
+            var text = await TextPopup.ShowAsync(_host, "Имя покемона", "Изменить имя покемона.");
             if (!string.IsNullOrWhiteSpace(text)) { _session.ApplyEdit(0, 0, new EntityEdit(Nickname: text.Trim())); _dirty = true; }
         }
 
@@ -577,7 +577,7 @@ public static class BankEntryEditor
 
         private async Task EditLevelAsync()
         {
-            var lv = await StatsPopup.ShowSingleAsync(_host, "Level", _detail.Level, 100);
+            var lv = await StatsPopup.ShowSingleAsync(_host, "Уровень", _detail.Level, 100);
             if (lv is { } v) { _session.ApplyEdit(0, 0, new EntityEdit(Level: Math.Max(1, v))); _dirty = true; }
         }
 
@@ -595,7 +595,7 @@ public static class BankEntryEditor
                     ? Enumerable.Range(0, _data.AbilityNames.Count).ToList()
                     : _session.GetAbilityChoices(_detail.Species, _detail.Form))
                 .Select(id => new PickItem(id, NameOf(_data.AbilityNames, id))).ToList();
-            var pick = await PickerMenu.ShowAsync(_host, "Ability", choices, _detail.Ability);
+            var pick = await PickerMenu.ShowAsync(_host, "Способность", choices, _detail.Ability);
             if (pick is not null)
             {
                 _session.ApplyEdit(0, 0, new EntityEdit(Ability: pick.Id));
@@ -610,35 +610,35 @@ public static class BankEntryEditor
 
         private async Task EditItemAsync()
         {
-            var pick = await PickerMenu.ShowAsync(_host, "Held item", ItemIcons(_data.ItemNames), _detail.HeldItem);
+            var pick = await PickerMenu.ShowAsync(_host, "Предмет", ItemIcons(_data.ItemNames), _detail.HeldItem);
             if (pick is not null) { _session.ApplyEdit(0, 0, new EntityEdit(HeldItem: pick.Id)); _dirty = true; }
         }
 
         private async Task EditBallAsync()
         {
-            var pick = await PickerMenu.ShowAsync(_host, "Ball", BallIcons(_data.BallNames), _detail.Ball);
+            var pick = await PickerMenu.ShowAsync(_host, "Покебол", BallIcons(_data.BallNames), _detail.Ball);
             if (pick is not null) { _session.ApplyEdit(0, 0, new EntityEdit(Ball: pick.Id)); _dirty = true; }
         }
 
         private async Task EditGenderAsync()
         {
-            var g = await EditorMenu.ShowAsync(_host, "Gender", null,
-                new PadOption("Male", IconPath: "male"),
-                new PadOption("Female", IconPath: "female"),
-                new PadOption("Genderless", IconPath: "genderless"));
-            var gender = g switch { "Male" => 0, "Female" => 1, "Genderless" => 2, _ => (int?)null };
+            var g = await EditorMenu.ShowAsync(_host, "Пол", null,
+                new PadOption("Самец", IconPath: "male"),
+                new PadOption("Самка", IconPath: "female"),
+                new PadOption("Бесполый", IconPath: "genderless"));
+            var gender = g switch { "Самец" => 0, "Самка" => 1, "Бесполый" => 2, _ => (int?)null };
             if (gender is { } value) { _session.ApplyEdit(0, 0, new EntityEdit(Gender: value)); _dirty = true; }
         }
 
         private async Task EditFriendshipAsync()
         {
-            var f = await StatsPopup.ShowSingleAsync(_host, "Friendship", _detail.Friendship, 255);
+            var f = await StatsPopup.ShowSingleAsync(_host, "Дружба", _detail.Friendship, 255);
             if (f is { } v) { _session.ApplyEdit(0, 0, new EntityEdit(Friendship: v)); _dirty = true; }
         }
 
         private async Task EditOtAsync()
         {
-            var text = await TextPopup.ShowAsync(_host, "Original trainer", "The OT name shown on this Pokémon.");
+            var text = await TextPopup.ShowAsync(_host, "Исходный тренер", "Имя исходного тренера, записанное у покемона.");
             if (!string.IsNullOrWhiteSpace(text)) { _session.ApplyEdit(0, 0, new EntityEdit(OriginalTrainer: text.Trim())); _dirty = true; }
         }
 
@@ -683,25 +683,25 @@ public static class BankEntryEditor
 
             var labels = new List<string>();
             if (current is not null)
-                labels.Add($"Current trainer · {current.Name} · {current.TID}/{current.SID}");
+                labels.Add($"Текущий тренер · {current.Name} · {current.TID}/{current.SID}");
             labels.AddRange(profiles.Select(p => $"{p.DisplayName} · {p.OriginalTrainer} · {p.TID}/{p.SID}"));
             if (labels.Count == 0)
             {
-                await EditorMenu.ShowAsync(_host, "Make mine",
+                await EditorMenu.ShowAsync(_host, "Сделать своим",
                     "Open a game and save its trainer as a profile first.", "OK");
                 return;
             }
 
-            var choice = await PadMenu.ShowAsync(_host, "Make mine", null, labels.ToArray());
+            var choice = await PadMenu.ShowAsync(_host, "Сделать своим", null, labels.ToArray());
             if (choice is null) return;
             var index = labels.IndexOf(choice);
             var profile = index == 0 && current is not null
-                ? new TrainerProfile("current", "Current trainer", current.Name, current.TID, current.SID, current.Gender)
+                ? new TrainerProfile("current", "Текущий тренер", current.Name, current.TID, current.SID, current.Gender)
                 : profiles[index - (current is not null ? 1 : 0)];
             var outcome = _session.MakeMine(0, 0, profile);
             if (!outcome.Success)
             {
-                await EditorMenu.ShowAsync(_host, "Make mine", outcome.Message, "OK");
+                await EditorMenu.ShowAsync(_host, "Сделать своим", outcome.Message, "OK");
                 return;
             }
 
@@ -727,19 +727,19 @@ public static class BankEntryEditor
         /// <summary>Pick a move slot, then a move for it.</summary>
         private async Task EditMovesAsync()
         {
-            string MoveName(int id) => id == 0 ? "(none)" : (uint)id < (uint)_data.MoveNames.Count ? _data.MoveNames[id] : $"#{id}";
+            string MoveName(int id) => id == 0 ? "(нет)" : (uint)id < (uint)_data.MoveNames.Count ? _data.MoveNames[id] : $"#{id}";
             var current = new[] { _detail.Move1, _detail.Move2, _detail.Move3, _detail.Move4 };
-            var slot = await EditorMenu.ShowAsync(_host, "Which move?", null,
-                new PadOption($"Move 1 · {MoveName(current[0])}", "1", UiTokens.MenuBlue),
-                new PadOption($"Move 2 · {MoveName(current[1])}", "2", UiTokens.MenuBlue),
-                new PadOption($"Move 3 · {MoveName(current[2])}", "3", UiTokens.MenuBlue),
-                new PadOption($"Move 4 · {MoveName(current[3])}", "4", UiTokens.MenuBlue));
+            var slot = await EditorMenu.ShowAsync(_host, "Какой приём?", null,
+                new PadOption($"Приём 1 · {MoveName(current[0])}", "1", UiTokens.MenuBlue),
+                new PadOption($"Приём 2 · {MoveName(current[1])}", "2", UiTokens.MenuBlue),
+                new PadOption($"Приём 3 · {MoveName(current[2])}", "3", UiTokens.MenuBlue),
+                new PadOption($"Приём 4 · {MoveName(current[3])}", "4", UiTokens.MenuBlue));
             if (slot is null) return;
             var which = slot[5] - '1';
             if ((uint)which >= 4) return;
 
-            var pick = await PickerMenu.ShowAsync(_host, $"Move {which + 1}",
-                NameItems(_data.MoveNames, includeZero: true, zeroLabel: "(none)"), current[which]);
+            var pick = await PickerMenu.ShowAsync(_host, $"Приём {which + 1}",
+                NameItems(_data.MoveNames, includeZero: true, zeroLabel: "(нет)"), current[which]);
             if (pick is null) return;
             _session.ApplyEdit(0, 0, which switch
             {
@@ -775,19 +775,19 @@ public static class BankEntryEditor
         {
             var legalizer = _legalizer;
             if (legalizer is null) return;
-            var overlay = LoadingOverlay.Show(_host, "Legalizing…", "Finding the closest real, legal version.");
+            var overlay = LoadingOverlay.Show(_host, "Исправление легальности…", "Поиск наиболее близкого легального варианта.");
             try
             {
                 var outcome = await Task.Run(() => legalizer.LegalizeSlot(_session, 0, 0));
                 _dirty = true;
                 overlay.Close();
                 if (!outcome.Success)
-                    await EditorMenu.ShowAsync(_host, "Legalize", outcome.Message, "OK");
+                    await EditorMenu.ShowAsync(_host, "Исправить легальность", outcome.Message, "OK");
             }
             catch (Exception error)
             {
                 overlay.Close();
-                await EditorMenu.ShowAsync(_host, "Legalize", error.Message, "OK");
+                await EditorMenu.ShowAsync(_host, "Исправить легальность", error.Message, "OK");
             }
         }
 
@@ -796,7 +796,7 @@ public static class BankEntryEditor
             // Hardcore mode: the stored mon may be inspected here but never rewritten.
             if (HardcoreMode.Blocks(SaveAction.EditMon, out var status))
             {
-                await EditorMenu.ShowAsync(_host, "Hardcore mode", status, "OK");
+                await EditorMenu.ShowAsync(_host, "Режим Hardcore", status, "OK");
                 return;
             }
             var export = _session.ExportSlot(0, 0);
@@ -810,11 +810,11 @@ public static class BankEntryEditor
         /// <summary>PKF1 .pk QR: show this mon as a scannable code, or receive one in its place.</summary>
         private async Task QrAsync()
         {
-            var choice = await EditorMenu.ShowAsync(_host, "QR transfer", null,
-                new PadOption("Show as .pk QR", IconPath: "qr", Detail: "Shows this Pokémon as a QR code to scan on another device."),
-                new PadOption("Scan a .pk QR", IconPath: "scan", Detail: "Pick a picture of a QR code; its Pokémon replaces this one."));
-            if (choice == "Show as .pk QR") await ShowEntityQrAsync();
-            else if (choice == "Scan a .pk QR") await ScanEntityQrAsync();
+            var choice = await EditorMenu.ShowAsync(_host, "Перенос по QR", null,
+                new PadOption("Показать .pk QR", IconPath: "qr", Detail: "Shows this Pokémon as a QR code to scan on another device."),
+                new PadOption("Сканировать .pk QR", IconPath: "scan", Detail: "Pick a picture of a QR code; its Pokémon replaces this one."));
+            if (choice == "Показать .pk QR") await ShowEntityQrAsync();
+            else if (choice == "Сканировать .pk QR") await ScanEntityQrAsync();
         }
 
         private async Task ShowEntityQrAsync()
@@ -834,7 +834,7 @@ public static class BankEntryEditor
             // A scan over this entry fabricates its replacement: creation, not a move.
             if (HardcoreMode.Blocks(SaveAction.CreateMon, out var status))
             {
-                await EditorMenu.ShowAsync(_host, "Hardcore mode", status, "OK");
+                await EditorMenu.ShowAsync(_host, "Режим Hardcore", status, "OK");
                 return;
             }
             var received = await QrEntityService.ScanAsync(_host, _engine,

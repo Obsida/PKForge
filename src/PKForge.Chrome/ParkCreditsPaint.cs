@@ -50,7 +50,7 @@ public static class ParkCreditsPaint
         paint.Color = SKColors.White;
         c.DrawText("PKForge", mid, y + 52 * unit, SKTextAlign.Center, big, paint);
         paint.Color = Role;
-        c.DrawText("and its Poképark", mid, y + 100 * unit, SKTextAlign.Center, role, paint);
+        c.DrawText("и его Покепарк", mid, y + 100 * unit, SKTextAlign.Center, role, paint);
         y += 220 * unit;
 
         foreach (var section in sections)
@@ -95,13 +95,13 @@ public static class ParkCreditsPaint
             y += 70 * unit;
         }
         paint.Color = Gold;
-        c.DrawText("Thank you for playing!", mid, y + 120 * unit, SKTextAlign.Center, name, paint);
+        c.DrawText("Спасибо за игру!", mid, y + 120 * unit, SKTextAlign.Center, name, paint);
         var contentHeight = y + 120 * unit + scroll - h * .62f;
 
         // The roll fades in at the bottom and out at the top.
         Fade(c, w, h, unit);
         paint.Color = Role.WithAlpha(200);
-        c.DrawText("Up and Down to scroll  ·  B to close", mid, h - 24 * unit, SKTextAlign.Center, small, paint);
+        c.DrawText("Вверх / Вниз — прокрутка · B — закрыть", mid, h - 24 * unit, SKTextAlign.Center, small, paint);
         return contentHeight;
     }
 

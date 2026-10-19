@@ -23,19 +23,19 @@ public static class PokeBeansEditor
             }
 
             var options = beans.Select(bean => new PadOption($"{bean.Name} · {bean.Count}/{bean.MaxCount}"))
-                .Append(new PadOption("Fill every Bean stack", IconPath: "fill", Detail: "Every Bean goes to its maximum; a restore point is made first."))
-                .Append(new PadOption("Clear every Bean stack", IconPath: "clear", Detail: "Every Bean goes to 0; a restore point is made first."))
+                .Append(new PadOption("Пополнить все покебобы", IconPath: "fill", Detail: "Every Bean goes to its maximum; a restore point is made first."))
+                .Append(new PadOption("Удалить все покебобы", IconPath: "clear", Detail: "Every Bean goes to 0; a restore point is made first."))
                 .ToArray();
             var choice = await EditorMenu.ShowAsync(host, "POKé BEANS", "Poké Pelago storage", options);
             if (choice is null) return;
 
-            if (choice == "Fill every Bean stack" || choice == "Clear every Bean stack")
+            if (choice == "Пополнить все покебобы" || choice == "Удалить все покебобы")
             {
-                var filling = choice.StartsWith("Fill", StringComparison.Ordinal);
-                var verb = filling ? "Fill" : "Clear";
+                var filling = choice == "Пополнить все покебобы";
+                var verb = filling ? "Заполнить" : "Очистить";
                 var confirmed = await PadMenu.ConfirmAsync(host, $"{verb} all beans?",
                     filling ? "Every Poké Bean stack becomes 255. A restore point is created first." : "Every Poké Bean stack becomes 0. A restore point is created first.",
-                    filling ? "Fill" : "Clear");
+                    filling ? "Заполнить" : "Очистить");
                 if (!confirmed) continue;
                 var success = await viewModel.RunMutationAsync(s =>
                 {

@@ -29,7 +29,7 @@ public static class ParkCardPaint
     /// <summary>The card's pages, switched with the tabs on its top edge (or X).</summary>
     public enum Page { Care, Bonds, About }
 
-    public static readonly IReadOnlyList<(Page Page, string Label)> Pages = [(Page.Care, "Care"), (Page.Bonds, "Bonds"), (Page.About, "About")];
+    public static readonly IReadOnlyList<(Page Page, string Label)> Pages = [(Page.Care, "Уход"), (Page.Bonds, "Bonds"), (Page.About, "About")];
 
     /// <summary>The panel's height for a page: Bonds and About need more room.</summary>
     public static float HeightOf(Page page) => page == Page.Care ? DesignHeight : 470f;
@@ -43,7 +43,7 @@ public static class ParkCardPaint
     public enum Action { Talk, Snack, Play, Relax }
 
     public static readonly IReadOnlyList<(Action Action, string Label)> Actions =
-        [(Action.Talk, "Talk"), (Action.Snack, "Snack"), (Action.Play, "Play"), (Action.Relax, "Relax")];
+        [(Action.Talk, "Talk"), (Action.Snack, "Snack"), (Action.Play, "Воспроизвести"), (Action.Relax, "Relax")];
 
     /// <summary>The card's height in design pixels.</summary>
     public const float DesignHeight = 330f;
@@ -66,8 +66,8 @@ public static class ParkCardPaint
 
     /// <summary>The games offered after Play, by key; fighting types also offer to train you.</summary>
     public static IReadOnlyList<(string Key, string Label)> GamesFor(bool fighter) => fighter
-        ? [("fetch", "Ball"), ("hide", "Hide"), ("race", "Race"), ("dig", "Dig"), ("brush", "Brush"), ("spar", "Train")]
-        : [("fetch", "Ball"), ("hide", "Hide"), ("race", "Race"), ("dig", "Dig"), ("brush", "Brush")];
+        ? [("fetch", "Покебол"), ("hide", "Скрыть"), ("race", "Race"), ("dig", "Dig"), ("brush", "Brush"), ("spar", "Train")]
+        : [("fetch", "Покебол"), ("hide", "Скрыть"), ("race", "Race"), ("dig", "Dig"), ("brush", "Brush")];
 
     /// <summary>How many buttons a row holds for that many choices (Back included).</summary>
     public static int ChoiceColumns(int count) => count > 6 ? 4 : 3;
@@ -166,7 +166,7 @@ public static class ParkCardPaint
             for (var i = 0; i < count; i++)
             {
                 var back = i == count - 1;
-                var caption = back ? "Back" : menu == Menu.Berries ? BerryNames[i] : games[i].Label;
+                var caption = back ? "Назад" : menu == Menu.Berries ? BerryNames[i] : games[i].Label;
                 ChoiceButton(c, ChoiceRect(r, i, unit, count), back ? null : menu == Menu.Berries ? Berry(i) : GameIcons[i], caption, i == selected, face, unit);
             }
             return;

@@ -112,7 +112,7 @@ public sealed class SecondScreenBoxPage : ContentPage
         async Task ShowBoxSummaryCore(Domain.EntityDetail detail)
         {
             var session = sessions?.CurrentSession;
-            var box = detail.Box == -1 ? "PARTY" : $"BOX {detail.Box + 1:00}";
+            var box = detail.Box == -1 ? "КОМАНДА" : $"БОКС {detail.Box + 1:00}";
             var caption = $"{box} · SLOT {detail.Slot + 1:00}";
             if (session is null || summaries is null) { _inspector.Show(null, caption: caption); return; }
             var key = (session, _viewModel.MutationGeneration, detail.Box, detail.Slot);
@@ -162,7 +162,7 @@ public sealed class SecondScreenBoxPage : ContentPage
             if (showSummary)
             {
                 if (bankDriven)
-                    _inspector.Show(state!.Inspected?.Summary, state.Inspected?.LegalityPending == true, state.Inspected?.Caption, "EMPTY BANK SLOT");
+                    _inspector.Show(state!.Inspected?.Summary, state.Inspected?.LegalityPending == true, state.Inspected?.Caption, "ПУСТАЯ ЯЧЕЙКА БАНКА");
                 else
                     ShowBoxSummary(detail!);
             }
@@ -227,7 +227,11 @@ public sealed class SecondScreenBoxPage : ContentPage
         SecondScreenMode.DisableForSession($"the lower screen's {what} failed", error);
         var host = IPlatformApplication.Current?.Services.GetService<ISecondaryDisplayHost>();
         try { _ = host?.DismissAsync(); }
-        catch (Exception dismiss) when (dismiss is InvalidOperationException or Java.Lang.Exception)
+        catch (Exception dismiss) when (dismiss is InvalidOperationException
+#if ANDROID
+            or Java.Lang.Exception
+#endif
+            )
         {
             AppLog.Error("second", "Dismissing the lower screen failed", dismiss);
         }

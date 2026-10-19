@@ -12,14 +12,14 @@ public static class MysteryGiftInboxEditor
         var inbox = session.GetMysteryGiftInbox();
         if (!inbox.Supported)
         {
-            await EditorMenu.ShowAsync(host, "Mystery gift inbox",
+            await EditorMenu.ShowAsync(host, "Входящие подарки",
                 "This game does not expose a supported Mystery Gift card store.", "OK");
             return;
         }
         if (inbox.Cards.Count == 0)
         {
-            await EditorMenu.ShowAsync(host, "Mystery gift inbox",
-                "No Mystery Gift cards or received-gift records are stored in this save.", "OK");
+            await EditorMenu.ShowAsync(host, "Входящие подарки",
+                "В сохранении нет карточек подарков или записей их получения.", "OK");
             return;
         }
 
@@ -33,24 +33,24 @@ public static class MysteryGiftInboxEditor
             inbox = session.GetMysteryGiftInbox();
             var options = inbox.Cards.Select(card => new PickItem(card.Slot,
                 $"{card.Title} · {CardNumber(card)}")).ToArray();
-            var picked = await PickerMenu.ShowAsync(host, $"Mystery gift inbox · {inbox.Cards.Count}", options);
+            var picked = await PickerMenu.ShowAsync(host, $"Входящие подарки · {inbox.Cards.Count}", options);
             if (picked is null)
                 return;
             var card = inbox.Cards.FirstOrDefault(candidate => candidate.Slot == picked.Id);
             if (card is null)
                 continue;
 
-            var kind = card.IsReceivedRecord ? "Received gift record" : "Stored Wonder Card";
+            var kind = card.IsReceivedRecord ? "Запись полученного подарка" : "Сохранённая карточка подарка";
             var contents = card.IsEntity && card.Species > 0
                 ? $"Pokémon: {SpeciesName(card.Species)} · Lv. {card.Level}"
-                : "Non-Pokémon gift or record";
-            var state = card.IsReceivedRecord ? "History entry" : card.GiftUsed ? "Gift used" : "Gift unused";
+                : "Подарок без покемона или запись";
+            var state = card.IsReceivedRecord ? "Запись истории" : card.GiftUsed ? "Подарок получен" : "Подарок не получен";
             await EditorMenu.ShowAsync(host, card.Title,
-                $"{kind}\n{CardNumber(card)} · {card.Type}\n{contents}\n{state}\n\nRead-only: PKForge does not alter cards or received flags.", "Back");
+                $"{kind}\n{CardNumber(card)} · {card.Type}\n{contents}\n{state}\n\nRead-only: PKForge does not alter cards or received flags.", "Назад");
         }
     }
 
     private static string CardNumber(MysteryGiftCard card) => card.CardId > 0
-        ? $"Card #{card.CardId:0000}"
-        : $"Slot {card.Slot + 1}";
+        ? $"Карточка \u2116{card.CardId:0000}"
+        : $"Ячейка {card.Slot + 1}";
 }

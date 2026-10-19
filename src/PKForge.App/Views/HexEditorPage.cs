@@ -71,7 +71,7 @@ public sealed class HexEditorPage : IPadHandler
         _bytes = session.Serialize().ToArray();
         _router = IPlatformApplication.Current?.Services.GetService<GamepadRouter>();
 
-        _title = new Label { Text = "Byte manipulation", TextColor = UiTokens.Ink0, FontFamily = DsChrome.PixelFont, FontSize = 15 };
+        _title = new Label { Text = "Редактор байтов", TextColor = UiTokens.Ink0, FontFamily = DsChrome.PixelFont, FontSize = 15 };
         _progress = new Label { TextColor = UiTokens.Ink1, FontFamily = DsChrome.PixelFont, FontSize = UiTokens.TextBody, HorizontalTextAlignment = TextAlignment.End, HorizontalOptions = LayoutOptions.End };
         _cursorInfo = new Label { TextColor = UiTokens.Ink1, FontFamily = DsChrome.PixelFont, FontSize = UiTokens.TextBody };
 
@@ -80,11 +80,11 @@ public sealed class HexEditorPage : IPadHandler
         _canvas.Touch += Touch;
 
         View hints = Kit.WindowHints(
-            ("A", "Edit", () => OnPadButton(PadButton.A)),
-            ("B", "Done", () => _ = CloseAsync()),
-            ("X", "Actions", () => _ = ShowActionsAsync()),
-            ("Y", "Jump", () => _ = JumpAsync()),
-            ("LR", "Page", () => OnPadButton(PadButton.R)));
+            ("A", "Изменить", () => OnPadButton(PadButton.A)),
+            ("B", "Готово", () => _ = CloseAsync()),
+            ("X", "Действия", () => _ = ShowActionsAsync()),
+            ("Y", "Перейти", () => _ = JumpAsync()),
+            ("LR", "Страница", () => OnPadButton(PadButton.R)));
 
         var content = new Grid
         {
@@ -301,14 +301,14 @@ public sealed class HexEditorPage : IPadHandler
 
     private async Task ShowActionsAsync()
     {
-        var undoLabel = $"Undo all changes ({_edits.Count})";
-        var options = new List<PadOption> { new("Jump to offset", IconPath: "search", Detail: "Go to a byte by its position, in hex (0x) or decimal.") };
+        var undoLabel = $"Отменить все изменения ({_edits.Count})";
+        var options = new List<PadOption> { new("Перейти к смещению", IconPath: "search", Detail: "Go to a byte by its position, in hex (0x) or decimal.") };
         if (_edits.Count > 0)
             options.Add(new PadOption(undoLabel, IconPath: "restore", Detail: "Drop every byte change not yet written to the save."));
-        options.Add(new PadOption("Close", IconPath: "close"));
+        options.Add(new PadOption("Закрыть", IconPath: "close"));
 
-        var choice = await PadMenu.ShowAsync(_host, "Byte editor", $"{_edits.Count} byte(s) changed.", options.ToArray());
-        if (choice == "Jump to offset")
+        var choice = await PadMenu.ShowAsync(_host, "Редактор байтов", $"{_edits.Count} byte(s) changed.", options.ToArray());
+        if (choice == "Перейти к смещению")
         {
             await JumpAsync();
             return;
@@ -349,9 +349,9 @@ public sealed class HexEditorPage : IPadHandler
                 Close(target);
         }
 
-        var jump = Kit.Capsule("Jump", UiTokens.Green);
+        var jump = Kit.Capsule("Перейти", UiTokens.Green);
         jump.Clicked += (_, _) => Apply();
-        var cancel = Kit.Capsule("Cancel", UiTokens.Ink1);
+        var cancel = Kit.Capsule("Отмена", UiTokens.Ink1);
         cancel.Clicked += (_, _) => Close(null);
 
         var content = new VerticalStackLayout
@@ -359,7 +359,7 @@ public sealed class HexEditorPage : IPadHandler
             Spacing = 10,
             Children =
             {
-                Kit.HeaderBar("Jump to offset"),
+                Kit.HeaderBar("Перейти к смещению"),
                 new Label { Text = $"0 to 0x{_bytes.Length - 1:X} · hex (0x…) or decimal", TextColor = UiTokens.Ink1, FontFamily = DsChrome.PixelFont, FontSize = UiTokens.TextSmall },
                 entry,
                 new HorizontalStackLayout { Spacing = 8, HorizontalOptions = LayoutOptions.End, Children = { cancel, jump } },
@@ -402,11 +402,11 @@ public sealed class HexEditorPage : IPadHandler
     {
         if (_edits.Count > 0)
         {
-            var choice = await PadMenu.ShowAsync(_host, "Save byte changes?",
+            var choice = await PadMenu.ShowAsync(_host, "Сохранить изменения байтов?",
                 $"{_edits.Count} byte(s) changed. Raw edits skip format checks; a restore point is created first.",
-                "Save changes", "Discard changes", "Keep editing");
-            if (choice == "Save changes") { await CommitAsync(); return; }
-            if (choice == "Keep editing" || choice is null) return;
+                "Сохранить изменения", "Отменить изменения", "Продолжить редактирование");
+            if (choice == "Сохранить изменения") { await CommitAsync(); return; }
+            if (choice == "Продолжить редактирование" || choice is null) return;
         }
         TearDown();
         _result.TrySetResult(false);
@@ -429,7 +429,7 @@ public sealed class HexEditorPage : IPadHandler
         var current = sessions?.Current;
         if (sessions is null || writer is null || current is null)
         {
-            _viewModel.Status = "No open save - byte changes kept.";
+            _viewModel.Status = "Нет открытого сохранения — изменения байтов оставлены в редакторе.";
             return;
         }
 
@@ -440,24 +440,24 @@ public sealed class HexEditorPage : IPadHandler
 
         if (candidate.Length != baseline.Length)
         {
-            _viewModel.Status = "Save length changed - write refused.";
+            _viewModel.Status = "Размер сохранения изменился — запись запрещена.";
             return;
         }
         if (candidate.AsSpan().SequenceEqual(baseline.Span))
         {
-            _viewModel.Status = "No changes.";
+            _viewModel.Status = "Изменений нет.";
             _edits.Clear();
             TearDown();
             _result.TrySetResult(true);
             return;
         }
 
-        var confirmed = await PadMenu.ConfirmAsync(_host, "Write byte changes?",
+        var confirmed = await PadMenu.ConfirmAsync(_host, "Записать изменения байтов?",
             $"{_edits.Count} byte(s) will be written to {current.Document.DisplayName}. A restore point is created first.",
-            "Write");
+            "Записать");
         if (!confirmed) return;
 
-        var loader = LoadingOverlay.Show(_host, "Writing bytes…", "Validating, backing up, writing.");
+        var loader = LoadingOverlay.Show(_host, "Запись байтов…", "Проверка, резервное копирование, запись.");
         try
         {
             var receipt = await writer.WriteAsync(current.Document.DocumentId, current.Snapshot, candidate,
@@ -470,7 +470,7 @@ public sealed class HexEditorPage : IPadHandler
             }
             _viewModel.Status = receipt.Changed
                 ? $"Bytes saved. Restore point {receipt.BackupId[..13]}…"
-                : "No changes.";
+                : "Изменений нет.";
             _edits.Clear();
             TearDown();
             _result.TrySetResult(true);

@@ -1,0 +1,1683 @@
+# English source text (exact) / Russian. Applied only to UI source files, never save data.
+Cancel	Отмена
+Close	Закрыть
+Back	Назад
+Next	Далее
+Previous	Предыдущее
+Continue	Продолжить
+Confirm	Подтвердить
+Choose	Выбрать
+Select	Выбрать
+Open	Открыть
+Save	Сохранить
+Save changes	Сохранить изменения
+SAVE CHANGES	СОХРАНИТЬ
+Apply	Применить
+Done	Готово
+Ready	Готово
+READY	ГОТОВО
+Yes	Да
+No	Нет
+YES	ДА
+NO	НЕТ
+NOT NOW	НЕ СЕЙЧАС
+Not now	Не сейчас
+Maybe later	Позже
+Decide later	Решить позже
+Delete	Удалить
+Remove	Убрать
+Clear	Очистить
+Reset	Сбросить
+Rename	Переименовать
+Edit	Изменить
+Copy	Копировать
+Copy all	Копировать всё
+Copy to clipboard	Копировать в буфер
+Copy report	Копировать отчёт
+Paste	Вставить
+Import	Импорт
+Export	Экспорт
+Filter	Фильтр
+Filters	Фильтры
+Sort	Сортировка
+Search	Поиск
+Search…	Поиск…
+Settings	Настройки
+Menu	Меню
+Tools	Инструменты
+Misc	Разное
+Music	Музыка
+Storage	Хранилище
+Games	Игры
+All games	Все игры
+All	Все
+None	Нет
+(none)	(нет)
+Empty	Пусто
+Selected	Выбрано
+Marked	Отмечено
+Deselect	Снять выделение
+Connect	Подключить
+Connected	Подключено
+Connected.	Подключено.
+Offline	Без сети
+Browse	Просмотр
+Swap	Поменять
+Place	Поместить
+Navigate	Навигация
+Use field	Изменить поле
+Get started	Начать
+Hello! Welcome to PKForge!	Привет! Добро пожаловать в PKForge!
+This is a place where your Pokémon from every game can live together, safely.	Здесь покемоны из разных игр могут безопасно жить вместе.
+I can edit them, keep them in the Bank, and make sure each one is legal.	Можно редактировать покемонов, хранить их в банке и проверять легальность.
+And every change is backed up before it is written, so nothing is ever lost.	Перед каждой записью создаётся резервная копия для восстановления.
+Now then... let's find your games!	А теперь… найдём твои игры!
+Link an emulator	Подключить эмулятор
+Link a storage unit	Подключить хранилище
+Open a save file	Открыть сохранение
+Open a single save file	Открыть отдельное сохранение
+Single save file	Отдельное сохранение
+Choose a save file…	Выбери файл сохранения…
+Select the save file to link…	Выбери файл для подключения…
+Choose folder	Выбрать папку
+Pick one save file instead of a whole emulator folder.	Выбрать отдельный файл сохранения.
+Pick the emulator folder where your games keep their saves.	Выбрать папку эмулятора с сохранениями игр.
+Choose a platform to see its emulators.	Выбери платформу, чтобы увидеть её эмуляторы.
+Pick the folder that holds your save files.	Выбери папку с файлами сохранений.
+Manage linked storage	Подключённые папки
+Linked storage	Подключённые хранилища
+Unlink emulator folders. Your files stay on the device.	Отключить папки эмуляторов. Файлы останутся на устройстве.
+Remove a linked emulator folder without resetting the app.	Отключить папку эмулятора без сброса приложения.
+Unlink all storage units	Отключить все папки
+Unlink all storage?	Отключить все хранилища?
+Unlink storage?	Отключить хранилище?
+Unlink all	Отключить всё
+Unlink	Отключить
+Unlink {0} · {1}	Отключить {0} · {1}
+Removes every linked folder. Your files stay on the device.	Отключить все папки. Файлы останутся на устройстве.
+Every linked emulator folder will be removed from PKForge. Your files stay on the device.	Все папки эмуляторов будут отключены от PKForge. Файлы останутся на устройстве.
+Remove {0} · {1} from PKForge? Your files stay on the device.	Отключить {0} · {1} от PKForge? Файлы останутся на устройстве.
+All linked storage units removed.	Все хранилища отключены.
+No linked storage units.	Нет подключённых хранилищ.
+No storage units linked yet. Open Link and choose your platform and emulator.	Хранилища ещё не подключены. Выбери подключение, платформу и эмулятор.
+Link an emulator's storage to begin.	Для начала подключи папку эмулятора.
+Storage linked.	Хранилище подключено.
+Link cancelled.	Подключение отменено.
+Open cancelled.	Открытие отменено.
+Link {0}	Подключить {0}
+Linking {0}…	Подключение {0}…
+Connecting to {0}…	Подключение к {0}…
+{0} linked	{0} подключено
+{0} unlinked.	{0} отключено.
+Could not connect: {0}	Не удалось подключиться: {0}
+Could not link save: {0}	Не удалось подключить сохранение: {0}
+Could not open save: {0}	Не удалось открыть сохранение: {0}
+Save could not open	Сохранение не открылось
+No save connected.	Сохранение не подключено.
+Open a save first.	Сначала открой сохранение.
+Hidden saves	Скрытые сохранения
+Show hidden saves ({0})	Показать скрытые сохранения ({0})
+Saves you hid from Home. Pick one to show it again.	Сохранения, скрытые с главного экрана. Выбери, чтобы вернуть.
+Pick a save to show it on Home and in save pickers again.	Выбери сохранение для возврата на главный экран и в список выбора.
+Color scheme: {0}	Цветовая тема: {0}
+The app's colors: the default blues or a theme for each type.	Цвета приложения: стандартная синяя тема или тема для каждого типа.
+Box background	Фон боксов
+Box background: {0}	Фон боксов: {0}
+Box background: {0}.	Фон боксов: {0}.
+How each PC box shows the wallpaper the game gives it.	Способ отображения игровых обоев в боксах.
+Restore points	Точки восстановления
+The backups made before each write, to put a save back as it was.	Резервные копии перед каждой записью для возврата к прежнему состоянию.
+Backups made before each change; go back to one.	Копии перед каждым изменением. Выбери нужную для восстановления.
+About PKForge	О PKForge
+Check for update	Проверить обновления
+Play your own audio files in the background.	Воспроизводить свои аудиофайлы в фоне.
+Sprite pack, rescan, logs, screen and editing modes.	Спрайты, поиск игр, журналы, экран и режимы редактирования.
+Quit PKForge	Выйти из PKForge
+Quit PKForge?	Выйти из PKForge?
+Quit	Выйти
+Unsaved edits in open menus are already backed up per write.	Перед записью каждого изменения создаётся резервная копия.
+Rescan games	Найти игры заново
+Look through your linked folders for saves again.	Повторно найти сохранения в подключённых папках.
+Scan report	Отчёт поиска
+Scan report copied	Отчёт поиска скопирован
+What the last scan found in each folder, to copy and send us.	Результаты последнего поиска по папкам. Отчёт можно скопировать.
+No diagnostic scan has run yet. Use Rescan games, then open Scan report again.	Поиск ещё не выполнялся. Запусти поиск игр, затем открой отчёт.
+Share logs	Поделиться журналами
+PKForge logs	Журналы PKForge
+Crash reports and recent activity, to send us when something goes wrong.	Отчёты об ошибках и последних действиях для диагностики.
+Sharing the logs failed	Не удалось отправить журналы
+Sprite pack	Набор спрайтов
+Download full sprite pack	Скачать все спрайты
+Download full sprite pack ({0})	Скачать все спрайты ({0})
+Download the sprite pack	Скачать набор спрайтов
+Download the sprite pack ({0})	Скачать набор спрайтов ({0})
+Animated sprites, HOME pictures and item icons, to use offline.	Анимации, изображения HOME и значки предметов для работы без сети.
+Already downloaded: every sprite is on this device, so it all works offline.	Все спрайты уже загружены и доступны без сети.
+Catching all the sprites!	Собираем все спрайты!
+Sprite pack complete - fully offline now.	Спрайты загружены и доступны без сети.
+Sprite pack paused - resume anytime from Settings.	Загрузка спрайтов приостановлена. Продолжить можно в настройках.
+Sprite pack stopped: {0}	Загрузка спрайтов остановлена: {0}
+Downloading animated battle sprites and HOME renders for every Pokémon. You can cancel anytime; finished parts are kept and it resumes where it left off.	Загрузка анимаций и изображений HOME для всех покемонов. Можно прервать: загруженные части сохранятся.
+Second screen: OFF	Второй экран: ВЫКЛ
+Second screen: ON	Второй экран: ВКЛ
+Second screen off: PKForge stays on this screen.	Второй экран выключен.
+Second screen on, but no second display is available.	Второй экран включён, но дополнительный дисплей недоступен.
+Second screen on.	Второй экран включён.
+Hardcore mode	Режим Hardcore
+Hardcore mode: OFF	Режим Hardcore: ВЫКЛ
+Hardcore mode: ON	Режим Hardcore: ВКЛ
+Hardcore mode is OFF.	Режим Hardcore выключен.
+Turn on hardcore mode?	Включить режим Hardcore?
+ON blocks edits, new Pokémon and copies. Moving Pokémon still works.	Блокирует изменения, создание и копирование. Перемещение остаётся доступным.
+HaX mode: OFF	Режим HaX: ВЫКЛ
+HaX mode: ON	Режим HaX: ВКЛ
+HaX mode is OFF.	Режим HaX выключен.
+HaX mode is ON.	Режим HaX включён.
+Turn on hax mode?	Включить режим HaX?
+Turn on	Включить
+ON lets pickers offer any option, even illegal ones.	Разрешает любые значения, в том числе нелегальные.
+Use at your own risk: mons edited this way will show as illegal.	Такие изменения могут сделать покемонов нелегальными.
+Restore points are still made. Change this later from Home.	Точки восстановления сохраняются. Режим можно изменить на главном экране.
+Generated Pokémon obey trainer:	Созданные покемоны слушаются тренера:
+Generated Pokémon obey trainer: OFF	Подчинение тренеру: ВЫКЛ
+Generated Pokémon obey trainer: ON	Подчинение тренеру: ВКЛ
+ON makes Pokémon you create belong to the open save's trainer.	Созданные покемоны будут принадлежать тренеру из открытого сохранения.
+Generated Pokémon will be owned by the open save's trainer.	Созданные покемоны будут принадлежать тренеру из открытого сохранения.
+Generated Pokémon may use Auto-Legality trainer data.	При создании могут использоваться данные тренера Auto-Legality.
+Bank	Банк
+Poképark	Покепарк
+Events	События
+Event database	База событий
+Event gallery	Галерея событий
+Mystery Gift	Таинственный подарок
+Wonder cards	Карточки подарков
+Every Mystery Gift this save can receive.	Все подарки, доступные этому сохранению.
+In-save inbox	Подарки в сохранении
+The Mystery Gift cards stored in this save, view only.	Карточки подарков в этом сохранении, только просмотр.
+Mystery Gift events and the gift cards stored in this save.	События Mystery Gift и карточки подарков в сохранении.
+Found inside each game: open a game, press Y, then Wonder cards.	Открой игру, нажми Y и выбери карточки подарков.
+Community boxes	Боксы сообщества
+Community boxes ({0})	Боксы сообщества ({0})
+Event Pokémon collections shared online, to put in your Bank.	Коллекции событийных покемонов для добавления в банк.
+Dex Autopilot	Автопилот покедекса
+Collection dex…	Коллекционный покедекс…
+Pokédex	Покедекс
+Generate Living Dex	Создать живой покедекс
+Generate living dex?	Создать живой покедекс?
+Living dex tracker for the Bank and this save, normal and shiny.	Учёт обычных и шайни покемонов в банке и сохранении.
+Filling the living dex…	Заполнение живого покедекса…
+Bag	Сумка
+Bag & items	Сумка и предметы
+Trainer card	Карточка тренера
+Trainer card updated.	Карточка тренера обновлена.
+Trainer records	Рекорды тренера
+Trainer profiles	Профили тренера
+Trainer profiles…	Профили тренера…
+Trainers	Тренеры
+Save current trainer as profile	Сохранить тренера в профиль
+Profile name	Имя профиля
+Delete a profile	Удалить профиль
+Delete profile?	Удалить профиль?
+APPLY TRAINER PROFILE	ПРИМЕНИТЬ ПРОФИЛЬ ТРЕНЕРА
+DELETE PROFILE	УДАЛИТЬ ПРОФИЛЬ
+Save trainer details and give them to Pokémon as their original trainer.	Сохранить данные тренера и назначать его исходным тренером покемонов.
+No named profiles yet.	Профилей пока нет.
+Trainer profile '{0}' saved.	Профиль тренера «{0}» сохранён.
+Save data	Данные сохранения
+Save blocks	Блоки сохранения
+Event flags	Флаги событий
+World & events	Мир и события
+Clocks, roaming Pokémon, one-time encounters and other world data.	Часы, бродячие покемоны, разовые встречи и другие данные мира.
+Key item events	События ключевых предметов
+Honey trees	Медовые деревья
+Day Care / Nursery	Пансион / Питомник
+Grand Underground	Великое подземелье
+Fashion	Одежда
+Cosmetics	Внешность
+Byte manipulation	Редактор байтов
+Browse save blocks and edit simple on/off and number values.	Просмотр блоков сохранения, изменение переключателей и чисел.
+Edit the save file's raw bytes. Written once, when you close.	Изменение байтов сохранения. Запись при закрытии редактора.
+Close save	Закрыть сохранение
+Export modified save	Экспорт сохранения
+Share a copy of the edited save file.	Экспорт копии изменённого сохранения.
+Save export failed: {0}	Ошибка экспорта сохранения: {0}
+Party	Команда
+PARTY	КОМАНДА
+Party {0}	Команда {0}
+Box	Бокс
+Boxes	Боксы
+Box {0}	Бокс {0}
+BOX {0}	БОКС {0}
+Box {0} · slot {1}	Бокс {0} · ячейка {1}
+Box {0}, Slot {1}	Бокс {0}, ячейка {1}
+This box	Этот бокс
+All boxes	Все боксы
+All unlocked boxes	Все открытые боксы
+Which boxes?	Какие боксы?
+Box actions	Действия с боксом
+Box actions · {0}	Действия с боксом · {0}
+Box manager…	Управление боксами…
+Box manager - {0} boxes selected	Управление боксами — выбрано: {0}
+Box manager - {0} box(es) selected	Управление боксами — выбрано: {0}
+BOX MANAGER - no boxes selected	БОКСЫ — НИЧЕГО НЕ ВЫБРАНО
+Reorder, copy, lock or empty whole boxes.	Перестановка, копирование, защита и очистка боксов.
+Select box	Выбрать бокс
+Select all boxes	Выбрать все боксы
+Mark all boxes	Отметить все боксы
+Unmark box	Снять отметку бокса
+Unmark this box	Снять отметки в боксе
+Unmark the party	Снять отметки команды
+Clear box marks	Снять отметки боксов
+Clear marks	Снять отметки
+Hold box	Взять бокс
+Drop box	Поставить бокс
+Copy boxes	Копировать боксы
+Copy box(es)…	Копировать боксы…
+Lock / Unlock box(es)	Защита боксов
+Empty selected boxes	Очистить выбранные боксы
+Empty selected boxes?	Очистить выбранные боксы?
+Empty all boxes	Очистить все боксы
+Empty every box?	Очистить все боксы?
+Empty all	Очистить всё
+Delete selected boxes?	Удалить выбранные боксы?
+Delete box(es) (rescue Pokémon)	Удалить боксы (с переносом покемонов)
+Replace destination boxes?	Заменить боксы назначения?
+Select Pokémon in these boxes	Выделить покемонов в боксах
+Select every box for the actions in this menu.	Выбрать все боксы для действий этого меню.
+Box is already first	Бокс уже первый
+Box is already last	Бокс уже последний
+This box is empty	Этот бокс пуст
+This box is empty.	Этот бокс пуст.
+This box is locked	Этот бокс защищён
+Every box is locked	Все боксы защищены
+Every marked box is locked	Все отмеченные боксы защищены
+Locked boxes are skipped by sorting, batch edits and emptying.	Защищённые боксы пропускаются при сортировке, массовом изменении и очистке.
+Box {0} swapped with box {1}.	Бокс {0} поменян с боксом {1}.
+{0} selected boxes	Выбрано боксов: {0}
+{0} unlocked boxes	Открытых боксов: {0}
+Emptied {0} box(es).	Очищено боксов: {0}.
+All storage boxes emptied.	Все боксы очищены.
+Select a Pokémon	Выбери покемона
+Add a Pokémon · slot {0}	Добавить покемона · ячейка {0}
+Create a Pokémon	Создать покемона
+Pick a species…	Выбери вид…
+Pick a species and details; it is built legal for this game.	Выбери вид и параметры. Покемон будет создан легальным для этой игры.
+Empty slot.	Пустая ячейка.
+Tap an empty slot to add one	Нажми пустую ячейку для добавления
+Summary	Сводка
+Stats	Характеристики
+Species	Вид
+SPECIES	ВИД
+Nickname	Имя покемона
+NICKNAME	ИМЯ ПОКЕМОНА
+Level	Уровень
+LEVEL	УРОВЕНЬ
+Nature	Характер
+NATURE	ХАРАКТЕР
+Ability	Способность
+ABILITY	СПОСОБНОСТЬ
+Held item	Предмет
+HELD ITEM	ПРЕДМЕТ
+Gender	Пол
+GENDER	ПОЛ
+Male	Самец
+Female	Самка
+Genderless	Бесполый
+Friendship	Дружба
+FRIENDSHIP	ДРУЖБА
+Form & shiny	Форма и шайни
+FORM & SHINY	ФОРМА И ШАЙНИ
+Form & shiny updated	Форма и шайни обновлены
+Shiny	Шайни
+Shiny first	Сначала шайни
+Potential	Потенциал
+POTENTIAL	ПОТЕНЦИАЛ
+Potential updated	Потенциал обновлён
+Met / origin	Встреча / происхождение
+MET / ORIGIN	ВСТРЕЧА / ПРОИСХОЖДЕНИЕ
+Met / origin updated	Данные встречи обновлены
+Awards	Награды
+AWARDS	НАГРАДЫ
+Awards updated	Награды обновлены
+Trainers updated	Тренеры обновлены
+Cosmetics updated	Внешность обновлена
+Move details	Параметры приёмов
+MOVE DETAILS	ПАРАМЕТРЫ ПРИЁМОВ
+Move details updated	Параметры приёмов обновлены
+MOVE 1	ПРИЁМ 1
+MOVE 2	ПРИЁМ 2
+MOVE 3	ПРИЁМ 3
+MOVE 4	ПРИЁМ 4
+MOVE {0}	ПРИЁМ {0}
+Move shop	Магазин приёмов
+MOVE SHOP	МАГАЗИН ПРИЁМОВ
+Move Shop updated	Магазин приёмов обновлён
+Tech records	Технические записи
+TECH RECORDS	ТЕХНИЧЕСКИЕ ЗАПИСИ
+Tech records updated	Технические записи обновлены
+Ribbon album	Альбом лент
+RIBBON ALBUM	АЛЬБОМ ЛЕНТ
+Ribbon album updated	Альбом лент обновлён
+Award all obtainable	Выдать все доступные
+Toggle ribbon	Переключить ленту
+Legality	Легальность
+LEGALITY	ЛЕГАЛЬНОСТЬ
+Legality check	Проверка легальности
+Checking legality…	Проверка легальности…
+Legalize	Исправить легальность
+LEGALIZE	ИСПРАВИТЬ
+Legalize all	Исправить всех
+Legalize all illegal	Исправить всех нелегальных
+Legalize all illegal?	Исправить всех нелегальных?
+Legalize this one	Исправить этого покемона
+Legalizing…	Исправление легальности…
+Legalizer unavailable.	Исправление легальности недоступно.
+Illegal.	Нелегален.
+Illegality report	Отчёт о нелегальности
+Explain legality	Объяснить легальность
+Why this Pokémon is flagged, with fixes when there are any.	Причины нелегальности и возможные исправления.
+No legality details were reported.	Подробности проверки отсутствуют.
+Nothing else is flagged.	Других замечаний нет.
+Checking…	Проверка…
+Applying…	Применение…
+Applying edit…	Применение изменений…
+Validating, backing up, writing…	Проверка, резервное копирование, запись…
+Nothing to save.	Нет изменений для сохранения.
+Nothing changed - no write, no restore point.	Изменений нет. Запись и резервная копия не требуются.
+Write failed - see status	Ошибка записи — см. сообщение
+WRITE FAILED - SEE STATUS	ОШИБКА ЗАПИСИ — СМ. СООБЩЕНИЕ
+Write aborted: {0}	Запись отменена: {0}
+Edit aborted ({0})	Изменение отменено ({0})
+Saved. Restore point {0} · {1}…	Сохранено. Точка восстановления {0} · {1}…
+Your edit is saved now. A restore point is made first. Change this later from Home.	Изменения сохранены. Предварительно создана точка восстановления.
+The current state stays available as a restore point.	Текущее состояние останется доступным в точке восстановления.
+One write, one restore point.	Одна запись — одна точка восстановления.
+Every action is one backed-up write.	Перед каждым действием создаётся резервная копия.
+Still busy	Операция выполняется
+PKForge is still busy with {0}. Try again in a moment; if it stays stuck, close and reopen PKForge.	PKForge выполняет операцию «{0}». Подожди; если она зависла, перезапусти приложение.
+Cancelled	Отменено
+Aborted: {0}	Отменено: {0}
+Move	Переместить
+Move mode	Режим перемещения
+Back to move mode	Назад к перемещению
+Pick it up and carry it to another slot.	Взять и перенести в другую ячейку.
+Grab	Взять
+Duplicate	Дублировать
+Duplicate failed	Не удалось дублировать
+Release	Выпустить
+Release?	Выпустить?
+Release all	Выпустить всех
+Release selection?	Выпустить выбранных?
+Release to the Wilds	Выпустить на волю
+Send to Bank	Отправить в банк
+Move to Bank	Переместить в банк
+Copy to Bank	Копировать в банк
+Send to Poképark	Отправить в Покепарк
+Send to another game…	Отправить в другую игру…
+Send to game	Отправить в игру
+Move to another game…	Переместить в другую игру…
+Copy to another game…	Копировать в другую игру…
+Move to box…	Переместить в бокс…
+Move to which box?	В какой бокс переместить?
+No other games linked. Link another emulator or save on Home.	Других игр нет. Подключи ещё один эмулятор или сохранение.
+Export .pk file	Экспорт файла .pk
+Export .PK	Экспорт .PK
+EXPORT .PK	ЭКСПОРТ .PK
+Export (.pk files)	Экспорт файлов .pk
+Import .pk file	Импорт файла .pk
+Import .pk files	Импорт файлов .pk
+Show as .pk QR	Показать .pk QR
+Show as QR code	Показать QR-код
+Show as Showdown set	Показать набор Showdown
+Share as file	Поделиться файлом
+Showdown set	Набор Showdown
+Showdown team	Команда Showdown
+Showdown set · QR	Набор Showdown · QR
+Import Showdown sets	Импорт наборов Showdown
+Import Showdown team	Импорт команды Showdown
+Import Showdown sets to this box	Импорт Showdown в этот бокс
+Paste a Showdown set	Вставить набор Showdown
+Paste the set exactly as exported from Pokémon Showdown.	Вставь набор в формате экспорта Pokémon Showdown.
+Reading the set…	Чтение набора…
+Export box (Showdown)	Экспорт бокса (Showdown)
+Export box to Showdown	Экспорт бокса в Showdown
+Box as Showdown team	Бокс как команда Showdown
+Box copied as Showdown text.	Бокс скопирован в формате Showdown.
+Set copied to clipboard.	Набор скопирован в буфер.
+Into the party	В команду
+Into first empty box slots	В первые свободные ячейки
+Multi-select	Множественный выбор
+Multi-select (- button)	Множественный выбор (кнопка −)
+Marked Pokémon ({0})	Отмеченные покемоны ({0})
+Selected Pokémon ({0})	Выбранные покемоны ({0})
+{0} selected Pokémon	Выбрано покемонов: {0}
+Multi-select · {0} marked	Множественный выбор · отмечено: {0}
+Multi-select - {0} marked	Множественный выбор — отмечено: {0}
+Select all in this box	Выбрать всех в боксе
+Select all in the party	Выбрать всю команду
+Leave multi-select.	Завершить множественный выбор.
+Mark several Pokémon to move, copy or edit them together.	Отметить несколько покемонов для общих действий.
+Lock / Unlock release	Защита от выпуска
+Unlock	Снять защиту
+LOCK	ЗАЩИТА
+A locked Pokémon cannot be released.	Защищённого покемона нельзя выпустить.
+Mon locked - release blocked	Покемон защищён от выпуска
+Mon unlocked	Защита покемона снята
+Batch editor	Массовый редактор
+Batch rename / OT…	Имена и исходный тренер…
+Battle prep	Подготовка к бою
+Storage tools	Инструменты хранилища
+RNG / IVs	RNG / IV
+Pick a nature	Выбери характер
+Reroll nature (keeps shiny)	Сменить характер (сохранить шайни)
+Nature rerolled; shiny state kept.	Характер изменён, статус шайни сохранён.
+Could not find a matching PID. Try again.	Подходящий PID не найден. Попробуй ещё раз.
+Edit IVs	Изменить IV
+Edit EVs	Изменить EV
+Edit DVs	Изменить DV
+Edit stat experience	Изменить опыт характеристик
+IV ranking	Рейтинг IV
+IV ranking…	Рейтинг IV…
+Highest IVs first	Сначала лучшие IV
+Lowest IVs first	Сначала худшие IV
+Heal	Вылечить
+Heal party	Вылечить команду
+Heal all (party + boxes)	Вылечить команду и боксы
+Heal + PP Max	Лечение + максимум PP
+PP Max all moves	Максимум PP всех приёмов
+Set all to Lv100	Всем уровень 100
+Set party to Lv50 (flat rules)	Команде уровень 50
+Reset EVs	Сбросить EV
+Reset EVs (all zero)	Обнулить все EV
+Max friendship	Максимум дружбы
+Hyper Train everything	Гипертренировка всех
+Remove held items	Убрать предметы
+Reset nicknames	Сбросить имена
+Reset nicknames to species names	Заменить имена названиями видов
+Nicknames → species names	Имена → названия видов
+Make mine	Сделать своим
+MAKE MINE	СДЕЛАТЬ СВОИМ
+Set OT to mine (adopt my trainer ID)	Назначить моего тренера исходным
+Sort boxes…	Сортировать боксы…
+Sort now?	Сортировать сейчас?
+Dex number	Номер покедекса
+Level (strongest first)	Уровень (сначала сильные)
+IV total (best first)	Сумма IV (сначала лучшие)
+Alphabetical	По алфавиту
+Alphabetical (A-Z)	По алфавиту (A–Z)
+Age (oldest first)	Возраст (сначала старшие)
+Type	Тип
+Normal order	Обычный порядок
+Reversed	Обратный порядок
+Which direction?	В каком порядке?
+Egg factory	Фабрика яиц
+Egg factory…	Фабрика яиц…
+Shiny eggs?	Яйца с шайни?
+Yes, shiny	Да, шайни
+Generating eggs…	Создание яиц…
+Generating team…	Создание команды…
+Random team…	Случайная команда…
+Team size	Размер команды
+Roll this team?	Создать эту команду?
+No restrictions	Без ограничений
+No legendaries	Без легендарных
+No duplicates	Без повторов
+No legendaries, no duplicates	Без легендарных и повторов
+Item presets	Наборы предметов
+My item presets	Мои наборы предметов
+Presets	Наборы
+Presets…	Наборы…
+Apply preset	Применить набор
+Apply preset?	Применить набор?
+Apply item preset?	Применить набор предметов?
+Save current bag as preset	Сохранить сумку как набор
+Preset name	Название набора
+Name your bag preset (60 characters max)	Название набора (до 60 символов)
+Rename preset	Переименовать набор
+Delete preset?	Удалить набор?
+Update from current bag	Обновить из текущей сумки
+Update preset?	Обновить набор?
+Add item	Добавить предмет
++  Add item	+  Добавить предмет
+Pouch	Карман
+Empty this pouch?	Очистить этот карман?
+Refill this pouch to 99	Пополнить этот карман до 99
+Remove every item in this pouch	Удалить все предметы из кармана
+No compatible items	Нет совместимых предметов
+No compatible items for this preset	Нет совместимых предметов для набора
+Preset applied - {0} items	Набор применён — предметов: {0}
+Preset saved - {0} items	Набор сохранён — предметов: {0}
+Preset failed - see status	Ошибка набора — см. сообщение
+Item preset error	Ошибка набора предметов
+No compatible items to save in a preset	Нет предметов для сохранения в набор
+Item quantity saved to file - restart the game to load it	Количество записано в файл — перезапусти игру
+{0} - quantity	{0} — количество
+Audit report	Отчёт аудита
+Auditing…	Аудит…
+Audit cancelled.	Аудит отменён.
+Audit: no clones, no impossible values	Аудит: клонов и недопустимых значений нет
+Nuzlocke report	Отчёт Nuzlocke
+How to get a Pokémon…	Где найти покемона…
+How to obtain a species in the game you are editing.	Способы получения вида в текущей игре.
+Find held item	Найти предмет у покемонов
+Find held item…	Найти предмет у покемонов…
+Filter games	Фильтр игр
+No data	Нет данных
+NO DATA	НЕТ ДАННЫХ
+Thank you for playing!	Спасибо за игру!
+and its Poképark	и его Покепарк
+Up and Down to scroll  ·  B to close	Вверх / Вниз — прокрутка · B — закрыть
+Actions	Действия
+Actions ({0})	Действия ({0})
+Add to bank	Добавить в банк
+Adds Pokémon from .pk files you pick.	Добавить покемонов из выбранных файлов .pk.
+Bank actions · {0}	Действия банка · {0}
+Bank · Box {0}	Банк · Бокс {0}
+Bank · Box {0} · slot {1}	Банк · Бокс {0} · ячейка {1}
+An empty space · {0} / {1} in this box	Пустая ячейка · {0} / {1} в боксе
+An exact copy goes into the first free bank slot.	Точная копия попадёт в первую свободную ячейку банка.
+Copy to game…	Копировать в игру…
+Send to a game…	Отправить в игру…
+Send to game…	Отправить в игру…
+Moves it into a game's boxes and out of the bank.	Переместить из банка в боксы игры.
+Puts a copy in a game's boxes; this one stays in the bank.	Копия попадёт в боксы игры, оригинал останется в банке.
+Release from bank	Удалить из банка
+Release from bank?	Удалить из банка?
+Release from bank…	Удалить из банка…
+Release from the bank?	Удалить из банка?
+Removes it from the bank for good; there is no undo.	Безвозвратно удалить из банка. Отменить это действие нельзя.
+Removes them from the bank for good; there is no undo.	Безвозвратно удалить из банка. Отменить это действие нельзя.
+Release {0}? Bank releases are permanent (the bank has no restore points yet).	Удалить {0}? Удаление из банка необратимо: точек восстановления банка пока нет.
+Release all {0} selected Pokémon? Bank releases are permanent (the bank has no restore points yet).	Удалить всех выбранных покемонов ({0})? Это необратимо: точек восстановления банка пока нет.
+Released {0} Pokémon from the bank.	Из банка удалено покемонов: {0}.
+No recognizable Pokémon in that folder.	В этой папке не найдены файлы покемонов.
+No games linked. Link an emulator on Home first.	Игры не подключены. Сначала подключи эмулятор на главном экране.
+No empty slot in the connected game.	В подключённой игре нет свободной ячейки.
+Export .pk files	Экспорт файлов .pk
+Folder of .pk files	Папка файлов .pk
+Export archive	Экспорт архива
+Export PKSM bank	Экспорт банка PKSM
+Export as a PKSM bank	Экспортировать как банк PKSM
+PKSM bank, dumps zip or .pk files	Банк PKSM, архив выгрузки или файлы .pk
+One .pk file per Pokémon, readable by PKHeX and PKForge.	Отдельный файл .pk для каждого покемона, совместимый с PKHeX и PKForge.
+One bank file to copy back to PKSM on your 3DS.	Один файл банка для переноса в PKSM на 3DS.
+A folder of .pk files plus a manifest — readable by PKHeX and PKForge alike.	Папка файлов .pk с описанием, совместимая с PKHeX и PKForge.
+A .pk folder is read by PKHeX and PKForge; a PKSM bank goes back to your 3DS.	Папка .pk открывается в PKHeX и PKForge; банк PKSM можно вернуть на 3DS.
+Writes one .pk file each into a folder you pick.	Записать каждого покемона отдельным файлом .pk в выбранную папку.
+Import from folder?	Импортировать из папки?
+Import cancelled.	Импорт отменён.
+Import failed: {0}	Ошибка импорта: {0}
+Export failed: {0}	Ошибка экспорта: {0}
+Reading the archive…	Чтение архива…
+Packing the archive…	Подготовка архива…
+Nothing to export — the bank is empty.	Экспортировать нечего — банк пуст.
+Nothing to export — this box is empty.	Экспортировать нечего — бокс пуст.
+Deposited {0} Pokémon into the bank.	В банк добавлено покемонов: {0}.
+Archive written: {0} Pokémon from {1} → {2}.	Архив записан: покемонов {0}, из {1} → {2}.
+Compact the bank (close gaps)	Уплотнить банк (убрать пустые ячейки)
+Compact	Уплотнить
+Sort the whole bank	Сортировать весь банк
+Sort the whole bank…	Сортировать весь банк…
+Whole bank	Весь банк
+Mark the whole bank	Отметить весь банк
+Mark everything in this box	Отметить весь бокс
+Mark range to here	Отметить диапазон до этой ячейки
+Mark by filter…	Отметить по фильтру…
+Invert marks in this box	Инвертировать отметки бокса
+Clear all filters	Сбросить все фильтры
+Search a Pokémon…	Поиск покемона…
+Search the bank and mark what matches.	Найти в банке и отметить совпадения.
+Move (carry)	Переместить (взять)
+Move to a position…	Переместить на позицию…
+Move to another box…	Переместить в другой бокс…
+Pick it up and drop it in another slot.	Взять и поместить в другую ячейку.
+Rename box…	Переименовать бокс…
+Rename box {0}	Переименовать бокс {0}
+Rename box {0}…	Переименовать бокс {0}…
+Sort box {0}	Сортировать бокс {0}
+Sort box {0}…	Сортировать бокс {0}…
+Delete box {0}…	Удалить бокс {0}…
+Box wallpaper…	Обои бокса…
+Wallpaper for box {0}…	Обои бокса {0}…
+Box {0} is now "{1}".	Бокс {0} теперь называется «{1}».
+Box {0} shows its number again.	Название бокса {0} сброшено.
+Box deleted.	Бокс удалён.
+Box deleted; its {0} Pokémon moved to free spaces.	Бокс удалён; покемоны ({0}) перенесены в свободные ячейки.
+Boxes…	Боксы…
+Box {0} / {1}	Бокс {0} / {1}
+Slot {0}	Ячейка {0}
+Slot {0} · empty	Ячейка {0} · пусто
+Slot {0} · {1}	Ячейка {0} · {1}
+Slot {0} · {1} · Lv. {2}{3}	Ячейка {0} · {1} · ур. {2}{3}
+Nothing selected	Ничего не выбрано
+Nothing to mark in an empty slot.	В пустой ячейке нечего отмечать.
+Nothing to summarize in an empty slot.	В пустой ячейке нет данных.
+Nothing to sort there yet.	Сортировать пока нечего.
+Nothing moved: box {0} is full.	Ничего не перемещено: бокс {0} заполнен.
+No room in box {0} from slot {1}.	В боксе {0} нет места начиная с ячейки {1}.
+Empty slot	Пустая ячейка
+This slot is empty.	Эта ячейка пуста.
+This box only	Только этот бокс
+No changes.	Изменений нет.
+Change	Изменить
+Any	Любой
+Generation	Поколение
+Gen {0}	Поколение {0}
+Generation I	Поколение I
+Generation II	Поколение II
+Generation III	Поколение III
+Generation IV	Поколение IV
+Generation V	Поколение V
+Generation VI	Поколение VI
+Generation VII	Поколение VII
+Generation VIII	Поколение VIII
+Generation IX	Поколение IX
+Types	Типы
+Category	Категория
+Category: {0}	Категория: {0}
+Power	Сила
+Power: {0}	Сила: {0}
+Theme	Тема
+Theme: {0}	Тема: {0}
+FILTER BY TYPE (toggle)	ФИЛЬТР ПО ТИПУ (переключение)
+Bug	Насекомый
+Dark	Тёмный
+Dragon	Драконий
+Electric	Электрический
+Fairy	Волшебный
+Fighting	Боевой
+Fire	Огненный
+Flying	Летающий
+Ghost	Призрачный
+Grass	Травяной
+Ground	Земляной
+Ice	Ледяной
+Normal	Обычный
+Poison	Ядовитый
+Psychic	Психический
+Rock	Каменный
+Steel	Стальной
+Water	Водный
+Legendary	Легендарные
+Mythical	Мифические
+Ultra Beast	Ультрачудовища
+Paradox	Парадоксы
+Starter	Стартовые
+Fossil	Ископаемые
+Baby	Малыши
+Pseudo-Legendary	Псевдолегендарные
+Regional Form	Региональная форма
+Has Alternate Forms	Есть другие формы
+Gigantamax-capable	Способные к гигантамаксу
+Mega-capable	Способные к мегаэволюции
+Physical Attacker	Физические атакующие
+Special Attacker	Специальные атакующие
+Birds	Птицы
+Dragons	Драконы
+Dinosaurs	Динозавры
+Canines	Псовые
+Felines	Кошачьи
+Aquatic	Водные обитатели
+Build a legal Pokémon step by step.	Пошаговое создание легального покемона.
+Create for which game era?	Для какого поколения создать?
+Creating for the bank…	Создание для банка…
+A read-only look at this Pokémon.	Просмотр покемона без изменений.
+Pokémon information	Данные покемона
+Info	Информация
+Moves	Приёмы
+Move {0}	Приём {0}
+Move {0} · {1}	Приём {0} · {1}
+Move 1 · {0}	Приём 1 · {0}
+Move 2 · {0}	Приём 2 · {0}
+Move 3 · {0}	Приём 3 · {0}
+Move 4 · {0}	Приём 4 · {0}
+Ball	Покебол
+Form	Форма
+Form · {0}	Форма · {0}
+Ability slot	Слот способности
+Ability slot (capsule / patch)	Слот способности (капсула / патч)
+Ability slot · {0}	Слот способности · {0}
+Stat nature (mint)	Характер характеристик (мята)
+Stat nature (mint) · {0}	Характер характеристик · {0}
+The nature its stats follow; its real nature stays the same.	Определяет характеристики, не меняя исходный характер.
+Tera type	Тера-тип
+Tera type · {0}{1}	Тера-тип · {0}{1}
+The type it turns into when it Terastallizes.	Тип покемона после терасталлизации.
+This Pokémon's Tera Type is fixed by its form and cannot be changed.	Тера-тип задан формой этого покемона и не изменяется.
+Hyper Training	Гипертренировка
+Hyper training	Гипертренировка
+Hyper Training · {0}/6	Гипертренировка · {0}/6
+Bottle Cap training: a stat acts as if its IV were perfect.	Тренировка крышками: характеристика считается имеющей идеальный IV.
+Dynamax level	Уровень динамакса
+Dynamax level · {0}/10	Уровень динамакса · {0}/10
+Gigantamax	Гигантамакс
+Gigantamax factor · {0}	Фактор гигантамакса · {0}
+Alpha · {0}	Альфа · {0}
+Favorite	Избранный
+Favorite · {0}	Избранный · {0}
+Sociability	Общительность
+Sociability · {0}	Общительность · {0}
+Height	Рост
+Weight	Вес
+Size	Размер
+Height scalar · {0}/255	Масштаб роста · {0}/255
+Weight scalar · {0}/255	Масштаб веса · {0}/255
+Scale · {0}/255	Масштаб размера · {0}/255
+The hidden values behind its height, weight or size.	Внутренние значения роста, веса и размера.
+Box markings	Отметки в боксе
+Box markings · {0}/{1}	Отметки в боксе · {0}/{1}
+The circle, heart and other symbols shown in the box.	Круг, сердце и другие символы в боксе.
+Contest stats	Конкурсные показатели
+Contest stats · {0}/1530	Конкурсные показатели · {0}/1530
+Cool	Крутость
+Beauty	Красота
+Cute	Миловидность
+Smart	Ум
+Tough	Крепость
+Sheen	Блеск
+Care	Уход
+Fullness	Сытость
+Fullness · {0}/255	Сытость · {0}/255
+Enjoyment · {0}/255	Удовольствие · {0}/255
+Affection, fullness and enjoyment.	Привязанность, сытость и удовольствие.
+Awakening Values	Пробуждение (AV)
+Awakening values	Пробуждение (AV)
+Awakening Values · {0}/1200	Пробуждение (AV) · {0}/1200
+Grit Effort Levels	Уровни усилий (EL)
+Grit effort levels	Уровни усилий (EL)
+Grit Effort Levels · {0}/{1}	Уровни усилий (EL) · {0}/{1}
+Stat exp	Опыт характеристик
+IV rank	Рейтинг IV
+Max IV	Максимум IV
+Max DV	Максимум DV
+Max all	Максимум всем
+Total	Всего
+Total {0}	Всего {0}
+Total {0}/510	Всего {0}/510
+Original trainer	Исходный тренер
+Its original trainer	Исходный тренер
+Handling trainer	Текущий тренер
+Current trainer	Текущий тренер
+Current trainer · {0} · {1}/{2}	Текущий тренер · {0} · {1}/{2}
+Trainer	Тренер
+Trainer ID	ID тренера
+Trainer ID (TID)	ID тренера (TID)
+Trainer ID · {0}	ID тренера · {0}
+Secret ID	Секретный ID
+Secret ID (SID)	Секретный ID (SID)
+Secret ID · {0}	Секретный ID · {0}
+Language	Язык
+Language · {0}	Язык · {0}
+OT gender	Пол исходного тренера
+OT gender · {0}	Пол исходного тренера · {0}
+OT friendship	Дружба с исходным тренером
+OT friendship · {0}	Дружба с исходным тренером · {0}
+OT affection · {0}/255	Привязанность к исходному тренеру · {0}/255
+OT memory	Память об исходном тренере
+Handler	Текущий владелец
+Handler · {0}	Владелец · {0}
+Handler gender	Пол текущего тренера
+Handler gender · {0}	Пол текущего тренера · {0}
+Handler language	Язык текущего тренера
+Handler language · {0}	Язык текущего тренера · {0}
+Handler friendship	Дружба с текущим тренером
+Handler friendship · {0}	Дружба с текущим тренером · {0}
+Handler affection · {0}/255	Привязанность к текущему тренеру · {0}/255
+Handler memory	Память о текущем тренере
+Friendship toward its original trainer.	Дружба с исходным тренером.
+Friendship toward the trainer it was traded to.	Дружба с тренером после обмена.
+Affection toward its original trainer.	Привязанность к исходному тренеру.
+Affection toward the trainer it was traded to.	Привязанность к тренеру после обмена.
+The OT name shown on this Pokémon.	Имя исходного тренера, записанное у покемона.
+The gender of its original trainer.	Пол исходного тренера.
+Origin game	Игра происхождения
+Origin game · {0}	Игра происхождения · {0}
+Met location	Место встречи
+Met location · {0}	Место встречи · {0}
+Met level	Уровень при встрече
+Met level · {0}	Уровень при встрече · {0}
+Met date	Дата встречи
+Met date · {0}	Дата встречи · {0}
+Egg location	Место получения яйца
+Egg location · {0}	Место получения яйца · {0}
+Egg date	Дата получения яйца
+Egg date · {0}	Дата получения яйца · {0}
+Hatched from egg	Вылупился из яйца
+Hatched from egg · {0}	Вылупился из яйца · {0}
+Fateful	Судьбоносная встреча
+Fateful encounter · {0}	Судьбоносная встреча · {0}
+Encryption constant	Константа шифрования
+Encryption constant · {0}	Константа шифрования · {0}
+A hidden number the game uses to encrypt its data.	Внутреннее число, используемое для шифрования данных.
+Its personality value, which decides whether it is shiny.	Значение личности, влияющее на статус шайни.
+Edit PID	Изменить PID
+Reroll PID and IVs	Перегенерировать PID и IV
+Reroll until shiny (legal)	Генерировать до шайни (легально)
+New random PID and IVs, made the way the game makes them.	Случайные PID и IV по алгоритму игры.
+Enter up to 8 hexadecimal digits (0-9, A-F).	Введи до 8 шестнадцатеричных цифр (0–9, A–F).
+Type a date as YYYY-MM-DD, or 'clear' to unset.	Введи дату ГГГГ-ММ-ДД или «clear» для очистки.
+Up to {0} characters	До {0} символов
+Names are at most {0} characters in this format.	В этом формате имя может содержать до {0} символов.
+Up to 24 characters · empty for its number	До 24 символов · пусто — номер бокса
+Current PP left	Оставшиеся PP
+PP Ups · {0}/3	Усиления PP · {0}/3
+PP Ups	Усиления PP
+PP ups	Усиления PP
+PP UPS	УСИЛЕНИЯ PP
+Restore PP	Восстановить PP
+Max PP {0}	Максимум PP {0}
+Max PP {0} (current)	Максимум PP {0} (текущий)
+Max PP {0} → {1}	Максимум PP {0} → {1}
+Choose a move first, then set its PP or PP Ups here.	Сначала выбери приём, затем настрой PP и их усиления.
+Relearn moves	Приёмы для вспоминания
+Relearn moves · {0}/4	Приёмы для вспоминания · {0}/4
+Relearn slot {0}	Ячейка вспоминания {0}
+Suggest ball	Подобрать покебол
+Suggest egg data	Подобрать данные яйца
+Suggest met data	Подобрать данные встречи
+Suggest moves	Подобрать приёмы
+Suggest relearn moves	Подобрать приёмы для вспоминания
+Which move?	Какой приём?
+All relearn slots legal	Все приёмы вспоминания легальны
+Every record this species or its evolutions can learn	Все записи, доступные этому виду или его эволюциям
+Learned	Изучено
+Learnable	Доступно
+Not learnable by this species	Недоступно этому виду
+Give all learnable records	Выдать все доступные записи
+Clear all records	Очистить все записи
+Purchased	Куплено
+PURCHASED	КУПЛЕНО
+NOT PURCHASED	НЕ КУПЛЕНО
+Purchased · {0}	Куплено · {0}
+Mastered	Освоено
+MASTERED	ОСВОЕНО
+NOT MASTERED	НЕ ОСВОЕНО
+Mastered · {0}	Освоено · {0}
+Train all	Обучить всему
+Ribbons	Ленты
+Ribbons & marks	Ленты и метки
+Ribbons · {0}/{1}	Ленты · {0}/{1}
+Title	Титул
+Title · {0}	Титул · {0}
+Select title	Выбрать титул
+The ribbons and marks it has earned.	Полученные ленты и метки.
+The ribbon or mark shown as a title with its name.	Лента или метка, отображаемая как титул рядом с именем.
+Cure	Вылечить
+Infect	Заразить
+Clear / susceptible	Не заражён / восприимчив
+No Pokérus at all; it can catch it again.	Покеруса нет; покемон может заразиться.
+It carries Pokérus and can spread it.	Носит покерус и может его распространять.
+It stops spreading Pokérus and can't catch it again.	Больше не распространяет покерус и не может заразиться снова.
+A rare virus that doubles the effort values it earns in battle.	Редкий вирус, удваивающий получаемые в бою EV.
+Evolution	Эволюция
+Evolution failed	Эволюция не удалась
+Evolve	Эволюционировать
+Evolve…	Эволюционировать…
+Evolves it right here in the bank.	Эволюционировать прямо в банке.
+Finding the closest real, legal version.	Поиск наиболее близкого легального варианта.
+The offline legalizer is at work.	Выполняется исправление легальности без сети.
+Legal	Легален
+Illegal	Нелегален
+Not checked for this ROM hack	Проверка этого ROM-хака недоступна
+No legal combination found.	Легальная комбинация не найдена.
+Keep editing	Продолжить редактирование
+Discard	Отменить изменения
+Discard changes	Отменить изменения
+Discard staged changes	Отменить отложенные изменения
+Save your changes?	Сохранить изменения?
+Save dex changes?	Сохранить изменения покедекса?
+Save byte changes?	Сохранить изменения байтов?
+Write byte changes?	Записать изменения байтов?
+Can't edit	Редактирование недоступно
+Edit error	Ошибка редактирования
+Out of range	Вне допустимого диапазона
+No open save - byte changes kept.	Нет открытого сохранения — изменения байтов оставлены в редакторе.
+Save length changed - write refused.	Размер сохранения изменился — запись запрещена.
+Byte editor	Редактор байтов
+Jump	Перейти
+Jump to offset	Перейти к смещению
+Enter a number…	Введи число…
+Value	Значение
+Write	Записать
+Writing bytes…	Запись байтов…
+Status	Статус
+Restore	Восстановить
+Restore anyway	Всё равно восстановить
+Restore this point?	Восстановить эту точку?
+Cancel (keep current save)	Отмена (оставить текущее сохранение)
+Duplication risk	Риск дублирования
+Connect to a save first - restoring writes into the connected save.	Сначала подключи сохранение: восстановление записывает данные в него.
+Write the {0} UTC restore point into the connected save? The current state is preserved as a new restore point first.	Восстановить подключённое сохранение из точки {0} UTC? Текущее состояние сначала будет сохранено в новой точке восстановления.
+No Pokémon that has left this save since then would come back. The current state is preserved as a new restore point first.	Ушедшие из сохранения покемоны не вернутся. Текущее состояние сначала сохранится в новой точке восстановления.
+Restore point	Точка восстановления
+Complete the Pokédex	Заполнить покедекс
+Mark everything seen	Отметить всех увиденными
+Dex actions	Действия покедекса
+Switch to dex editor	Перейти к редактору покедекса
+Switch to living dex gaps	Показать недостающих покемонов
+Living dex	Живой покедекс
+Living dex gaps	Недостающие покемоны
+Living dex gaps · {0} missing	Живой покедекс · не хватает: {0}
+Select all (gaps)	Выбрать всех недостающих
+Generate selected ({0})	Создать выбранных ({0})
+Generating…	Создание…
+Every species becomes seen and caught; you choose to save when you leave.	Все виды отмечаются увиденными и пойманными. Сохранение — при выходе.
+Every species becomes seen; caught ones stay caught.	Все виды отмечаются увиденными; пойманные остаются пойманными.
+Species missing from your boxes, ready to create.	Виды, отсутствующие в боксах и доступные для создания.
+Creates a legal Pokémon of each selected species in your boxes.	Создать в боксах легального покемона каждого выбранного вида.
+Dex updated for {0} species.	Покедекс обновлён для видов: {0}.
+Seen {0}/{1} · caught {2}/{3} · {4} staged	Увидено {0}/{1} · поймано {2}/{3} · изменений {4}
+Undo all changes ({0})	Отменить все изменения ({0})
+Nothing here. Try Y to show unlabeled entries, or another section.	Здесь пусто. Нажми Y для показа неизвестных записей или выбери другой раздел.
+Search label or number…	Поиск по названию или номеру…
+Show all	Показать всё
+Enable	Включить
+Disable	Выключить
+Set true	Установить «да»
+Set false	Установить «нет»
+Set ON	Включить
+Set OFF	Выключить
+Set flag?	Установить флаг?
+Clear flag?	Сбросить флаг?
+Gift used	Подарок получен
+Gift unused	Подарок не получен
+Used	Использован
+Used up.	Использован.
+Completed	Завершено
+Incomplete	Не завершено
+Enable event	Включить событие
+Enable event?	Включить событие?
+Disable event	Выключить событие
+Disable event?	Выключить событие?
+Ready: the event will trigger in game.	Готово: событие сработает в игре.
+Clock repair	Исправление часов
+About the clock	О часах
+Reset both clocks (recommended)	Сбросить оба счётчика (рекомендуется)
+Let the game ask for the time again	Запросить настройку времени в игре
+Roaming legendaries	Бродячие легендарные покемоны
+Re-arm one-time encounters	Сбросить разовые встречи
+Poké Beans	Покебобы
+Empty the Apricorn Box	Очистить коробку априкорнов
+Fill every Apricorn (99)	Пополнить все априкорны (99)
+Fill every Bean stack	Пополнить все покебобы
+Fill every stack	Пополнить все стопки
+Clear every Bean stack	Удалить все покебобы
+Clear every stack	Очистить все стопки
+Already full	Уже заполнено
+Fill	Заполнить
+Withdraw	Забрать
+WITHDRAW POKéMON?	ЗАБРАТЬ ПОКЕМОНА?
+Deposited Pokémon	Покемоны в пансионе
+Day care	Пансион
+Mystery gift inbox	Входящие подарки
+Mystery gift inbox · {0}	Входящие подарки · {0}
+Card #{0}	Карточка №{0}
+Stored Wonder Card	Сохранённая карточка подарка
+Received gift record	Запись полученного подарка
+Non-Pokémon gift or record	Подарок без покемона или запись
+History entry	Запись истории
+No Mystery Gift cards or received-gift records are stored in this save.	В сохранении нет карточек подарков или записей их получения.
+Nothing to do: {0} is already in that order.	Изменения не нужны: {0} уже в таком порядке.
+Next page	Следующая страница
+Previous page	Предыдущая страница
+Page	Страница
+Select a save	Выбрать сохранение
+Which save do you want to open?	Какое сохранение открыть?
+Which version is this?	Какая это версия игры?
+Pick yours once; you can change it later from the save's menu (long-press).	Выбери версию. Изменить её можно в меню сохранения (правый щелчок на ПК).
+PKForge backs up before every write, but close the emulator first.	PKForge создаёт копию перед записью. Перед редактированием закрой эмулятор.
+No games found. Scanned {0} file(s), {1} looked like saves but did not parse.	Игры не найдены. Проверено файлов: {0}; не распознано сохранений: {1}.
+{0} save(s) on the shelf. Scanned {1} file(s).	Сохранений: {0}. Проверено файлов: {1}.
+Opened {0} ({1}, gen {2})	Открыто {0} ({1}, поколение {2})
+Scanning {0} unit · {1}…	Поиск: хранилищ {0} · {1}…
+Found {0} Pokémon save{1} in {2}.	Найдено сохранений Pokémon: {0}{1}, папка: {2}.
+No saves found in {0}	Сохранения в {0} не найдены
+No operations selected	Действия не выбраны
+Apply to which boxes?	К каким боксам применить?
+Apply to which Pokémon?	К каким покемонам применить?
+Which operation?	Какое действие?
+Apply batch edit?	Применить массовое изменение?
+Apply? some would turn illegal	Применить? Некоторые станут нелегальными
+Nothing would change	Изменений не будет
+Toggle operations, then apply.	Выбери действия, затем примени.
+EV spread	Распределение EV
+EV spread: {0}	Распределение EV: {0}
+Level 100	Уровень 100
+Level 50 flat	Уровень 50 для всех
+Keep EVs as they are	Оставить EV как есть
+Heal, max PP or set levels for the party or every box.	Лечение, максимум PP и уровни для команды или боксов.
+Change level, IVs, EVs, healing and more on many Pokémon at once.	Массовое изменение уровней, IV, EV, лечения и других параметров.
+Batch applied to {0} Pokémon (legality not re-checked).	Изменено покемонов: {0} (без повторной проверки легальности).
+Apply to every matching Pokémon?	Применить ко всем подходящим покемонам?
+Batch rename	Массовое переименование
+Reset nicknames, or make you the original trainer, on many Pokémon.	Сбросить имена или назначить себя исходным тренером нескольких покемонов.
+Copy these boxes over other boxes, replacing what is there.	Скопировать эти боксы поверх других с заменой содержимого.
+This box's Pokémon are reordered and compacted to the top.	Покемоны этого бокса будут упорядочены и собраны в начало.
+The current save state is kept as a restore point. This can take several minutes.	Текущее состояние сохранится в точке восстановления. Это может занять несколько минут.
+Release every boxed Pokémon. Party Pokémon are untouched. A restore point is created first.	Выпустить всех покемонов из боксов. Команда останется. Сначала создастся точка восстановления.
+Release every Pokémon in {0} box(es). A restore point is created first.	Выпустить покемонов из боксов ({0}). Сначала создастся точка восстановления.
+Release all {0} marked Pokémon? The current save state is kept as a restore point.	Выпустить отмеченных покемонов ({0})? Текущее состояние сохранится в точке восстановления.
+Release {0} back into the wild? The current save state is kept as a restore point.	Выпустить {0} на волю? Текущее состояние сохранится в точке восстановления.
+Released {0} Pokémon. Bye-bye!	Выпущено покемонов: {0}. До встречи!
+{0} was released. Bye-bye!	{0} выпущен. До встречи!
+{0} copied to the Bank. The original stays in the game.	{0} скопирован в банк. Оригинал остался в игре.
+{0} deposited in the Bank.	{0} помещён в банк.
+{0} duplicated.	{0} продублирован.
+{0} moved to {1}.	{0} перемещён в {1}.
+Imported {0} Pokémon.	Импортировано покемонов: {0}.
+Exported {0} Pokémon.	Экспортировано покемонов: {0}.
+Imported {0}.	Импортировано: {0}.
+Exported {0}	Экспортировано: {0}
+No Pokémon could be duplicated. Check free storage.	Не удалось дублировать покемонов. Проверь свободные ячейки.
+This box is full - no room to duplicate.	Бокс заполнен — нет места для копии.
+The party is full - no room to duplicate.	Команда заполнена — нет места для копии.
+Could not duplicate into that slot.	Не удалось создать копию в этой ячейке.
+Not enough empty box slots ({0} needed).	Недостаточно свободных ячеек (нужно {0}).
+That file is not a recognizable Pokémon.	Файл не распознан как покемон.
+This Pokémon's data could not be read.	Не удалось прочитать данные покемона.
+This save stores no Pokémon.	В сохранении нет покемонов.
+Below its met level ({0}): this would be illegal.	Ниже уровня встречи ({0}): покемон станет нелегальным.
+No impossible values: every Pokémon passed PKHeX's checks.	Недопустимых значений нет: все покемоны прошли проверку PKHeX.
+No clones: every Pokémon has a unique identity fingerprint.	Клонов нет: каждый покемон имеет уникальные данные личности.
+All {0} Pokémon are legal.	Все покемоны ({0}) легальны.
+Legality check cancelled.	Проверка легальности отменена.
+No Pokémon to rank in this save	В сохранении нет покемонов для рейтинга
+No Pokémon in this save is holding an item	В сохранении нет покемонов с предметами
+The save was closed before the move was written.	Сохранение закрыто до записи перемещения.
+Move aborted	Перемещение отменено
+Move aborted: {0}	Перемещение отменено: {0}
+Read-only	Только чтение
+READ-ONLY · this save's layout is not supported	ТОЛЬКО ЧТЕНИЕ · формат сохранения не поддерживается
+Save in game and close the emulator. Select its saves folder (or the folder containing your battery saves). Save states are not supported. Restart the game normally after editing.	Сохранись в игре и закрой эмулятор. Выбери папку обычных сохранений. Состояния эмулятора (save states) не поддерживаются. После редактирования запусти игру обычным способом.
+Save in game and close the emulator. Select the user folder you chose in its setup (the one containing sdmc); sdmc, Nintendo 3DS or a folder above the user folder also work. Restart the game normally after editing.	Сохранись в игре и закрой эмулятор. Выбери пользовательскую папку с sdmc, саму sdmc или Nintendo 3DS. После редактирования запусти игру обычным способом.
+Save in game and close melonDS. Select the folder containing your .sav battery saves: next to your ROMs by default, or the save folder set in melonDS's settings. Save states are not supported. Restart the game normally after editing.	Сохранись в игре и закрой melonDS. Выбери папку файлов .sav рядом с ROM или указанную в настройках melonDS. Состояния эмулятора не поддерживаются. После редактирования запусти игру обычным способом.
+Save in game and close the emulator. Select its files root containing the emulated storage. Restart the game normally after editing.	Сохранись в игре и закрой эмулятор. Выбери его папку данных с эмулируемым хранилищем. После редактирования запусти игру обычным способом.
+Could not	Не удалось
+Caption	Подпись
+Link	Подключить
+File	Файл
+Filter · {0}	Фильтр · {0}
+Edit game · hold	Настроить игру · правый щелчок
+Choose the save to rename, recolor or identify.	Выбери сохранение для изменения имени, цвета или версии игры.
+Both versions write the same save file, so PKForge cannot tell them apart.\u0020	Обе версии используют одинаковый формат сохранения, поэтому PKForge не может различить их.\u0020
+Every game, from the oldest release to the newest.	Все игры, от старых до новых.
+Release order	Порядок выхода
+Gen I	Поколение I
+Gen II	Поколение II
+Gen III	Поколение III
+Gen IV	Поколение IV
+Gen V	Поколение V
+Gen VI	Поколение VI
+Gen VII	Поколение VII
+Gen VIII	Поколение VIII
+Gen IX	Поколение IX
+Share report	Поделиться отчётом
+PKForge closed unexpectedly	PKForge завершился с ошибкой
+A crash report was saved. Sharing it helps us fix it: it holds the error, your recent activity, file names and your device model, never your save data.	Отчёт об ошибке сохранён. Он содержит ошибку, недавние действия, имена файлов и модель устройства, без данных сохранений.
+The logs could not be packed: {0}	Не удалось собрать журналы: {0}
+Update check failed: {0}	Ошибка проверки обновлений: {0}
+Update failed: {0}	Ошибка обновления: {0}
+The game's wallpaper pattern in the color scheme's tones.	Узор игровых обоев в цветах выбранной темы.
+The game's wallpaper under a veil of the color scheme.	Игровые обои под оттенком выбранной темы.
+The wallpaper rises from the bottom and fades into the color scheme.	Обои появляются снизу и плавно переходят в цвета темы.
+The wallpaper's pattern in two tones, the color scheme's to its own.	Узор обоев в двух оттенках: темы и самих обоев.
+Wondercards depend on the game they are delivered to. Open a game from the shelf, press the Y button (Save data), and choose Wonder cards there.	Подарки зависят от игры. Открой игру, нажми Y (данные сохранения) и выбери карточки подарков.
+Background music	Фоновая музыка
+Add music files	Добавить музыку
+Add music files ({0})	Добавить музыку ({0})
+Added {0} track(s) to the music library.	Добавлено треков: {0}.
+All tracks	Все треки
+Autostart:\u0020	Автозапуск:\u0020
+Autostart: {0}	Автозапуск: {0}
+Order:\u0020	Порядок:\u0020
+Order: {0}	Порядок: {0}
+Clear library	Очистить медиатеку
+Clear music library?	Очистить медиатеку?
+Empties the list. Your audio files stay on the device.	Очистить список. Аудиофайлы останутся на устройстве.
+In order	По порядку
+Keeps the menus' music playing, without a cut.	Продолжать музыку меню без прерывания.
+Library: {0} track(s)	Медиатека: треков {0}
+Menus	Меню
+Music: {0}	Музыка: {0}
+No music here.	Здесь без музыки.
+ON starts the music when PKForge opens.	При включении музыка запускается вместе с PKForge.
+Park by day	Парк днём
+Park by night	Парк ночью
+Pause	Пауза
+Play	Воспроизвести
+Pick audio files on your device to add to the library.	Выбери аудиофайлы на устройстве для добавления в медиатеку.
+Play the tracks in order or shuffled.	Воспроизводить треки по порядку или случайно.
+Playing: {0}	Сейчас играет: {0}
+Plays everywhere in PKForge outside the Poképark.	Музыка во всём приложении, кроме Покепарка.
+Plays in the Poképark in the evening and at night.	Музыка в Покепарке вечером и ночью.
+Plays in the Poképark in the morning and the afternoon.	Музыка в Покепарке утром и днём.
+Removes every track. Your audio files on storage are untouched.	Очистить список треков. Аудиофайлы не удаляются.
+Same as menus	Как в меню
+Shuffle	Случайно
+Silence	Тишина
+Silence here ({0}).	Здесь тишина ({0}).
+Skip to next track	Следующий трек
+The whole library.	Вся медиатека.
+Those files are already in the library.	Эти файлы уже в медиатеке.
+No backups yet. One is created automatically before every write.	Резервных копий пока нет. Они создаются автоматически перед каждой записью.
+Open a save first - restore writes into the open save file.	Сначала открой сохранение: восстановление записывается в открытый файл.
+Restore aborted: {0}	Восстановление отменено: {0}
+Restored. Previous state kept as restore point {0}…	Восстановлено. Прежнее состояние сохранено в точке {0}…
+Restoring {0}…	Восстановление {0}…
+Safety copy: the state right before this restore	Резервная копия: состояние перед восстановлением
+This restore point belongs to another save, so it was not restored here.	Эта точка принадлежит другому сохранению. Восстановление не выполнено.
+This restore point matches the current state - nothing was written.	Точка совпадает с текущим состоянием. Запись не требуется.
+{0} backup(s) of this save. Restoring writes into it.	Резервных копий этого сохранения: {0}. Восстановление записывает данные в него.
+{0} backup(s). Open a save to enable restore.	Резервных копий: {0}. Для восстановления открой сохранение.
+MAUI services are unavailable.	Службы приложения недоступны.
+PKForge failed to start:\n\n{0}	Не удалось запустить PKForge:\n\n{0}
+NO STORAGE CONNECTED - PRESS ACCESS STORAGE	НЕТ ХРАНИЛИЩА — ПОДКЛЮЧИ СОХРАНЕНИЕ
+PKMN Info	Данные покемона
+PKMN Moves	Приёмы покемона
+TRAINERS	ТРЕНЕРЫ
+BALL	ПОКЕБОЛ
+NO STORAGE CONNECTED	ХРАНИЛИЩЕ НЕ ПОДКЛЮЧЕНО
+MARKING	ВЫДЕЛЕНИЕ
+UNMARKING	СНЯТИЕ ВЫДЕЛЕНИЯ
+MULTI-SELECT - {0} MARKED	ВЫБРАНО ПОКЕМОНОВ: {0}
+MULTI-SELECT - {0} · {1} MARKED	ВЫБОР — {0} · ОТМЕЧЕНО {1}
+MULTI-SELECT - A MARKS · Y WHOLE BOX · X ACTIONS	ВЫБОР — A ОТМЕТИТЬ · Y ВЕСЬ БОКС · X ДЕЙСТВИЯ
+CARRYING - place with A, cancel with B	ПЕРЕНОС — A ПОМЕСТИТЬ · B ОТМЕНА
+MARKS CLEARED	ОТМЕТКИ СНЯТЫ
+ALL BOXES MARKED	ВСЕ БОКСЫ ОТМЕЧЕНЫ
+{0} BOX(ES) MARKED	ОТМЕЧЕНО БОКСОВ: {0}
+{0} MARKED	ОТМЕЧЕНО: {0}
+{0} CLEARED	{0} ОЧИЩЕНО
+{0} REMOVED	{0} УДАЛЕНО
+{0} INVERTED	{0} ИНВЕРТИРОВАНО
+THE PARTY NEEDS ONE POKéMON - UNMARK A PARTY MEMBER	В КОМАНДЕ НУЖЕН ХОТЯ БЫ ОДИН ПОКЕМОН
+CREATING YOUR POKéMON…	СОЗДАНИЕ ПОКЕМОНА…
+OPENING THE POKéDEX…	ОТКРЫТИЕ ПОКЕДЕКСА…
+Options	Параметры
+Time and weather	Время и погода
+Morning	Утро
+Day	День
+Evening	Вечер
+Night	Ночь
+Automatic	Автоматически
+Cloudy	Облачно
+Sunny	Солнечно
+Rain	Дождь
+Snow	Снег
+Storm	Гроза
+Disabled	Отключено
+Off	Выкл
+ON	ВКЛ
+OFF	ВЫКЛ
+Invite Pokémon	Пригласить покемонов
+Meet Pokémon	Познакомиться с покемонами
+Empty park	Очистить парк
+Empty the park?	Очистить парк?
+Leave park	Покинуть парк
+Leave the park?	Покинуть парк?
+In the park right now	Сейчас в парке
+Auto-fill park	Автозаполнение парка
+Auto-fill mode	Режим автозаполнения
+Bank only	Только банк
+An empty meadow	Пустая поляна
+A wild Pokémon	Дикий покемон
+Happy	Радостный
+Joyous	Счастливый
+Content	Довольный
+Daycare	Пансион
+Leave a Pokémon here	Оставить покемона здесь
+How the daycare works	Как работает пансион
+How to play	Как играть
+How to play  {0}/{1}	Как играть  {0}/{1}
+Time	Время
+Weather	Погода
+Treasures	Сокровища
+Today's goals	Задачи на сегодня
+Park journal	Дневник парка
+Journal	Дневник
+Captions: Off	Подписи: выкл
+Captions: On	Подписи: вкл
+Hide performance	Скрыть производительность
+Show performance	Показать производительность
+Credits	Авторы
+Made by	Создано
+Built on	Основано на
+Art	Графика
+Comes from	Родом из
+Lives in	Живёт в
+Congratulations!	Поздравляем!
+Name	Имя
+NAME	ИМЯ
+Money	Деньги
+Item	Предмет
+ITEM	ПРЕДМЕТ
+Items	Предметы
+Add	Добавить
+Add to bag	Добавить в сумку
+All generations	Все поколения
+All languages	Все языки
+All gifts	Все подарки
+All sources	Все источники
+All types	Все типы
+All rarities	Любая редкость
+All sections ({0})	Все разделы ({0})
+All (no item filter)	Все (без фильтра предметов)
+Any event	Любое событие
+Any gender	Любой пол
+Any held item	Любой предмет
+Any item	Любой предмет
+Any language	Любой язык
+Any status	Любой статус
+Any year	Любой год
+Any Pokémon	Любой покемон
+Any highest level	Любой максимальный уровень
+Any lowest level	Любой минимальный уровень
+Allow	Разрешить
+Apply anyway	Всё равно применить
+Apply to…	Применить к…
+Apply profile to selected Pokémon	Применить профиль к выбранным покемонам
+Attack	Атака
+Defense	Защита
+Sp. Atk	Спец. атака
+Sp. Def	Спец. защита
+Speed	Скорость
+Base stats	Базовые характеристики
+Base	Базовые
+Resulting stats	Итоговые характеристики
+Neutral: no stat is raised or lowered.	Нейтральный характер: характеристики не повышаются и не понижаются.
+Battle prep / battle rules	Подготовка к бою / правила
+Batch edit	Массовое изменение
+Autopilot	Автопилот
+Living Dex Autopilot	Автопилот живого покедекса
+How the Living Dex Autopilot works	Как работает автопилот покедекса
+What the Autopilot does	Что делает автопилот
+What it never does	Чего он никогда не делает
+What the Autopilot does, and what it never does.	Возможности и ограничения автопилота.
+What is a living dex?	Что такое живой покедекс?
+Where should your living dex live?	Где хранить живой покедекс?
+Where your Pokémon come from	Откуда брать покемонов
+Take a game's only one	Забирать единственного покемона вида
+Take a game's only one?	Забирать единственного покемона вида?
+Use party Pokémon	Использовать покемонов команды
+Meet & evolve	Получение и эволюция
+First empty boxes	Первые пустые боксы
+Living dex boxes	Боксы живого покедекса
+Living dex updated	Живой покедекс обновлён
+This living dex is complete.	Живой покедекс собран полностью.
+Done! Your living dex is updated.	Готово! Живой покедекс обновлён.
+Start the living dex at…	Начать живой покедекс с…
+Let's go	Начать
+Planning…	Подготовка плана…
+Moving your Pokémon…	Перемещение покемонов…
+Moving	Перемещение
+Nothing to move	Нечего перемещать
+Nothing can move	Нет доступных перемещений
+Nothing is changed	Ничего не изменяется
+Nothing has been written yet. B goes back to the plan.	Пока ничего не записано. B — вернуться к плану.
+Never copies: every Pokémon moves, none is duplicated.	Покемоны перемещаются без создания копий.
+Never touches Hardcore, ROM hack or read-only saves.	Сохранения Hardcore, ROM-хаков и доступные только для чтения не изменяются.
+Your party stays exactly as it is.	Команда останется без изменений.
+Party Pokémon may move too.	Покемоны команды тоже могут перемещаться.
+They stay exactly where they are.	Останутся на своих местах.
+One per species; forms don't need their own space.	По одному на вид; формы не требуют отдельных мест.
+Only shiny Pokémon count and move.	Учитываются и перемещаются только шайни.
+Any Pokémon counts, shiny or not.	Учитываются все покемоны, включая обычных и шайни.
+A game / source game	Игра / игра-источник
+Collection center	Центр коллекции
+Bank search	Поиск в банке
+Bank filters · {0} match	Фильтры банка · совпадений: {0}
+Default names only:	Только стандартные имена:
+Default names only: {0}	Только стандартные имена: {0}
+Name or nickname…	Название вида или имя…
+Lowest level	Минимальный уровень
+Lowest level:	Минимальный уровень:
+Lowest level: {0}	Минимальный уровень: {0}
+Highest level	Максимальный уровень
+Highest level:	Максимальный уровень:
+Highest level: {0}	Максимальный уровень: {0}
+Level band	Диапазон уровней
+Source game	Игра-источник
+Source game:	Игра-источник:
+Source game: {0}	Игра-источник: {0}
+Group by	Группировать по
+Group:	Группа:
+Group: {0}	Группа: {0}
+Rarity	Редкость
+Rarity:	Редкость:
+Rarity: {0}	Редкость: {0}
+Type:	Тип:
+Type: All	Тип: все
+Type: {0}	Тип: {0}
+Gender:	Пол:
+Gender: {0}	Пол: {0}
+Held item:	Предмет:
+Held item: {0}	Предмет: {0}
+Shiny only	Только шайни
+Shiny only:	Только шайни:
+Shiny only: {0}	Только шайни: {0}
+Shiny forms	Шайни-формы
+Shiny living dex	Живой покедекс шайни
+Shiny owned	Шайни в коллекции
+Owned	В коллекции
+Owned + shiny	В коллекции + шайни
+Missing	Не хватает
+Missing only	Только отсутствующие
+Every form	Все формы
+View:	Вид:
+View: every form	Вид: все формы
+View: one per species	Вид: по одному на вид
+View: one per	Вид: по одному
+View: normal living dex	Вид: обычный живой покедекс
+View: SHINY living dex	Вид: живой покедекс ШАЙНИ
+Sort:	Порядок:
+Sort: {0}	Порядок: {0}
+Sort: {0}{1}	Порядок: {0}{1}
+Oldest	Старые
+Oldest first	Сначала старые
+Newest	Новые
+Newest first	Сначала новые
+Date deposited	Дата помещения
+Level (high first)	Уровень (по убыванию)
+Sort the results	Сортировать результаты
+Reset all filters	Сбросить все фильтры
+Turn off every filter and clear the search.	Сбросить фильтры и очистить поиск.
+Also clears the search text.	Также очищает поисковый запрос.
+Also clears the type and generation picks.	Также сбрасывает выбор типа и поколения.
+Legendary / mythical	Легендарные / мифические
+Legendary or mythical	Легендарные или мифические
+Legendary, mythical, or both.	Легендарные, мифические или обе группы.
+Hides nicknamed Pokémon.	Скрыть покемонов с изменённым именем.
+Hide anything above this level.	Скрыть покемонов выше этого уровня.
+Hide anything below this level.	Скрыть покемонов ниже этого уровня.
+Hides anything above this level.	Скрыть покемонов выше этого уровня.
+Hides anything below this level.	Скрыть покемонов ниже этого уровня.
+Clear the search or relax the filters (Y).	Очисти поиск или ослабь фильтры (Y).
+NO POKéMON MATCH	НЕТ ПОДХОДЯЩИХ ПОКЕМОНОВ
+THE BANK IS EMPTY	БАНК ПУСТ
+EMPTY BANK SLOT	ПУСТАЯ ЯЧЕЙКА БАНКА
+Hide	Скрыть
+Show	Показать
+Show hidden	Показать скрытые
+Hide save	Скрыть сохранение
+Name this save	Назвать сохранение
+Leave empty to use the game's name	Оставь пустым для названия игры
+Set game…	Указать игру…
+This game is…	Это игра…
+Reset to detected	Вернуть определённую версию
+Cartridge color	Цвет картриджа
+Console color	Цвет консоли
+Color scheme	Цветовая тема
+Colors	Цвета
+Default	По умолчанию
+Standard	Стандартный
+The standard colour for this generation.	Стандартный цвет для этого поколения.
+The colour of this save's cartridge on the Home shelf.	Цвет картриджа на главном экране.
+Close your emulators	Закрой эмуляторы
+Open save	Открыть сохранение
+Open this box	Открыть этот бокс
+Box menu	Меню бокса
+Box is full	Бокс заполнен
+Empty box.	Пустой бокс.
+Pick up	Взять
+Drop here	Поместить сюда
+Mark	Отметить
+Mark all	Отметить всех
+Mark everything	Отметить всё
+Mark a range	Отметить диапазон
+Mark {0}	Отметить {0}
+Unmark {0}	Снять отметку {0}
+Clear marks ({0})	Снять отметки ({0})
+Clear marks / selection	Снять отметки / выделение
+Invert marks	Инвертировать отметки
+Invert this box	Инвертировать этот бокс
+Invert the party	Инвертировать команду
+Invert {0}	Инвертировать {0}
+Markings	Отметки
+Make shiny	Сделать шайни
+Making shiny…	Превращение в шайни…
+Remove shiny	Убрать шайни
+Removing shiny…	Удаление статуса шайни…
+Marked Pokémon become shiny.\u0020	Отмеченные покемоны станут шайни.\u0020
+Marked Pokémon lose their shininess.\u0020	Отмеченные покемоны перестанут быть шайни.\u0020
+Legalize selection	Исправить выбранных
+Heal selection	Вылечить выбранных
+Delete clones	Удалить клонов
+Delete clones?	Удалить клонов?
+No clones among the marked Pokémon.	Среди отмеченных покемонов клонов нет.
+Delete this box…	Удалить этот бокс…
+New box	Новый бокс
+Insert a new box after it	Вставить новый бокс после этого
+Insert a new box before it	Вставить новый бокс перед этим
+Rename…	Переименовать…
+Rename this Pokémon.	Изменить имя покемона.
+Mark Pokémon holding…	Отметить покемонов с предметом…
+Move all	Переместить всех
+Move instead	Переместить вместо обмена
+Swap instead	Поменять местами
+Swapping	Обмен местами
+Copies	Копии
+Duplicate all	Дублировать всех
+Copy / duplicate	Копировать / дублировать
+Deposit	Поместить
+Deposit in the bank	Поместить в банк
+Depositing…	Помещение в банк…
+To Bank	В банк
+Import files	Импортировать файлы
+Import where?	Куда импортировать?
+Import into which box?	В какой бокс импортировать?
+Import sets?	Импортировать наборы?
+Choose files…	Выбрать файлы…
+Choose a box…	Выбрать бокс…
+First free space	Первая свободная ячейка
+Merge into free slots	Разместить в свободных ячейках
+Add as new boxes (keep layout + names)	Добавить новыми боксами (сохранить расположение и названия)
+Import from PKSM	Импортировать из PKSM
+PKSM import	Импорт PKSM
+PKSM export	Экспорт PKSM
+PKSM bank name	Название банка PKSM
+Reading PKSM files…	Чтение файлов PKSM…
+Building a PKSM bank…	Создание банка PKSM…
+PKSM import cancelled.	Импорт PKSM отменён.
+PKSM import failed: {0}	Ошибка импорта PKSM: {0}
+PKSM export failed: {0}	Ошибка экспорта PKSM: {0}
+Nothing importable found.	Нет данных для импорта.
+No importable Pokémon in those files.	В файлах нет подходящих покемонов.
+None of these Pokémon fit a PKSM bank.	Ни один из покемонов не подходит для банка PKSM.
+PKSM has no slot for this format	В PKSM нет места для этого формата
+PKSM export: nothing PKSM can hold.	Экспорт PKSM: нет совместимых покемонов.
+Share	Поделиться
+Sharing…	Подготовка экспорта…
+Show a QR code	Показать QR-код
+Scan a QR code	Сканировать QR-код
+Scan a .pk QR	Сканировать .pk QR
+QR transfer	Перенос по QR
+Received a Pokémon over QR.	Покемон получен по QR.
+Received	Получено
+Receive	Получить
+Receive into Box {0}	Получить в бокс {0}
+Receive into party	Получить в команду
+Receive into slot {0}	Получить в ячейку {0}
+Event	Событие
+Gifts	Подарки
+Gifts:	Подарки:
+Gifts: {0}	Подарки: {0}
+Filter cards	Фильтр карточек
+Card	Карточка
+Card number	Номер карточки
+Card no.	Номер карточки
+Card No.	Номер карточки
+No card selected	Карточка не выбрана
+No cards match.	Подходящих карточек нет.
+One card per event	Одна карточка на событие
+Title A-Z	Название A–Z
+Other language	Другой язык
+Other lang.	Другой язык
+Every language	Все языки
+New only	Только новые
+New (not received)	Новые (не получены)
+Never received	Не получено
+Received before	Ранее получено
+Forget received marks	Сбросить отметки получения
+Remove every received mark, for all your saves.	Сбросить отметки получения во всех сохранениях.
+Fits save	Подходит сохранению
+Fits this save	Подходит этому сохранению
+Not your game	Другая игра
+Not obtainable here	Здесь не получить
+No description available.	Описание недоступно.
+Opening the card album…	Открытие альбома карточек…
+Event series	Серия событий
+Year	Год
+Year:	Год:
+Year: {0}	Год: {0}
+Language:	Язык:
+Language: {0}	Язык: {0}
+Generation:	Поколение:
+Generation: {0}	Поколение: {0}
+No empty slot in this box for the gift.	В этом боксе нет свободной ячейки для подарка.
+This card could not be converted for the Bank.	Не удалось преобразовать карточку для банка.
+Can't read this Pokémon\n{0}	Не удалось прочитать покемона\n{0}
+No empty slot in this box for the encounter.	В этом боксе нет свободной ячейки для встречи.
+Catch this encounter?	Создать покемона этой встречи?
+Catch	Поймать
+Where to find this species in each game.	Где найти этот вид в каждой игре.
+How to get	Как получить
+How to get (locations)	Как получить (места)
+How to get this one	Как получить этого покемона
+Looking up where to catch it…	Поиск мест поимки…
+No catch data in this save	В сохранении нет данных встреч
+This game's met data isn't readable yet.	Чтение данных встреч этой игры пока не поддерживается.
+Not in this game	Нет в этой игре
+In this game	В этой игре
+Not shiny	Не шайни
+Square	Квадратный
+Star	Звёздный
+Square sparkles	Квадратные искры
+Star sparkles	Звёздные искры
+Egg	Яйцо
+Eggs	Яйца
+EGGS	ЯЙЦА
+Eggs:	Яйца:
+Eggs: {0}	Яйца: {0}
+Hatch	Вылупить
+Hatched	Вылупился
+One egg of every species	По яйцу каждого вида
+Egg #{0}	Яйцо №{0}
+Eggs fill the boxes.	Яйца заполнят боксы.
+One moment	Подожди
+Got it	Понятно
+Done!	Готово!
+Starting…	Запуск…
+Stopped: {0}	Остановлено: {0}
+Checking the legal options offline.	Проверка доступных легальных вариантов без сети.
+Legality report	Отчёт о легальности
+Legality fixes applied	Исправления легальности применены
+Fishy	Сомнительный
+Invalid	Некорректно
+Valid	Корректно
+Warning	Предупреждение
+Not analyzed	Не проверен
+Not checked	Не проверен
+Checks	Проверки
+Every check passed.	Все проверки пройдены.
+Check failed	Проверка не пройдена
+Fix it	Исправить
+Fix all safe	Исправить все безопасные
+Suggest	Подобрать
+Suggesting…	Подбор…
+No suggestion.	Нет подходящего варианта.
+Relearnable	Можно вспомнить
+Learn {0}	Изучить {0}
+Learn {0}?	Изучить {0}?
+Don't learn	Не изучать
+Don't learn {0}	Не изучать {0}
+Forget	Забыть
+Forget {0}	Забыть {0}
+Leave it	Оставить
+Leaves the move slot empty.	Ячейка приёма останется пустой.
+Keep browsing	Продолжить просмотр
+Abilities	Способности
+Technical Records	Технические записи
+Tera Type	Тера-тип
+Hidden Power	Скрытая сила
+Hidden power	Скрытая сила
+Origin	Происхождение
+Memories	Воспоминания
+Mint	Мята
+Met	Встреча
+New	Новый
+Unknown	Неизвестно
+Undated	Без даты
+Free	Свободно
+Full	Заполнено
+FULL	ПОЛНО
+Watch	Смотреть
+Talk to it	Поговорить
+Traits	Черты
+Trait	Черта
+Feeling	Чувство
+Character	Характер
+At Lv. {0}	На уровне {0}
+Timid	Робкий
+Item: {0}	Предмет: {0}
+From {0}	Из {0}
+Caught · {0}	Пойман · {0}
+From {0} · Gen {1} · deposited {2}	Из {0} · поколение {1} · добавлен {2}
+Pokémon you can catch here:	Покемоны, которых здесь можно поймать:
+The bag	Сумка
+The party	Команда
+This game	Эта игра
+This generation has no natures	В этом поколении нет характеров
+Gen 1 and 2 Pokémon have no nature or ability.	У покемонов поколений 1 и 2 нет характера и способности.
+This game exposes no editable bag.	Сумка этой игры недоступна для редактирования.
+Nothing is written.	Данные не записываются.
+Nothing was changed.	Ничего не изменено.
+Nothing changed	Изменений нет
+Nothing here	Здесь пусто
+Nothing to show.	Нет данных для показа.
+Nothing to export.	Экспортировать нечего.
+Nothing to edit there.	Здесь нечего изменять.
+Nothing to edit in that scope.	В выбранной области нечего изменять.
+Nothing more this Pokémon can legally earn.	Больше нет легально доступных наград.
+No records learned.	Записи не изучены.
+No ribbons or marks yet.	Лент и меток пока нет.
+No moves recorded.	Приёмы не записаны.
+No stats recorded.	Характеристики не записаны.
+No groups	Нет групп
+Not enabled.	Не включено.
+Only exists during a battle	Существует только во время боя
+No Showdown set was found in that text.	В тексте не найден набор Showdown.
+Could not build a legal mon from that set.	Не удалось создать легального покемона из набора.
+The stored bytes aren't a Pokémon PKForge can edit.	Данные не распознаны как доступный для редактирования покемон.
+This Pokémon's format stores none of these fields.	Формат покемона не содержит этих полей.
+This Pokémon format has no cosmetic data.	В этом формате нет данных внешности.
+This Pokémon format has no Pokérus or ribbon data.	В этом формате нет данных покеруса и лент.
+This Pokémon format stores no ribbons or marks.	В этом формате нет лент и меток.
+This Pokémon has edits that are not in the bank yet.	Изменения этого покемона ещё не сохранены в банке.
+Pokémon save manager and bank	Редактор сохранений Pokémon и банк
+PKForge game library	Библиотека игр PKForge
+PKForge Bank	Банк PKForge
+Features	Возможности
+Developed by	Разработчик
+Design by	Дизайн
+Summary · {0}	Сводка · {0}
+Trainer card · {0}	Карточка тренера · {0}
+Start at box {0}	Начать с бокса {0}
+Wallpaper…	Обои…
+Lock / unlock	Включить / снять защиту
+Items & care	Предметы и уход
+Scope	Область
+How it works	Как это работает
+Which way round?	В каком порядке?
+Section	Раздел
+More…	Ещё…
+More · {0}	Ещё · {0}
+Yours	Твои данные
+Yours (your name & ID)	Твои данные (имя и ID)
+Set me as handler	Назначить меня текущим тренером
+Use this set	Использовать этот набор
+Version	Версия
+Format	Формат
+A restore point first	Сначала точка восстановления
+One backed-up write.	Одна запись с резервной копией.
+Every change makes a restore point first.	Перед каждым изменением создаётся точка восстановления.
+Validating, backing up, writing.	Проверка, резервное копирование, запись.

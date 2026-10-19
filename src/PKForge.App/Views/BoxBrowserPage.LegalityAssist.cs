@@ -15,12 +15,12 @@ public sealed partial class BoxBrowserPage
 {
     // ── Bulk actions (multi-select) ──
 
-    private const string BulkLegalize = "Legalize selection";
-    private const string BulkShiny = "Make shiny";
-    private const string BulkUnshiny = "Remove shiny";
-    private const string BulkHandler = "Set me as handler";
-    private const string BulkHeal = "Heal selection";
-    private const string BulkClones = "Delete clones";
+    private const string BulkLegalize = "Исправить выбранных";
+    private const string BulkShiny = "Сделать шайни";
+    private const string BulkUnshiny = "Убрать шайни";
+    private const string BulkHandler = "Назначить меня текущим тренером";
+    private const string BulkHeal = "Вылечить выбранных";
+    private const string BulkClones = "Удалить клонов";
 
     /// <summary>The bulk entries for the organizer menu, without the ones Hardcore refuses.</summary>
     private IEnumerable<PadOption> BulkOptions()
@@ -46,7 +46,7 @@ public sealed partial class BoxBrowserPage
                 var legalizer = IPlatformApplication.Current?.Services.GetService<ILegalizerService>();
                 if (legalizer is null) return true;
                 await RunBulkAsync(BulkLegalize, "Every illegal marked Pokémon is rewritten to its closest legal version; legal ones are left alone.",
-                    "Legalizing…", (s, slots, report) => legalizer.LegalizeSlots(s, slots, report));
+                    "Исправление легальности…", (s, slots, report) => legalizer.LegalizeSlots(s, slots, report));
                 return true;
             }
             case BulkShiny or BulkUnshiny:
@@ -54,11 +54,11 @@ public sealed partial class BoxBrowserPage
                 var shiny = choice == BulkShiny;
                 var hax = HaXMode.IsOn;
                 await RunBulkAsync(choice, (shiny
-                        ? "Marked Pokémon become shiny. "
-                        : "Marked Pokémon lose their shininess. ") +
+                        ? "Отмеченные покемоны станут шайни. "
+                        : "Отмеченные покемоны перестанут быть шайни. ") +
                     (hax ? "HaX mode: the PID is rewritten even when that breaks legality."
                         : "A legal Pokémon is only changed when a legal version of it exists (shiny-locked ones stay as they are)."),
-                    shiny ? "Making shiny…" : "Removing shiny…",
+                    shiny ? "Превращение в шайни…" : "Удаление статуса шайни…",
                     (s, slots, report) => BulkBoxActions.SetShiny(s, slots, shiny, keepLegal: !hax, report)
                         .ToOutcome(shiny ? "Made shiny:" : "Removed shiny from"));
                 return true;
@@ -119,13 +119,13 @@ public sealed partial class BoxBrowserPage
         var targets = extras.Except(locked).ToList();
         if (targets.Count == 0)
         {
-            _viewModel.Status = extras.Count == 0 ? "No clones among the marked Pokémon." : "Every extra clone is locked against release.";
+            _viewModel.Status = extras.Count == 0 ? "Среди отмеченных покемонов клонов нет." : "Every extra clone is locked against release.";
             return;
         }
         var lockedNote = locked.Count > 0 ? $" {locked.Count} locked clone(s) stay." : "";
-        var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Delete clones?",
+        var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Удалить клонов?",
             $"{targets.Count} duplicate(s) share an identity (EC + PID, or PID + OT + TID) with another marked Pokémon. One of each is kept (a party member first).{lockedNote} The current state stays available as a restore point.",
-            "Delete clones");
+            "Удалить клонов");
         if (!confirmed) return;
         await _viewModel.BulkReleaseAsync(targets);
         _canvas.InvalidateSurface();
@@ -133,10 +133,10 @@ public sealed partial class BoxBrowserPage
 
     // ── Showdown team / box import ──
 
-    private const string ImportThisBox = "This box";
+    private const string ImportThisBox = "Этот бокс";
     private const string ImportOnward = "This box and the next ones";
-    private const string ImportPickBox = "Choose a box…";
-    private const string ImportParty = "The party";
+    private const string ImportPickBox = "Выбрать бокс…";
+    private const string ImportParty = "Команда";
 
     /// <summary>
     /// Paste many sets, see each one's legality after an offline dry run, choose which to
@@ -169,7 +169,7 @@ public sealed partial class BoxBrowserPage
         finally { overlay.Close(); }
         if (previews.Count == 0)
         {
-            await PadMenu.ShowAsync(_hostGrid, title, "No Showdown set was found in that text.", "OK");
+            await PadMenu.ShowAsync(_hostGrid, title, "В тексте не найден набор Showdown.", "OK");
             return;
         }
 
@@ -206,12 +206,12 @@ public sealed partial class BoxBrowserPage
             return;
         }
         var fits = Math.Min(picked.Count, targets.Count);
-        var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Import sets?",
+        var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Импортировать наборы?",
             $"{fits} Pokémon go into empty slots" + (picked.Count > targets.Count ? $"; {picked.Count - targets.Count} do not fit and are skipped" : "") +
-            ". Nothing is overwritten. The current state stays available as a restore point.", "Import");
+            ". Nothing is overwritten. The current state stays available as a restore point.", "Импорт");
         if (!confirmed) return;
 
-        var place = LoadingOverlay.Show(_hostGrid, "Placing the sets…", "One backed-up write.");
+        var place = LoadingOverlay.Show(_hostGrid, "Placing the sets…", "Одна запись с резервной копией.");
         try
         {
             await _viewModel.RunMutationAsync(s => ShowdownTeamService.Place(s, legalizer, picked, targets, hax),
@@ -238,7 +238,7 @@ public sealed partial class BoxBrowserPage
         if (box == -1)
         {
             var party = ShowdownTeamService.EmptySlots(session, -1, onlyThisBox: true);
-            var partyChoice = await PadMenu.ShowAsync(_hostGrid, "Import where?", null,
+            var partyChoice = await PadMenu.ShowAsync(_hostGrid, "Куда импортировать?", null,
                 new PadOption($"{ImportParty} · {party.Count} free", IconPath: "party"),
                 new PadOption($"{ImportPickBox}", IconPath: "box"));
             if (partyChoice is null) return null;
@@ -248,7 +248,7 @@ public sealed partial class BoxBrowserPage
 
         var here = ShowdownTeamService.EmptySlots(session, box, onlyThisBox: true);
         var onward = ShowdownTeamService.EmptySlots(session, box, onlyThisBox: false);
-        var choice = await PadMenu.ShowAsync(_hostGrid, "Import where?", $"{needed} set(s) to place into empty slots.",
+        var choice = await PadMenu.ShowAsync(_hostGrid, "Куда импортировать?", $"{needed} set(s) to place into empty slots.",
             new PadOption($"{ImportThisBox} · {here.Count} empty", IconPath: "box", Detail: $"Box {box + 1:00} only"),
             new PadOption($"{ImportOnward} · {onward.Count} empty", IconPath: "all", Detail: $"From box {box + 1:00} onward"),
             new PadOption(ImportPickBox, IconPath: "move"));
@@ -261,9 +261,9 @@ public sealed partial class BoxBrowserPage
     private async Task<IReadOnlyList<SlotRef>?> PickBoxAsync(ISaveEngineSession session)
     {
         var boxes = Enumerable.Range(0, _viewModel.BoxCount)
-            .Select(b => new PadOption($"Box {b + 1:00}", Detail: $"{ShowdownTeamService.EmptySlots(session, b, onlyThisBox: true).Count} empty"))
+            .Select(b => new PadOption($"Бокс {b + 1:00}", Detail: $"{ShowdownTeamService.EmptySlots(session, b, onlyThisBox: true).Count} empty"))
             .ToArray();
-        var target = await PadMenu.ShowAsync(_hostGrid, "Import into which box?", null, boxes);
+        var target = await PadMenu.ShowAsync(_hostGrid, "В какой бокс импортировать?", null, boxes);
         if (target is null) return null;
         var index = Array.FindIndex(boxes, b => b.Label == target);
         return index < 0 ? null : ShowdownTeamService.EmptySlots(session, index, onlyThisBox: true);
@@ -277,7 +277,7 @@ public sealed partial class BoxBrowserPage
     {
         var session = _sessionsFor();
         if (HardcoreMode.IsOn || session is null || !session.SupportsLegalityAnalysis) return false;
-        await RunSubEditorAsync(LegalityReportEditor.ShowAsync, "Legality fixes applied");
+        await RunSubEditorAsync(LegalityReportEditor.ShowAsync, "Исправления легальности применены");
         _canvas.InvalidateSurface();
         return true;
     }

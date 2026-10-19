@@ -17,15 +17,15 @@ public sealed class BackupHistoryPage : ContentPage, IPadHandler
     {
         _viewModel = viewModel;
         BindingContext = viewModel;
-        Title = "Restore points";
+        Title = "Точки восстановления";
         BackgroundColor = UiTokens.Housing;
         NavigationPage.SetHasNavigationBar(this, false);
 
-        var back = Kit.MiniCapsule("Back", UiTokens.Ink0);
+        var back = Kit.MiniCapsule("Назад", UiTokens.Ink0);
         back.WidthRequest = 72;
         back.Clicked += async (_, _) => await Navigation.PopAsync();
 
-        var header = Kit.HeaderBar("Restore points");
+        var header = Kit.HeaderBar("Точки восстановления");
         header.VerticalOptions = LayoutOptions.Center;
         var titleRow = new Grid
         {
@@ -161,8 +161,8 @@ public sealed class BackupHistoryPage : ContentPage, IPadHandler
                 Name = "CommonStates",
                 States =
                 {
-                    new VisualState { Name = "Normal", Setters = { new Setter { Property = Border.StrokeProperty, Value = Colors.Transparent }, new Setter { Property = VisualElement.BackgroundColorProperty, Value = UiTokens.RowStripe } } },
-                    new VisualState { Name = "Selected", Setters = { new Setter { Property = Border.StrokeProperty, Value = UiTokens.Rim }, new Setter { Property = VisualElement.BackgroundColorProperty, Value = UiTokens.SelectFill } } },
+                    new VisualState { Name = "Обычный", Setters = { new Setter { Property = Border.StrokeProperty, Value = Colors.Transparent }, new Setter { Property = VisualElement.BackgroundColorProperty, Value = UiTokens.RowStripe } } },
+                    new VisualState { Name = "Выбрано", Setters = { new Setter { Property = Border.StrokeProperty, Value = UiTokens.Rim }, new Setter { Property = VisualElement.BackgroundColorProperty, Value = UiTokens.SelectFill } } },
                 },
             },
         });
@@ -193,7 +193,7 @@ public sealed class BackupHistoryPage : ContentPage, IPadHandler
     {
         if (!_viewModel.CanRestore)
         {
-            await PadMenu.ShowAsync(_hostGrid, "Restore", "Connect to a save first - restoring writes into the connected save.", "OK");
+            await PadMenu.ShowAsync(_hostGrid, "Восстановить", "Сначала подключи сохранение: восстановление записывает данные в него.", "OK");
             return;
         }
 
@@ -205,9 +205,9 @@ public sealed class BackupHistoryPage : ContentPage, IPadHandler
         }
 
         var confirmed = await PadMenu.ConfirmAsync(_hostGrid,
-            "Restore this point?",
-            $"Write the {backup.CreatedUtc:yyyy-MM-dd HH:mm} UTC restore point into the connected save? The current state is preserved as a new restore point first.",
-            "Restore");
+            "Восстановить эту точку?",
+            $"Восстановить подключённое сохранение из точки {backup.CreatedUtc:yyyy-MM-dd HH:mm} UTC? Текущее состояние сначала будет сохранено в новой точке восстановления.",
+            "Восстановить");
         if (confirmed)
             await _viewModel.RestoreAsync(backup);
     }
@@ -219,14 +219,14 @@ public sealed class BackupHistoryPage : ContentPage, IPadHandler
     /// </summary>
     private async Task<bool> ConfirmHardcoreRestoreAsync(BackupInfo backup)
     {
-        const string Cancel = "Cancel (keep current save)";
-        const string Anyway = "Restore anyway";
+        const string Cancel = "Отмена (оставить текущее сохранение)";
+        const string Anyway = "Всё равно восстановить";
         var check = await _viewModel.CheckResurrectionAsync(backup);
         if (check is { IsSafe: true })
-            return await PadMenu.ConfirmAsync(_hostGrid, "Restore this point?",
+            return await PadMenu.ConfirmAsync(_hostGrid, "Восстановить эту точку?",
                 $"Write the {backup.CreatedUtc:yyyy-MM-dd HH:mm} UTC restore point into the connected save? " +
-                "No Pokémon that has left this save since then would come back. The current state is preserved as a new restore point first.",
-                "Restore");
+                "Ушедшие из сохранения покемоны не вернутся. Текущее состояние сначала сохранится в новой точке восстановления.",
+                "Восстановить");
 
         string message;
         if (check is null)
@@ -248,14 +248,14 @@ public sealed class BackupHistoryPage : ContentPage, IPadHandler
                 "Release or withdraw those copies yourself if you restore.";
         }
 
-        var choice = await PadMenu.ShowAsync(_hostGrid, "Duplication risk", message, Cancel, Anyway);
+        var choice = await PadMenu.ShowAsync(_hostGrid, "Риск дублирования", message, Cancel, Anyway);
         return choice == Anyway;
     }
 
     private static string Describe(SlotSummary slot)
     {
         var name = slot.Nickname ?? $"#{slot.Species:000}";
-        if (slot.IsEgg) name = $"Egg #{slot.Species:000}";
+        if (slot.IsEgg) name = $"Яйцо №{slot.Species:000}";
         return slot.IsShiny ? $"{name} (shiny)" : name;
     }
 }

@@ -14,14 +14,14 @@ namespace PKForge.App.Views;
 /// </summary>
 public static class WorldEventsMenu
 {
-    private const string Clock = "Clock repair";
-    private const string Roamers = "Roaming legendaries";
-    private const string Resets = "Re-arm one-time encounters";
+    private const string Clock = "Исправление часов";
+    private const string Roamers = "Бродячие легендарные покемоны";
+    private const string Resets = "Сбросить разовые встречи";
     private const string Entralink = "Entralink & Dream World";
     private const string Apricorns = "Apricorn Box";
     private const string Walker = "Pokéwalker";
-    private const string Honey = "Honey trees";
-    private const string KeyItems = "Key item events";
+    private const string Honey = "Медовые деревья";
+    private const string KeyItems = "События ключевых предметов";
 
     /// <summary>True when the open game has anything to show here (the SAVE DATA entry is hidden otherwise).</summary>
     public static bool HasAny(ISaveEngineSession session) => Options(session).Length != 0;
@@ -32,8 +32,8 @@ public static class WorldEventsMenu
         {
             var options = Options(session);
             if (options.Length == 0) return;
-            var note = HardcoreMode.IsOn ? HardcoreMode.StatusFor(SaveAction.EditWorld) : "Every change makes a restore point first.";
-            var choice = await PadMenu.ShowAsync(host, "World & events", note, options);
+            var note = HardcoreMode.IsOn ? HardcoreMode.StatusFor(SaveAction.EditWorld) : "Перед каждым изменением создаётся точка восстановления.";
+            var choice = await PadMenu.ShowAsync(host, "Мир и события", note, options);
             switch (choice)
             {
                 case Clock: await ClockRepairEditor.ShowAsync(host, session, viewModel); break;

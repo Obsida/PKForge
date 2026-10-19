@@ -9,7 +9,7 @@ namespace PKForge.App.Views;
 /// </summary>
 public static class CosmeticsEditor
 {
-    private static readonly string[] ContestNames = ["Cool", "Beauty", "Cute", "Smart", "Tough", "Sheen"];
+    private static readonly string[] ContestNames = ["Крутость", "Красота", "Миловидность", "Ум", "Крепость", "Блеск"];
 
     public static async Task<bool> ShowAsync(Grid host, ISaveEngineSession session, int box, int slot)
     {
@@ -18,26 +18,26 @@ public static class CosmeticsEditor
         {
             var c = session.GetCosmetics(box, slot);
             var options = new List<PadOption>();
-            if (c.Markings.Count != 0) options.Add(new PadOption($"Box markings · {c.Markings.Count(m => m.Value != 0)}/{c.Markings.Count}",
-                Detail: "The circle, heart and other symbols shown in the box."));
-            if (c.ContestStats.Count != 0) options.Add(new PadOption($"Contest stats · {c.ContestStats.Sum()}/1530",
+            if (c.Markings.Count != 0) options.Add(new PadOption($"Отметки в боксе · {c.Markings.Count(m => m.Value != 0)}/{c.Markings.Count}",
+                Detail: "Круг, сердце и другие символы в боксе."));
+            if (c.ContestStats.Count != 0) options.Add(new PadOption($"Конкурсные показатели · {c.ContestStats.Sum()}/1530",
                 Detail: "Cool, Beauty, Cute, Smart, Tough and Sheen, used in contests."));
-            if (c.SupportsSize || c.SupportsScale) options.Add(new PadOption("Size", Detail: "The hidden values behind its height, weight or size."));
-            if (c.SupportsAffection || c.SupportsFullnessEnjoyment) options.Add(new PadOption("Care", Detail: "Affection, fullness and enjoyment."));
+            if (c.SupportsSize || c.SupportsScale) options.Add(new PadOption("Размер", Detail: "Внутренние значения роста, веса и размера."));
+            if (c.SupportsAffection || c.SupportsFullnessEnjoyment) options.Add(new PadOption("Уход", Detail: "Привязанность, сытость и удовольствие."));
             if (HasSpecial(c)) options.Add(new PadOption("Special", Detail: "Favorite, Dynamax, Alpha and sociability, where the game has them."));
 
             if (options.Count == 0)
             {
-                await EditorMenu.ShowAsync(host, "Cosmetics", "This Pokémon format has no cosmetic data.", "OK");
+                await EditorMenu.ShowAsync(host, "Внешность", "В этом формате нет данных внешности.", "OK");
                 return dirty;
             }
 
-            var choice = await EditorMenu.ShowAsync(host, "Cosmetics", null, options.ToArray());
+            var choice = await EditorMenu.ShowAsync(host, "Внешность", null, options.ToArray());
             if (choice is null) return dirty;
-            if (choice.StartsWith("Box markings", StringComparison.Ordinal)) dirty |= await EditMarkingsAsync(host, session, box, slot);
-            else if (choice.StartsWith("Contest stats", StringComparison.Ordinal)) dirty |= await EditContestAsync(host, session, box, slot);
-            else if (choice == "Size") dirty |= await EditSizeAsync(host, session, box, slot);
-            else if (choice == "Care") dirty |= await EditCareAsync(host, session, box, slot);
+            if (choice.StartsWith("Отметки в боксе", StringComparison.Ordinal)) dirty |= await EditMarkingsAsync(host, session, box, slot);
+            else if (choice.StartsWith("Конкурсные показатели", StringComparison.Ordinal)) dirty |= await EditContestAsync(host, session, box, slot);
+            else if (choice == "Размер") dirty |= await EditSizeAsync(host, session, box, slot);
+            else if (choice == "Уход") dirty |= await EditCareAsync(host, session, box, slot);
             else if (choice == "Special") dirty |= await EditSpecialAsync(host, session, box, slot);
         }
     }
@@ -51,7 +51,7 @@ public static class CosmeticsEditor
         {
             var c = session.GetCosmetics(box, slot);
             var items = c.Markings.Select((m, i) => new PickItem(i, $"{m.Name} · {MarkingValueName(m.Value, m.MaxValue)}")).ToList();
-            var picked = await PickerMenu.ShowAsync(host, "Box markings", items);
+            var picked = await PickerMenu.ShowAsync(host, "Отметки в боксе", items);
             if (picked is null) return dirty;
 
             var marking = c.Markings[picked.Id];
@@ -69,12 +69,12 @@ public static class CosmeticsEditor
         if (marking.MaxValue == 1)
         {
             var choice = await EditorMenu.ShowAsync(host, marking.Name, null,
-                new PadOption("Off"), new PadOption("On"));
-            return choice switch { "Off" => 0, "On" => 1, _ => null };
+                new PadOption("Выкл"), new PadOption("On"));
+            return choice switch { "Выкл" => 0, "On" => 1, _ => null };
         }
         var color = await EditorMenu.ShowAsync(host, marking.Name, null,
-            new PadOption("Off"), new PadOption("Blue"), new PadOption("Pink"));
-        return color switch { "Off" => 0, "Blue" => 1, "Pink" => 2, _ => null };
+            new PadOption("Выкл"), new PadOption("Blue"), new PadOption("Pink"));
+        return color switch { "Выкл" => 0, "Blue" => 1, "Pink" => 2, _ => null };
     }
 
     private static async Task<bool> EditContestAsync(Grid host, ISaveEngineSession session, int box, int slot)
@@ -84,13 +84,13 @@ public static class CosmeticsEditor
         {
             var c = session.GetCosmetics(box, slot);
             var options = ContestNames.Select((name, i) => new PadOption($"{name} · {c.ContestStats[i]}/255")).ToList();
-            options.Add(new PadOption("Max all", IconPath: "fill"));
+            options.Add(new PadOption("Максимум всем", IconPath: "fill"));
             options.Add(new PadOption("Clear all", IconPath: "clear"));
-            var choice = await EditorMenu.ShowAsync(host, "Contest stats", null, options.ToArray());
+            var choice = await EditorMenu.ShowAsync(host, "Конкурсные показатели", null, options.ToArray());
             if (choice is null) return dirty;
 
             var values = c.ContestStats.ToArray();
-            if (choice == "Max all") values = [255, 255, 255, 255, 255, 255];
+            if (choice == "Максимум всем") values = [255, 255, 255, 255, 255, 255];
             else if (choice == "Clear all") values = [0, 0, 0, 0, 0, 0];
             else
             {
@@ -109,53 +109,44 @@ public static class CosmeticsEditor
     private static async Task<bool> EditSizeAsync(Grid host, ISaveEngineSession session, int box, int slot)
     {
         var c = session.GetCosmetics(box, slot);
-        var options = new List<PadOption>();
+        var fields = new List<(PadOption Option, int Value, Func<int, CosmeticEdit> Edit)>();
         if (c.SupportsSize)
         {
-            options.Add(new PadOption($"Height scalar · {c.HeightScalar}/255", Detail: "0 is the shortest, 255 the tallest."));
-            options.Add(new PadOption($"Weight scalar · {c.WeightScalar}/255", Detail: "0 is the lightest, 255 the heaviest."));
+            fields.Add((new PadOption($"Масштаб роста · {c.HeightScalar}/255", Detail: "0 — самый низкий, 255 — самый высокий."), c.HeightScalar, n => new CosmeticEdit(HeightScalar: n)));
+            fields.Add((new PadOption($"Масштаб веса · {c.WeightScalar}/255", Detail: "0 — самый лёгкий, 255 — самый тяжёлый."), c.WeightScalar, n => new CosmeticEdit(WeightScalar: n)));
         }
-        if (c.SupportsScale) options.Add(new PadOption($"Scale · {c.Scale}/255", Detail: "0 is the smallest, 255 the largest."));
-        var choice = await EditorMenu.ShowAsync(host, "Size", null, options.ToArray());
-        if (choice is null) return false;
-
-        var current = choice.StartsWith("Height", StringComparison.Ordinal) ? c.HeightScalar
-            : choice.StartsWith("Weight", StringComparison.Ordinal) ? c.WeightScalar : c.Scale;
-        var value = await StatsPopup.ShowSingleAsync(host, choice.Split('·')[0].Trim(), current, 255);
-        if (value is not { } next || next == current) return false;
-        var edit = choice.StartsWith("Height", StringComparison.Ordinal) ? new CosmeticEdit(HeightScalar: next)
-            : choice.StartsWith("Weight", StringComparison.Ordinal) ? new CosmeticEdit(WeightScalar: next)
-            : new CosmeticEdit(Scale: next);
-        session.ApplyCosmeticEdit(box, slot, edit);
+        if (c.SupportsScale) fields.Add((new PadOption($"Масштаб размера · {c.Scale}/255", Detail: "0 — самый маленький, 255 — самый большой."), c.Scale, n => new CosmeticEdit(Scale: n)));
+        var choice = await EditorMenu.ShowAsync(host, "Размер", null, fields.Select(f => f.Option).ToArray());
+        var index = fields.FindIndex(field => field.Option.Label == choice);
+        if (index < 0) return false;
+        var selected = fields[index];
+        var value = await StatsPopup.ShowSingleAsync(host, selected.Option.Label.Split('·')[0].Trim(), selected.Value, 255);
+        if (value is not { } next || next == selected.Value) return false;
+        session.ApplyCosmeticEdit(box, slot, selected.Edit(next));
         return true;
     }
 
     private static async Task<bool> EditCareAsync(Grid host, ISaveEngineSession session, int box, int slot)
     {
         var c = session.GetCosmetics(box, slot);
-        var options = new List<PadOption>();
+        var fields = new List<(PadOption Option, int Value, Func<int, CosmeticEdit> Edit)>();
         if (c.SupportsAffection)
         {
-            options.Add(new PadOption($"OT affection · {c.OriginalTrainerAffection}/255", Detail: "Affection toward its original trainer."));
-            options.Add(new PadOption($"Handler affection · {c.HandlingTrainerAffection}/255", Detail: "Affection toward the trainer it was traded to."));
+            fields.Add((new PadOption($"Привязанность к исходному тренеру · {c.OriginalTrainerAffection}/255"), c.OriginalTrainerAffection, n => new CosmeticEdit(OriginalTrainerAffection: n)));
+            fields.Add((new PadOption($"Привязанность к текущему тренеру · {c.HandlingTrainerAffection}/255"), c.HandlingTrainerAffection, n => new CosmeticEdit(HandlingTrainerAffection: n)));
         }
         if (c.SupportsFullnessEnjoyment)
         {
-            options.Add(new PadOption($"Fullness · {c.Fullness}/255"));
-            options.Add(new PadOption($"Enjoyment · {c.Enjoyment}/255"));
+            fields.Add((new PadOption($"Сытость · {c.Fullness}/255"), c.Fullness, n => new CosmeticEdit(Fullness: n)));
+            fields.Add((new PadOption($"Удовольствие · {c.Enjoyment}/255"), c.Enjoyment, n => new CosmeticEdit(Enjoyment: n)));
         }
-        var choice = await EditorMenu.ShowAsync(host, "Care", null, options.ToArray());
-        if (choice is null) return false;
-        var current = choice.StartsWith("OT", StringComparison.Ordinal) ? c.OriginalTrainerAffection
-            : choice.StartsWith("Handler", StringComparison.Ordinal) ? c.HandlingTrainerAffection
-            : choice.StartsWith("Fullness", StringComparison.Ordinal) ? c.Fullness : c.Enjoyment;
-        var value = await StatsPopup.ShowSingleAsync(host, choice.Split('·')[0].Trim(), current, 255);
-        if (value is not { } next || next == current) return false;
-        var edit = choice.StartsWith("OT", StringComparison.Ordinal) ? new CosmeticEdit(OriginalTrainerAffection: next)
-            : choice.StartsWith("Handler", StringComparison.Ordinal) ? new CosmeticEdit(HandlingTrainerAffection: next)
-            : choice.StartsWith("Fullness", StringComparison.Ordinal) ? new CosmeticEdit(Fullness: next)
-            : new CosmeticEdit(Enjoyment: next);
-        session.ApplyCosmeticEdit(box, slot, edit);
+        var choice = await EditorMenu.ShowAsync(host, "Уход", null, fields.Select(f => f.Option).ToArray());
+        var index = fields.FindIndex(field => field.Option.Label == choice);
+        if (index < 0) return false;
+        var selected = fields[index];
+        var value = await StatsPopup.ShowSingleAsync(host, selected.Option.Label.Split('·')[0].Trim(), selected.Value, 255);
+        if (value is not { } next || next == selected.Value) return false;
+        session.ApplyCosmeticEdit(box, slot, selected.Edit(next));
         return true;
     }
 
@@ -163,34 +154,36 @@ public static class CosmeticsEditor
     {
         var c = session.GetCosmetics(box, slot);
         var options = new List<PadOption>();
-        if (c.SupportsFavorite) options.Add(new PadOption($"Favorite · {(c.IsFavorite ? "on" : "off")}"));
+        var keys = new Dictionary<string, string>();
+        void Add(string key, PadOption option) { options.Add(option); keys[option.Label] = key; }
+        if (c.SupportsFavorite) Add("favorite", new PadOption($"Избранный · {(c.IsFavorite ? "вкл" : "выкл")}"));
         if (c.SupportsDynamax)
         {
-            options.Add(new PadOption($"Dynamax level · {c.DynamaxLevel}/10", Detail: "Each level adds HP while it is Dynamaxed."));
-            options.Add(new PadOption($"Gigantamax factor · {(c.CanGigantamax ? "on" : "off")}", Detail: "Lets it Gigantamax if its species has that form."));
+            Add("dynamax", new PadOption($"Уровень динамакса · {c.DynamaxLevel}/10", Detail: "Каждый уровень увеличивает HP в состоянии динамакса."));
+            Add("gmax", new PadOption($"Фактор гигантамакса · {(c.CanGigantamax ? "вкл" : "выкл")}", Detail: "Разрешает гигантамакс, если у вида есть такая форма."));
         }
-        if (c.SupportsAlpha) options.Add(new PadOption($"Alpha · {(c.IsAlpha ? "on" : "off")}", Detail: "Marks it as an Alpha, the bigger kind from the Legends games."));
-        if (c.SupportsSociability) options.Add(new PadOption($"Sociability · {c.Sociability}"));
-        var choice = await EditorMenu.ShowAsync(host, "Special", null, options.ToArray());
-        if (choice is null) return false;
+        if (c.SupportsAlpha) Add("alpha", new PadOption($"Альфа · {(c.IsAlpha ? "вкл" : "выкл")}", Detail: "Отметить покемона как крупную альфа-особь из игр Legends."));
+        if (c.SupportsSociability) Add("social", new PadOption($"Общительность · {c.Sociability}"));
+        var choice = await EditorMenu.ShowAsync(host, "Особые параметры", null, options.ToArray());
+        if (choice is null || !keys.TryGetValue(choice, out var key)) return false;
 
-        if (choice.StartsWith("Dynamax level", StringComparison.Ordinal))
+        if (key == "dynamax")
         {
-            var value = await StatsPopup.ShowSingleAsync(host, "Dynamax level", c.DynamaxLevel, 10);
+            var value = await StatsPopup.ShowSingleAsync(host, "Уровень динамакса", c.DynamaxLevel, 10);
             if (value is not { } next || next == c.DynamaxLevel) return false;
             session.ApplyCosmeticEdit(box, slot, new CosmeticEdit(DynamaxLevel: next));
             return true;
         }
-        if (choice.StartsWith("Sociability", StringComparison.Ordinal))
+        if (key == "social")
         {
-            var value = await StatsPopup.ShowSingleAsync(host, "Sociability", (int)Math.Min(c.Sociability, int.MaxValue), int.MaxValue);
+            var value = await StatsPopup.ShowSingleAsync(host, "Общительность", (int)Math.Min(c.Sociability, int.MaxValue), int.MaxValue);
             if (value is not { } next || (uint)next == c.Sociability) return false;
             session.ApplyCosmeticEdit(box, slot, new CosmeticEdit(Sociability: (uint)next));
             return true;
         }
-        if (choice.StartsWith("Favorite", StringComparison.Ordinal)) session.ApplyCosmeticEdit(box, slot, new CosmeticEdit(IsFavorite: !c.IsFavorite));
-        else if (choice.StartsWith("Gigantamax", StringComparison.Ordinal)) session.ApplyCosmeticEdit(box, slot, new CosmeticEdit(CanGigantamax: !c.CanGigantamax));
-        else if (choice.StartsWith("Alpha", StringComparison.Ordinal)) session.ApplyCosmeticEdit(box, slot, new CosmeticEdit(IsAlpha: !c.IsAlpha));
+        if (key == "favorite") session.ApplyCosmeticEdit(box, slot, new CosmeticEdit(IsFavorite: !c.IsFavorite));
+        else if (key == "gmax") session.ApplyCosmeticEdit(box, slot, new CosmeticEdit(CanGigantamax: !c.CanGigantamax));
+        else if (key == "alpha") session.ApplyCosmeticEdit(box, slot, new CosmeticEdit(IsAlpha: !c.IsAlpha));
         else return false;
         return true;
     }

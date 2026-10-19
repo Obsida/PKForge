@@ -32,7 +32,7 @@ public static class EventGallery
 
         // Loading the archive (extract + index once per generation) and describing ~1k cards
         // happens off the UI thread; a small overlay covers the first-open beat.
-        var loading = LoadingOverlay.Show(host, "Mystery gift", "Opening the card album…");
+        var loading = LoadingOverlay.Show(host, "Mystery gift", "Открытие альбома карточек…");
         EventGiftSaveProfile? profile;
         IReadOnlyList<WonderCardEntry> entries;
         try
@@ -75,7 +75,7 @@ public static class EventGallery
         {
             if (slot < 0)
             {
-                viewModel.Status = "No empty slot in this box for the gift.";
+                viewModel.Status = "В этом боксе нет свободной ячейки для подарка.";
                 return;
             }
             received = await viewModel.RunMutationAsync(s => service.Receive(s, gift.Id, viewModel.BoxIndex, slot), slot, action: SaveAction.InjectEvent);
@@ -356,7 +356,7 @@ public static class EventGallery
         if (gift.Kind == EventGiftKind.Item)
         {
             var items = gift.Details?.Items ?? [];
-            if (items.Count == 0) return "Item";
+            if (items.Count == 0) return "Предмет";
             var first = items[0].Quantity > 1 ? $"{items[0].Name} x{items[0].Quantity}" : items[0].Name;
             return items.Count > 1 ? $"{first} + {items.Count - 1} more" : first;
         }
@@ -364,7 +364,7 @@ public static class EventGallery
     }
 
     private static string DateText(WonderCardEntry e) =>
-        e.Date is { } d ? d.ToString("yyyy-MM-dd") : e.Year?.ToString() ?? "Undated";
+        e.Date is { } d ? d.ToString("yyyy-MM-dd") : e.Year?.ToString() ?? "Без даты";
 
     // ── Item icons (bag art, cached) ────────────────────────────────────────────
 
@@ -492,12 +492,12 @@ public static class EventGallery
             Grid.SetColumn(_preview, 1);
 
             var hints = Kit.WindowHints(
-                ("A", "Open", OpenCard),
-                ("X", "Search", FocusSearch),
-                ("Y", "Filters", () => _ = ShowFilterMenuAsync()),
-                ("LR", "Section", () => OnPadButton(PadButton.R)),
-                ("+", "Sort", CycleSort),
-                ("B", "Back", () => Close(null)));
+                ("A", "Открыть", OpenCard),
+                ("X", "Поиск", FocusSearch),
+                ("Y", "Фильтры", () => _ = ShowFilterMenuAsync()),
+                ("LR", "Раздел", () => OnPadButton(PadButton.R)),
+                ("+", "Сортировка", CycleSort),
+                ("B", "Назад", () => Close(null)));
 
             var content = new Grid
             {
@@ -631,14 +631,14 @@ public static class EventGallery
             var size = BeginDp(c, args.Info);
             var strip = new SKRect(0, 1, size.Width - 3, size.Height - 2);
             using var title = Font(15.5f);
-            PksmPaint.HeaderStrip(c, strip, "Mystery Gift", title, Pksm.GiftPinkLight);
+            PksmPaint.HeaderStrip(c, strip, "Таинственный подарок", title, Pksm.GiftPinkLight);
             using var small = Font(12.5f);
             var counts = _page.Items.Count == _page.Total
                 ? $"{_page.Total} cards"
                 : $"{_page.Items.Count} of {_page.Total}";
             var received = _page.ReceivedCount > 0 ? $"  ·  {_page.ReceivedCount} received" : "";
             using var ink = new SKPaint { Color = Pksm.Ink, IsAntialias = true };
-            var text = Fit(small, counts + received, strip.Width - title.MeasureText("Mystery Gift") - 34);
+            var text = Fit(small, counts + received, strip.Width - title.MeasureText("Таинственный подарок") - 34);
             Text(c, text, strip.Right - 10, strip.MidY + small.Size * 0.36f, SKTextAlign.Right, small, ink);
         }
 
@@ -646,18 +646,18 @@ public static class EventGallery
         {
             var q = _query;
             if (_ctx.Profile is not null)
-                yield return ("Fits save", q.CompatibleOnly, () => Set(q with { CompatibleOnly = !q.CompatibleOnly }));
-            yield return (q.Kind switch { WonderCardKindFilter.Pokemon => "Pokémon", WonderCardKindFilter.Items => "Items", _ => "All gifts" },
+                yield return ("Подходит сохранению", q.CompatibleOnly, () => Set(q with { CompatibleOnly = !q.CompatibleOnly }));
+            yield return (q.Kind switch { WonderCardKindFilter.Pokemon => "Pokémon", WonderCardKindFilter.Items => "Предметы", _ => "Все подарки" },
                 q.Kind != WonderCardKindFilter.All,
                 () => Set(q with { Kind = (WonderCardKindFilter)(((int)q.Kind + 1) % 3) }));
-            yield return ("Shiny", q.ShinyOnly, () => Set(q with { ShinyOnly = !q.ShinyOnly }));
-            yield return (q.Received switch { WonderCardReceivedFilter.NotReceived => "New only", WonderCardReceivedFilter.Received => "Received", _ => "Any status" },
+            yield return ("Шайни", q.ShinyOnly, () => Set(q with { ShinyOnly = !q.ShinyOnly }));
+            yield return (q.Received switch { WonderCardReceivedFilter.NotReceived => "Только новые", WonderCardReceivedFilter.Received => "Получено", _ => "Любой статус" },
                 q.Received != WonderCardReceivedFilter.Any,
                 () => Set(q with { Received = (WonderCardReceivedFilter)(((int)q.Received + 1) % 3) }));
             var extra = (q.Year is null ? 0 : 1) + (q.Species is null ? 0 : 1) + (q.Language is null ? 0 : 1) + (q.Series is null ? 0 : 1);
-            yield return (extra > 0 ? $"More · {extra}" : "More…", extra > 0, () => _ = ShowFilterMenuAsync());
-            yield return ($"Sort: {SortLabel(q.Sort)}", false, CycleSort);
-            yield return ($"Group: {GroupLabel(q.Grouping)}", false, CycleGrouping);
+            yield return (extra > 0 ? $"Ещё · {extra}" : "Ещё…", extra > 0, () => _ = ShowFilterMenuAsync());
+            yield return ($"Порядок: {SortLabel(q.Sort)}", false, CycleSort);
+            yield return ($"Группа: {GroupLabel(q.Grouping)}", false, CycleGrouping);
         }
 
         private void PaintChips(object? sender, SKPaintSurfaceEventArgs args)
@@ -702,22 +702,22 @@ public static class EventGallery
 
         private static string SortLabel(WonderCardSort sort) => sort switch
         {
-            WonderCardSort.Newest => "Newest",
-            WonderCardSort.Oldest => "Oldest",
-            WonderCardSort.CardNumber => "Card no.",
+            WonderCardSort.Newest => "Новые",
+            WonderCardSort.Oldest => "Старые",
+            WonderCardSort.CardNumber => "Номер карточки",
             WonderCardSort.DexNumber => "Dex no.",
             WonderCardSort.Title => "A-Z",
-            WonderCardSort.Level => "Level",
+            WonderCardSort.Level => "Уровень",
             _ => sort.ToString(),
         };
 
         private static string GroupLabel(WonderCardGrouping grouping) => grouping switch
         {
-            WonderCardGrouping.Year => "Year",
-            WonderCardGrouping.Series => "Event",
+            WonderCardGrouping.Year => "Год",
+            WonderCardGrouping.Series => "Событие",
             WonderCardGrouping.Games => "Game",
             WonderCardGrouping.Species => "Pokémon",
-            _ => "None",
+            _ => "Нет",
         };
 
         private void CycleSort() => Set(_query with { Sort = (WonderCardSort)(((int)_query.Sort + 1) % 6) });
@@ -750,8 +750,8 @@ public static class EventGallery
 
             if (_page.Items.Count == 0)
             {
-                Text(c, "No cards match.", panel.MidX, panel.MidY - 6, SKTextAlign.Center, title, ink);
-                Text(c, "Clear the search or relax the filters (Y).", panel.MidX, panel.MidY + 14, SKTextAlign.Center, small, soft);
+                Text(c, "Подходящих карточек нет.", panel.MidX, panel.MidY - 6, SKTextAlign.Center, title, ink);
+                Text(c, "Очисти поиск или ослабь фильтры (Y).", panel.MidX, panel.MidY + 14, SKTextAlign.Center, small, soft);
                 c.Restore();
                 return;
             }
@@ -814,7 +814,7 @@ public static class EventGallery
             var tagLeft = DrawTag(c, status, r.Top + 17, tagText, tagFont,
                 selected ? Pksm.LogoVoid.WithAlpha(0xA0) : Pksm.LogoDeck, Pksm.InkSoft, alignRight: true);
             if (e.Received) DrawCheck(c, status - 8, r.Bottom - 12, 7f);
-            else if (!e.Compatible) DrawTag(c, status, r.Bottom - 7, "Other lang.", tagFont, PksmPaint.Tone(Pksm.Illegal), Pksm.Ink, alignRight: true);
+            else if (!e.Compatible) DrawTag(c, status, r.Bottom - 7, "Другой язык", tagFont, PksmPaint.Tone(Pksm.Illegal), Pksm.Ink, alignRight: true);
 
             var titleW = tagLeft - textLeft - 6;
             Text(c, Fit(title, e.Title, titleW), textLeft, r.Top + 19, SKTextAlign.Left, title, ink);
@@ -891,7 +891,7 @@ public static class EventGallery
             Text(c, "WONDER CARD", card.Left + 12, card.Top + 18.5f, SKTextAlign.Left, bandFont, ink);
             if (Current is not { } e)
             {
-                Text(c, "No card selected", card.MidX, card.MidY, SKTextAlign.Center, title, soft);
+                Text(c, "Карточка не выбрана", card.MidX, card.MidY, SKTextAlign.Center, title, soft);
                 return;
             }
             Text(c, CardNumber(e.Gift), card.Right - 20, card.Top + 18.5f, SKTextAlign.Right, bandFont, faint);
@@ -925,9 +925,9 @@ public static class EventGallery
             var x = card.Left + 12;
             x = DrawTag(c, x, tagY, e.LanguageTag is { } lang ? lang : "ALL LANG.", tagFont, Pksm.LogoDeck.WithAlpha(0xD0), Pksm.Ink) + 4;
             if (e.Source?.Region is { } region) x = DrawTag(c, x, tagY, region, tagFont, Pksm.LogoDeck.WithAlpha(0xD0), Pksm.Ink) + 4;
-            if (e.Received) x = DrawTag(c, x, tagY, "Received", tagFont, PksmPaint.Tone(Pksm.Legal), Pksm.Ink) + 4;
-            else if (!e.Compatible) x = DrawTag(c, x, tagY, "Other language", tagFont, PksmPaint.Tone(Pksm.Illegal), Pksm.Ink) + 4;
-            else x = DrawTag(c, x, tagY, "New", tagFont, PksmPaint.Tone(Pksm.GiftRed), Pksm.Ink) + 4;
+            if (e.Received) x = DrawTag(c, x, tagY, "Получено", tagFont, PksmPaint.Tone(Pksm.Legal), Pksm.Ink) + 4;
+            else if (!e.Compatible) x = DrawTag(c, x, tagY, "Другой язык", tagFont, PksmPaint.Tone(Pksm.Illegal), Pksm.Ink) + 4;
+            else x = DrawTag(c, x, tagY, "Новый", tagFont, PksmPaint.Tone(Pksm.GiftRed), Pksm.Ink) + 4;
 
             // Printed facts, as many as fit.
             var facts = PreviewFacts(e).ToArray();
@@ -952,14 +952,14 @@ public static class EventGallery
                     yield return ("Also", item.Quantity > 1 ? $"{item.Name} x{item.Quantity}" : item.Name);
                 yield break;
             }
-            yield return ("OT", d is { OriginalTrainer.Length: > 0 } ? $"{d.OriginalTrainer}  ID {d.TrainerId}" : "Yours (your name & ID)");
-            if (e.Source is { Name.Length: > 0 } s) yield return ("Event", GiftTitles.TranslateEventName(s.Name) is { Length: > 0 } n ? n : s.Name);
-            if (d is { Moves.Count: > 0 }) yield return ("Moves", string.Join(", ", d.Moves));
-            yield return ("Item", d is { HeldItemName.Length: > 0 } ? d.HeldItemName : "None");
-            if (d is { BallName.Length: > 0 }) yield return ("Ball", d.BallName);
-            if (d is { MetLocation.Length: > 0 }) yield return ("Met", d.MetLocation);
+            yield return ("OT", d is { OriginalTrainer.Length: > 0 } ? $"{d.OriginalTrainer}  ID {d.TrainerId}" : "Твои данные (имя и ID)");
+            if (e.Source is { Name.Length: > 0 } s) yield return ("Событие", GiftTitles.TranslateEventName(s.Name) is { Length: > 0 } n ? n : s.Name);
+            if (d is { Moves.Count: > 0 }) yield return ("Приёмы", string.Join(", ", d.Moves));
+            yield return ("Предмет", d is { HeldItemName.Length: > 0 } ? d.HeldItemName : "Нет");
+            if (d is { BallName.Length: > 0 }) yield return ("Покебол", d.BallName);
+            if (d is { MetLocation.Length: > 0 }) yield return ("Встреча", d.MetLocation);
             if (e.Source is { Games.Length: > 0 } g) yield return ("Game", g.Games);
-            if (e.Variants.Count > 1) yield return ("Copies", string.Join(" ", e.Variants.Select(v => v.LanguageTag ?? "?").Distinct()));
+            if (e.Variants.Count > 1) yield return ("Копии", string.Join(" ", e.Variants.Select(v => v.LanguageTag ?? "?").Distinct()));
         }
 
         // ── Filters menu (Y) ─────────────────────────────────────────────────
@@ -975,55 +975,55 @@ public static class EventGallery
                     var q = _query;
                     var options = new List<PadOption>();
                     if (_ctx.Profile is not null)
-                        options.Add(new PadOption(Check(q.CompatibleOnly) + "Fits this save", IconPath: "game", Detail: "Only cards for this save's generation and language."));
-                    options.Add(new PadOption($"Gifts: {q.Kind switch { WonderCardKindFilter.Pokemon => "Pokémon", WonderCardKindFilter.Items => "Items", _ => "All" }}", IconPath: "events"));
-                    options.Add(new PadOption(Check(q.ShinyOnly) + "Shiny only", IconPath: "shiny", Detail: "Only cards that give a shiny Pokémon."));
-                    options.Add(new PadOption($"Status: {q.Received switch { WonderCardReceivedFilter.NotReceived => "New only", WonderCardReceivedFilter.Received => "Received", _ => "Any" }}", IconPath: "check", Detail: "Show cards you already received here, or only new ones."));
-                    options.Add(new PadOption($"Pokémon: {(q.Species is { } sp ? SpeciesName(_ctx.Data, sp) : "Any")}", IconPath: "pokedex"));
-                    options.Add(new PadOption($"Year: {q.Year?.ToString() ?? "Any"}", IconPath: "calendar"));
-                    options.Add(new PadOption($"Language: {q.Language ?? "Any"}", IconPath: "info"));
-                    options.Add(new PadOption($"Event: {(q.Series is { Length: > 14 } lengthy ? lengthy[..13] + "…" : q.Series ?? "Any")}", IconPath: "ribbons", Detail: "Only cards from one event series."));
-                    options.Add(new PadOption(Check(q.OnePerEvent) + "One card per event", IconPath: "compact", Detail: "Show one card for each event instead of one per language."));
-                    options.Add(new PadOption($"Sort: {SortLabel(q.Sort)}", IconPath: "sort"));
-                    options.Add(new PadOption($"Group: {GroupLabel(q.Grouping)}", IconPath: "blocks"));
+                        options.Add(new PadOption(Check(q.CompatibleOnly) + "Подходит этому сохранению", IconPath: "game", Detail: "Only cards for this save's generation and language."));
+                    options.Add(new PadOption($"Подарки: {q.Kind switch { WonderCardKindFilter.Pokemon => "Pokémon", WonderCardKindFilter.Items => "Предметы", _ => "Все" }}", IconPath: "events"));
+                    options.Add(new PadOption(Check(q.ShinyOnly) + "Только шайни", IconPath: "shiny", Detail: "Only cards that give a shiny Pokémon."));
+                    options.Add(new PadOption($"Status: {q.Received switch { WonderCardReceivedFilter.NotReceived => "Только новые", WonderCardReceivedFilter.Received => "Получено", _ => "Любой" }}", IconPath: "check", Detail: "Show cards you already received here, or only new ones."));
+                    options.Add(new PadOption($"Pokémon: {(q.Species is { } sp ? SpeciesName(_ctx.Data, sp) : "Любой")}", IconPath: "pokedex"));
+                    options.Add(new PadOption($"Год: {q.Year?.ToString() ?? "Любой"}", IconPath: "calendar"));
+                    options.Add(new PadOption($"Язык: {q.Language ?? "Любой"}", IconPath: "info"));
+                    options.Add(new PadOption($"Event: {(q.Series is { Length: > 14 } lengthy ? lengthy[..13] + "…" : q.Series ?? "Любой")}", IconPath: "ribbons", Detail: "Only cards from one event series."));
+                    options.Add(new PadOption(Check(q.OnePerEvent) + "Одна карточка на событие", IconPath: "compact", Detail: "Show one card for each event instead of one per language."));
+                    options.Add(new PadOption($"Порядок: {SortLabel(q.Sort)}", IconPath: "sort"));
+                    options.Add(new PadOption($"Группа: {GroupLabel(q.Grouping)}", IconPath: "blocks"));
                     if (q.ActiveFilterCount > 0 || q.Search.Length > 0)
-                        options.Add(new PadOption("Clear all filters", IconPath: "clear", Detail: "Turn off every filter and clear the search."));
-                    options.Add(new PadOption($"Clear marks ({_ctx.History.Count})", IconPath: "delete", Detail: "Remove every received mark, for all your saves."));
+                        options.Add(new PadOption("Сбросить все фильтры", IconPath: "clear", Detail: "Сбросить фильтры и очистить поиск."));
+                    options.Add(new PadOption($"Снять отметки ({_ctx.History.Count})", IconPath: "delete", Detail: "Сбросить отметки получения во всех сохранениях."));
 
-                    var choice = await PadMenu.ShowAsync(_ctx.Host, "Filter cards",
+                    var choice = await PadMenu.ShowAsync(_ctx.Host, "Фильтр карточек",
                         $"{_page.Items.Count} of {_page.Total} cards shown. Filters never block receiving.", options.ToArray());
                     if (choice is null) return;
                     var label = choice.StartsWith("✓ ", StringComparison.Ordinal) ? choice[2..] : choice;
                     switch (label)
                     {
-                        case "Fits this save": Set(q with { CompatibleOnly = !q.CompatibleOnly }); break;
-                        case "Shiny only": Set(q with { ShinyOnly = !q.ShinyOnly }); break;
-                        case "One card per event": Set(q with { OnePerEvent = !q.OnePerEvent }); break;
-                        case "Clear all filters":
+                        case "Подходит этому сохранению": Set(q with { CompatibleOnly = !q.CompatibleOnly }); break;
+                        case "Только шайни": Set(q with { ShinyOnly = !q.ShinyOnly }); break;
+                        case "Одна карточка на событие": Set(q with { OnePerEvent = !q.OnePerEvent }); break;
+                        case "Сбросить все фильтры":
                             _search.Text = "";
                             Set(new WonderCardQuery { Sort = q.Sort, Grouping = q.Grouping, OnePerEvent = q.OnePerEvent });
                             break;
-                        case { } s when s.StartsWith("Gifts:", StringComparison.Ordinal):
-                            await PickAsync("Gifts", [(0, "All gifts"), (1, "Pokémon"), (2, "Items")], (int)q.Kind,
+                        case { } s when s.StartsWith("Подарки:", StringComparison.Ordinal):
+                            await PickAsync("Подарки", [(0, "Все подарки"), (1, "Pokémon"), (2, "Предметы")], (int)q.Kind,
                                 id => q with { Kind = (WonderCardKindFilter)id });
                             break;
                         case { } s when s.StartsWith("Status:", StringComparison.Ordinal):
-                            await PickAsync("Status", [(0, "Any"), (1, "New (not received)"), (2, "Received")], (int)q.Received,
+                            await PickAsync("Статус", [(0, "Любой"), (1, "Новые (не получены)"), (2, "Получено")], (int)q.Received,
                                 id => q with { Received = (WonderCardReceivedFilter)id });
                             break;
                         case { } s when s.StartsWith("Pokémon:", StringComparison.Ordinal): await PickSpeciesAsync(); break;
-                        case { } s when s.StartsWith("Year:", StringComparison.Ordinal): await PickYearAsync(); break;
-                        case { } s when s.StartsWith("Language:", StringComparison.Ordinal): await PickLanguageAsync(); break;
+                        case { } s when s.StartsWith("Год:", StringComparison.Ordinal): await PickYearAsync(); break;
+                        case { } s when s.StartsWith("Язык:", StringComparison.Ordinal): await PickLanguageAsync(); break;
                         case { } s when s.StartsWith("Event:", StringComparison.Ordinal): await PickSeriesAsync(); break;
-                        case { } s when s.StartsWith("Sort:", StringComparison.Ordinal):
-                            await PickAsync("Sort", [(0, "Newest first"), (1, "Oldest first"), (2, "Card number"), (3, "Pokédex number"), (4, "Title A-Z"), (5, "Level (high first)")],
+                        case { } s when s.StartsWith("Порядок:", StringComparison.Ordinal):
+                            await PickAsync("Сортировка", [(0, "Сначала новые"), (1, "Сначала старые"), (2, "Номер карточки"), (3, "Pokédex number"), (4, "Название A–Z"), (5, "Уровень (по убыванию)")],
                                 (int)q.Sort, id => q with { Sort = (WonderCardSort)id });
                             break;
-                        case { } s when s.StartsWith("Group:", StringComparison.Ordinal):
-                            await PickAsync("Group by", [(0, "Year"), (1, "Event series"), (2, "Game"), (3, "Pokémon"), (4, "No groups")],
+                        case { } s when s.StartsWith("Группа:", StringComparison.Ordinal):
+                            await PickAsync("Группировать по", [(0, "Год"), (1, "Серия событий"), (2, "Game"), (3, "Pokémon"), (4, "Нет групп")],
                                 (int)q.Grouping, id => q with { Grouping = (WonderCardGrouping)id });
                             break;
-                        case { } s when s.StartsWith("Clear marks", StringComparison.Ordinal):
+                        case { } s when s.StartsWith("Снять отметки", StringComparison.Ordinal):
                             await ClearHistoryAsync();
                             break;
                     }
@@ -1048,7 +1048,7 @@ public static class EventGallery
             var items = _all.Where(e => e.Gift.Kind == EventGiftKind.Pokemon)
                 .GroupBy(e => e.Gift.Species).OrderBy(g => g.Key)
                 .Select(g => new PickItem(g.Key, $"{SpeciesName(_ctx.Data, g.Key)}", Detail: $"No. {g.Key:000} · {g.Count()} cards"))
-                .Prepend(new PickItem(0, "Any Pokémon")).ToArray();
+                .Prepend(new PickItem(0, "Любой покемон")).ToArray();
             var picked = await PickerMenu.ShowAsync(_ctx.Host, "Pokémon", items, currentId: _query.Species ?? 0);
             if (picked is not null) Set(_query with { Species = picked.Id == 0 ? null : picked.Id });
         }
@@ -1057,8 +1057,8 @@ public static class EventGallery
         {
             var items = _all.Where(e => e.Year is not null).GroupBy(e => e.Year!.Value).OrderByDescending(g => g.Key)
                 .Select(g => new PickItem(g.Key, g.Key.ToString(), Detail: $"{g.Count()} cards"))
-                .Prepend(new PickItem(0, "Any year")).ToArray();
-            var picked = await PickerMenu.ShowAsync(_ctx.Host, "Year", items, currentId: _query.Year ?? 0);
+                .Prepend(new PickItem(0, "Любой год")).ToArray();
+            var picked = await PickerMenu.ShowAsync(_ctx.Host, "Год", items, currentId: _query.Year ?? 0);
             if (picked is not null) Set(_query with { Year = picked.Id == 0 ? null : picked.Id });
         }
 
@@ -1066,9 +1066,9 @@ public static class EventGallery
         {
             var tags = _all.Select(e => e.LanguageTag).Where(t => t is not null).Distinct().Order().ToArray();
             var items = tags.Select((t, i) => new PickItem(i + 1, GiftLanguages.DisplayName(t!), Detail: $"{t} · {_all.Count(e => e.LanguageTag == t)} cards"))
-                .Prepend(new PickItem(0, "Any language")).ToArray();
+                .Prepend(new PickItem(0, "Любой язык")).ToArray();
             var current = _query.Language is { } l ? Array.IndexOf(tags, l) + 1 : 0;
-            var picked = await PickerMenu.ShowAsync(_ctx.Host, "Language", items, currentId: current);
+            var picked = await PickerMenu.ShowAsync(_ctx.Host, "Язык", items, currentId: current);
             if (picked is not null) Set(_query with { Language = picked.Id == 0 ? null : tags[picked.Id - 1] });
         }
 
@@ -1077,17 +1077,17 @@ public static class EventGallery
             var series = _all.GroupBy(e => e.Series, StringComparer.OrdinalIgnoreCase).OrderByDescending(g => g.Count())
                 .Select(g => (Name: g.Key, Count: g.Count())).ToArray();
             var items = series.Select((s, i) => new PickItem(i + 1, s.Name, Detail: $"{s.Count} cards"))
-                .Prepend(new PickItem(0, "Any event")).ToArray();
+                .Prepend(new PickItem(0, "Любое событие")).ToArray();
             var current = _query.Series is { } cur ? Array.FindIndex(series, s => string.Equals(s.Name, cur, StringComparison.OrdinalIgnoreCase)) + 1 : 0;
-            var picked = await PickerMenu.ShowAsync(_ctx.Host, "Event series", items, currentId: current);
+            var picked = await PickerMenu.ShowAsync(_ctx.Host, "Серия событий", items, currentId: current);
             if (picked is not null) Set(_query with { Series = picked.Id == 0 ? null : series[picked.Id - 1].Name });
         }
 
         private async Task ClearHistoryAsync()
         {
             if (_ctx.History.Count == 0) return;
-            var confirmed = await PadMenu.ConfirmAsync(_ctx.Host, "Forget received marks",
-                $"Forget all {_ctx.History.Count} recorded gifts? The marks disappear; receiving again still works.", "Forget");
+            var confirmed = await PadMenu.ConfirmAsync(_ctx.Host, "Сбросить отметки получения",
+                $"Forget all {_ctx.History.Count} recorded gifts? The marks disappear; receiving again still works.", "Забыть");
             if (!confirmed) return;
             _ctx.History.Clear();
             _all = _all.Select(e => e with { Received = false }).ToArray();
@@ -1192,9 +1192,9 @@ public static class EventGallery
             _facts = new SKCanvasView { InputTransparent = true };
             _facts.PaintSurface += PaintFacts;
 
-            _receive = Kit.Capsule("Receive", UiTokens.Green, primary: true, icon: "events");
+            _receive = Kit.Capsule("Получить", UiTokens.Green, primary: true, icon: "events");
             _receive.Clicked += (_, _) => Receive();
-            _bank = Kit.Capsule("To Bank", UiTokens.Ink1, icon: "bank");
+            _bank = Kit.Capsule("В банк", UiTokens.Ink1, icon: "bank");
             _bank.Clicked += (_, _) => _ = SendToBankAsync();
             _exportCard = Kit.Capsule("Card file", UiTokens.Ink1, icon: "export");
             _exportCard.Clicked += (_, _) => _ = ExportAsync(entity: false);
@@ -1227,11 +1227,11 @@ public static class EventGallery
             Grid.SetColumn(_facts, 1);
 
             var itemCard = Shown.Gift.Kind == EventGiftKind.Item;
-            var hintList = new List<(string, string, Action?)> { ("A", itemCard ? "Add to bag" : "Receive", Receive) };
-            if (!itemCard) hintList.Add(("X", "To Bank", () => _ = SendToBankAsync()));
-            hintList.Add(("Y", "Export", () => _ = ExportMenuAsync()));
-            if (_variants.Count > 1) hintList.Add(("LR", "Language", () => OnPadButton(PadButton.R)));
-            hintList.Add(("B", "Close", () => Close(null)));
+            var hintList = new List<(string, string, Action?)> { ("A", itemCard ? "Добавить в сумку" : "Получить", Receive) };
+            if (!itemCard) hintList.Add(("X", "В банк", () => _ = SendToBankAsync()));
+            hintList.Add(("Y", "Экспорт", () => _ = ExportMenuAsync()));
+            if (_variants.Count > 1) hintList.Add(("LR", "Язык", () => OnPadButton(PadButton.R)));
+            hintList.Add(("B", "Закрыть", () => Close(null)));
             var hints = Kit.WindowHints([.. hintList]);
 
             var content = new Grid
@@ -1278,10 +1278,10 @@ public static class EventGallery
         {
             var gift = Shown.Gift;
             var item = gift.Kind == EventGiftKind.Item;
-            _receive.Text = item ? "Add to bag"
-                : _ctx.TargetSlot < 0 ? "Box is full"
-                : _ctx.SlotChosen ? $"Receive into slot {_ctx.TargetSlot + 1}"
-                : _ctx.ViewModel.BoxIndex < 0 ? "Receive into party" : $"Receive into Box {_ctx.ViewModel.BoxIndex + 1}";
+            _receive.Text = item ? "Добавить в сумку"
+                : _ctx.TargetSlot < 0 ? "Бокс заполнен"
+                : _ctx.SlotChosen ? $"Получить в ячейку {_ctx.TargetSlot + 1}"
+                : _ctx.ViewModel.BoxIndex < 0 ? "Получить в команду" : $"Получить в бокс {_ctx.ViewModel.BoxIndex + 1}";
             _receive.IsEnabled = !Blocked && (item || _ctx.TargetSlot >= 0);
             _bank.IsVisible = !item;
             _exportPk.IsVisible = !item;
@@ -1352,11 +1352,11 @@ public static class EventGallery
                     c.DrawRoundRect(strip, 5, 5, well);
                 var y = strip.Top + 18;
                 var x = strip.Left + 10;
-                x = DrawTag(c, x, y, e.LanguageTag is { } lang ? GiftLanguages.DisplayName(lang) : "All languages", tagFont, Pksm.LogoDeck, Pksm.Ink) + 5;
+                x = DrawTag(c, x, y, e.LanguageTag is { } lang ? GiftLanguages.DisplayName(lang) : "Все языки", tagFont, Pksm.LogoDeck, Pksm.Ink) + 5;
                 if (e.Source?.Region is { } region) x = DrawTag(c, x, y, region, tagFont, Pksm.LogoDeck, Pksm.Ink) + 5;
                 if (e.Source?.Games is { Length: > 0 } games) x = DrawTag(c, x, y, games, tagFont, Pksm.LogoDeck, Pksm.Ink) + 5;
-                if (e.Received) DrawTag(c, x, y, "Received", tagFont, PksmPaint.Tone(Pksm.Legal), Pksm.Ink);
-                else DrawTag(c, x, y, "New", tagFont, PksmPaint.Tone(Pksm.GiftRed), Pksm.Ink);
+                if (e.Received) DrawTag(c, x, y, "Получено", tagFont, PksmPaint.Tone(Pksm.Legal), Pksm.Ink);
+                else DrawTag(c, x, y, "Новый", tagFont, PksmPaint.Tone(Pksm.GiftRed), Pksm.Ink);
                 y += 20;
                 var eventName = e.Source is { } s ? (GiftTitles.TranslateEventName(s.Name) is { Length: > 0 } n ? n : s.Name) : e.Series;
                 if (y < strip.Bottom - 4)
@@ -1405,7 +1405,7 @@ public static class EventGallery
 
             if (e.Gift.Kind == EventGiftKind.Item)
             {
-                Header("Items");
+                Header("Предметы");
                 foreach (var item in d.Items)
                 {
                     if (y > panel.Bottom - 22) break;
@@ -1417,25 +1417,25 @@ public static class EventGallery
                     y += 20;
                 }
                 y += 4;
-                Header("Card");
-                Row("Goes to", "The bag");
-                Row("Card No.", $"{e.Gift.CardId:0000} · {d.Format}");
-                Row("Status", e.Received ? "Received before" : "Never received");
+                Header("Карточка");
+                Row("Goes to", "Сумка");
+                Row("Номер карточки", $"{e.Gift.CardId:0000} · {d.Format}");
+                Row("Статус", e.Received ? "Ранее получено" : "Не получено");
                 return;
             }
 
             Header("Pokémon");
-            Row("OT", d.OriginalTrainer.Length > 0 ? d.OriginalTrainer : "Yours");
-            Row("ID No.", d.TrainerId.Length > 0 ? d.TrainerId : "Yours");
-            Row("Ball", d.BallName.Length > 0 ? d.BallName : "—");
-            Row("Item", d.HeldItemName.Length > 0 ? d.HeldItemName : "None");
-            Row("Met", d.MetLocation.Length > 0 ? d.MetLocation : "—");
-            if (d.IsEgg) Row("Hatch", "Arrives as an Egg");
+            Row("OT", d.OriginalTrainer.Length > 0 ? d.OriginalTrainer : "Твои данные");
+            Row("ID No.", d.TrainerId.Length > 0 ? d.TrainerId : "Твои данные");
+            Row("Покебол", d.BallName.Length > 0 ? d.BallName : "—");
+            Row("Предмет", d.HeldItemName.Length > 0 ? d.HeldItemName : "Нет");
+            Row("Встреча", d.MetLocation.Length > 0 ? d.MetLocation : "—");
+            if (d.IsEgg) Row("Вылупить", "Arrives as an Egg");
 
             if (d.Moves.Count > 0 && y < panel.Bottom - 40)
             {
                 y += 2;
-                Header("Moves");
+                Header("Приёмы");
                 // Two columns of move pills.
                 var colW = (right - left - 6) / 2;
                 for (var i = 0; i < d.Moves.Count; i++)
@@ -1454,11 +1454,11 @@ public static class EventGallery
             {
                 if (y > panel.Bottom - 60) return;
                 y += 2;
-                Header("Card");
-                Row("Card No.", $"{e.Gift.CardId:0000} · {d.Format}");
-                Row("Status", e.Received ? "Received before" : "Never received");
-                if (_variants.Count > 1) Row("Copies", string.Join(" ", _variants.Select(v => v.LanguageTag ?? "?")));
-                else Row("Language", e.LanguageTag is { } l ? GiftLanguages.DisplayName(l) : "Every language");
+                Header("Карточка");
+                Row("Номер карточки", $"{e.Gift.CardId:0000} · {d.Format}");
+                Row("Статус", e.Received ? "Ранее получено" : "Не получено");
+                if (_variants.Count > 1) Row("Копии", string.Join(" ", _variants.Select(v => v.LanguageTag ?? "?")));
+                else Row("Язык", e.LanguageTag is { } l ? GiftLanguages.DisplayName(l) : "Все языки");
             }
         }
 
@@ -1519,7 +1519,7 @@ public static class EventGallery
                     var info = engine.TryDescribeEntity(export.Data, $"Mystery Gift · {Shown.Title}", export.Format);
                     return info is null ? null : bank.Add(export.Data, info);
                 });
-                _note.Text = added is null ? "This card could not be converted for the Bank." : $"Sent to the Bank (Box {added.Box + 1}).";
+                _note.Text = added is null ? "Не удалось преобразовать карточку для банка." : $"Sent to the Bank (Box {added.Box + 1}).";
             }
             finally
             {
@@ -1539,7 +1539,7 @@ public static class EventGallery
             string? choice;
             try
             {
-                choice = await PadMenu.ShowAsync(_ctx.Host, "Export", "Share the wonder card itself, or the Pokémon it gives as a .pk file.",
+                choice = await PadMenu.ShowAsync(_ctx.Host, "Экспорт", "Share the wonder card itself, or the Pokémon it gives as a .pk file.",
                     new PadOption("Card file", IconPath: "events", Detail: "The wonder card as a file."),
                     new PadOption("Pokémon (.pk)", IconPath: "export", Detail: "The Pokémon the card gives, as a .pk file."));
             }
@@ -1572,11 +1572,11 @@ public static class EventGallery
                 var path = System.IO.Path.Combine(FileSystem.CacheDirectory, export.FileName);
                 await File.WriteAllBytesAsync(path, export.Data);
                 await Share.Default.RequestAsync(new ShareFileRequest { Title = Shown.Title, File = new ShareFile(path) });
-                _note.Text = $"Exported {export.FileName}";
+                _note.Text = $"Экспортировано: {export.FileName}";
             }
             catch (Exception error) when (error is IOException or UnauthorizedAccessException or InvalidOperationException)
             {
-                _note.Text = $"Export failed: {error.Message}";
+                _note.Text = $"Ошибка экспорта: {error.Message}";
             }
             finally
             {

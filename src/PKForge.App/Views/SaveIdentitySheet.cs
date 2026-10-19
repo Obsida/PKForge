@@ -12,12 +12,12 @@ namespace PKForge.App.Views;
 /// </summary>
 public static class SaveIdentitySheet
 {
-    public const string OpenOption = "Open save";
-    private const string RenameOption = "Rename";
-    private const string ColorOption = "Cartridge color";
-    private const string GameOption = "Set game…";
-    private const string HideOption = "Hide save";
-    private const string ResetOption = "Reset to detected";
+    public const string OpenOption = "Открыть сохранение";
+    private const string RenameOption = "Переименовать";
+    private const string ColorOption = "Цвет картриджа";
+    private const string GameOption = "Указать игру…";
+    private const string HideOption = "Скрыть сохранение";
+    private const string ResetOption = "Вернуть определённую версию";
     private const string ReadOnlyOption = "Make read-only";
 
     /// <summary>
@@ -34,7 +34,7 @@ public static class SaveIdentitySheet
         if (offerOpen) options.Add(new PadOption(OpenOption, IconPath: "play"));
         options.Add(new PadOption(RenameOption, IconPath: "rename"));
         options.Add(new PadOption(ColorOption, Glyph: "●", Accent: SaveColors.For(resolved?.ColorKey, save.Generation),
-            Detail: "The colour of this save's cartridge on the Home shelf."));
+            Detail: "Цвет картриджа на главном экране."));
         if (guess is not null) options.Add(new PadOption(GameOption, IconPath: "game", Detail: "Say which game this is, from those that share its save format."));
         // Only saves the box already warned about as a suspected ROM hack carry the choice.
         var flaggedHack = RomHackNotice.IsFlagged(save.DocumentId);
@@ -72,8 +72,8 @@ public static class SaveIdentitySheet
                 store.Set(current with { Hidden = true });
                 return false;
             case ResetOption:
-                if (await PadMenu.ConfirmAsync(host, "Reset to detected",
-                        "Forget this save's name, color, game choice and ROM-hack editing choice, and show it again if hidden? The save file itself is not touched.", "Reset"))
+                if (await PadMenu.ConfirmAsync(host, "Вернуть определённую версию",
+                        "Forget this save's name, color, game choice and ROM-hack editing choice, and show it again if hidden? The save file itself is not touched.", "Сбросить"))
                     store.Reset(save.DocumentId);
                 return false;
             default:
@@ -96,18 +96,18 @@ public static class SaveIdentitySheet
 
     private static async Task RenameAsync(Grid host, ISaveIdentityStore store, SaveIdentity current, string shown)
     {
-        var text = await TextPopup.ShowLineAsync(host, "Name this save", "Leave empty to use the game's name", shown);
+        var text = await TextPopup.ShowLineAsync(host, "Назвать сохранение", "Оставь пустым для названия игры", shown);
         if (text is null) return;
         store.Set(current with { DisplayName = text.Length == 0 ? null : text[..Math.Min(text.Length, 32)] });
     }
 
     private static async Task PickColorAsync(Grid host, ISaveIdentityStore store, SaveIdentity current, int generation)
     {
-        const string eraOption = "Console color";
-        var options = new List<PadOption> { new(eraOption, Glyph: "●", Accent: Kit.EraColor(generation), Detail: "The standard colour for this generation.") };
+        const string eraOption = "Цвет консоли";
+        var options = new List<PadOption> { new(eraOption, Glyph: "●", Accent: Kit.EraColor(generation), Detail: "Стандартный цвет для этого поколения.") };
         options.AddRange(SaveIdentityPalette.Swatches.Select(s =>
             new PadOption(s.Key == current.ColorKey ? $"{s.Name} ✓" : s.Name, Glyph: "●", Accent: SaveColors.For(s.Key, generation))));
-        var choice = await PadMenu.ShowAsync(host, "Cartridge color", null, [.. options]);
+        var choice = await PadMenu.ShowAsync(host, "Цвет картриджа", null, [.. options]);
         if (choice is null) return;
         var picked = SaveIdentityPalette.Swatches.FirstOrDefault(s => choice.StartsWith(s.Name, StringComparison.Ordinal));
         store.Set(current with { ColorKey = choice == eraOption ? null : picked.Key });
@@ -126,7 +126,7 @@ public static class SaveIdentitySheet
             SaveLayoutFamily.Other => "Pick the retail game, or mark it as a ROM hack built on it.",
             _ => "Only games that share this save's layout are listed. A ROM hack built on it keeps the retail engine.",
         };
-        var choice = await PadMenu.ShowAsync(host, "This game is…", message, options);
+        var choice = await PadMenu.ShowAsync(host, "Это игра…", message, options);
         if (choice is null) return;
         var picked = choices.First(c => choice.StartsWith(c.Label, StringComparison.Ordinal));
         var updated = current with { GameChoiceId = picked.Id };

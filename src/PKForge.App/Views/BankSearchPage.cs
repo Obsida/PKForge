@@ -29,8 +29,8 @@ public sealed class BankSearchPage : IPadPagingHandler
     /// type filter speaks the same numbers the park catalog returns.</summary>
     private static readonly string[] TypeNames =
     [
-        "", "Normal", "Fighting", "Flying", "Poison", "Ground", "Rock", "Bug", "Ghost", "Steel",
-        "Fire", "Water", "Grass", "Electric", "Psychic", "Ice", "Dragon", "Dark", "Fairy",
+        "", "Обычный", "Боевой", "Летающий", "Ядовитый", "Земляной", "Каменный", "Насекомый", "Призрачный", "Стальной",
+        "Огненный", "Водный", "Травяной", "Электрический", "Психический", "Ледяной", "Драконий", "Тёмный", "Волшебный",
     ];
 
     private readonly TaskCompletionSource<bool> _result = new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -74,7 +74,7 @@ public sealed class BankSearchPage : IPadPagingHandler
         _router = IPlatformApplication.Current?.Services.GetService<GamepadRouter>();
         _all = [.. bank.GetAll()]; // the vault is an in-memory index; the snapshot is the scan
 
-        var title = new Label { Text = "Bank search", TextColor = UiTokens.Ink0, FontFamily = DsChrome.PixelFont, FontSize = 15 };
+        var title = new Label { Text = "Поиск в банке", TextColor = UiTokens.Ink0, FontFamily = DsChrome.PixelFont, FontSize = 15 };
         _count = new Label
         {
             TextColor = UiTokens.Ink1,
@@ -87,7 +87,7 @@ public sealed class BankSearchPage : IPadPagingHandler
 
         _text = new Entry
         {
-            Placeholder = "Name or nickname…",
+            Placeholder = "Название вида или имя…",
             PlaceholderColor = UiTokens.Ink1,
             TextColor = UiTokens.Ink0,
             BackgroundColor = UiTokens.ShellPress,
@@ -111,12 +111,12 @@ public sealed class BankSearchPage : IPadPagingHandler
         _canvas.Touch += Touch;
 
         View hints = Kit.WindowHints(
-            ("A", "Jump", () => OnPadButton(PadButton.A)),
-            ("B", "Done", () => Close()),
-            ("LR", "Page", () => OnPadButton(PadButton.R)),
-            ("X", "Filter", () => _ = ShowFilterMenuAsync()),
-            ("Y", "Shiny", ToggleShinyOnly),
-            ("+", "Mark all", MarkAllResults));
+            ("A", "Перейти", () => OnPadButton(PadButton.A)),
+            ("B", "Готово", () => Close()),
+            ("LR", "Страница", () => OnPadButton(PadButton.R)),
+            ("X", "Фильтр", () => _ = ShowFilterMenuAsync()),
+            ("Y", "Шайни", ToggleShinyOnly),
+            ("+", "Отметить всех", MarkAllResults));
 
         var content = new Grid
         {
@@ -204,18 +204,18 @@ public sealed class BankSearchPage : IPadPagingHandler
     {
         _count.Text = $"{Count} of {_all.Count}";
         _chips.Children.Clear();
-        AddChip("Shiny", active: _filter.ShinyOnly, ToggleShinyOnly);
+        AddChip("Шайни", active: _filter.ShinyOnly, ToggleShinyOnly);
         AddChip($"Filters · {_filter.ActiveCount}", active: _filter.ActiveCount > 0, () => _ = ShowFilterMenuAsync());
-        AddChip($"Gen: {(_filter.Generation is { } gen ? Roman(gen) : "All")}", active: _filter.Generation is not null,
+        AddChip($"Gen: {(_filter.Generation is { } gen ? Roman(gen) : "Все")}", active: _filter.Generation is not null,
             () => _ = PickGenerationAsync());
-        AddChip($"Source: {_filter.SourceName ?? "All"}", active: _filter.SourceName is not null, () => _ = PickSourceAsync());
-        AddChip($"Item: {HeldItemLabel()}", active: _filter.HoldsItemOnly || _filter.HeldItemId is not null,
+        AddChip($"Source: {_filter.SourceName ?? "Все"}", active: _filter.SourceName is not null, () => _ = PickSourceAsync());
+        AddChip($"Предмет: {HeldItemLabel()}", active: _filter.HoldsItemOnly || _filter.HeldItemId is not null,
             () => _ = PickHeldItemAsync());
-        AddChip($"Sort: {SortLabel(_sort)}{(_reverse ? " ↓" : "")}", active: IsSorted, () => _ = ShowSortMenuAsync());
+        AddChip($"Порядок: {SortLabel(_sort)}{(_reverse ? " ↓" : "")}", active: IsSorted, () => _ = ShowSortMenuAsync());
         if (_markAll is not null && Count > 0)
-            AddChip($"Mark {Count}", active: false, MarkAllResults);
+            AddChip($"Отметить {Count}", active: false, MarkAllResults);
         if (_filter.IsActive || IsSorted)
-            AddChip("Reset", active: true, ResetFilters);
+            AddChip("Сбросить", active: true, ResetFilters);
     }
 
     private bool IsSorted => _sort != BankSortOrder.DexNumber || _reverse;
@@ -261,72 +261,72 @@ public sealed class BankSearchPage : IPadPagingHandler
     {
         while (true)
         {
-            var choice = await PadMenu.ShowAsync(_host, $"Bank filters · {Count} match",
+            var choice = await PadMenu.ShowAsync(_host, $"Фильтры банка · совпадений: {Count}",
                 "Pick a filter, set it, and this menu comes back. RESET clears everything.",
-                new PadOption($"Shiny only: {OnOff(_filter.ShinyOnly)}", IconPath: "shiny"),
-                new PadOption($"Generation: {(_filter.Generation is { } gen ? Roman(gen) : "All")}", IconPath: "generation",
+                new PadOption($"Только шайни: {OnOff(_filter.ShinyOnly)}", IconPath: "shiny"),
+                new PadOption($"Поколение: {(_filter.Generation is { } gen ? Roman(gen) : "Все")}", IconPath: "generation",
                     Detail: "The generation of its data, not the game it was caught in."),
-                new PadOption($"Source game: {_filter.SourceName ?? "ALL"}", IconPath: "game",
+                new PadOption($"Игра-источник: {_filter.SourceName ?? "ALL"}", IconPath: "game",
                     Detail: "The game it was deposited from."),
-                new PadOption($"Type: {(_filter.TypeId is { } type ? TypeNames[type] : "All")}", IconPath: "type",
+                new PadOption($"Тип: {(_filter.TypeId is { } type ? TypeNames[type] : "Все")}", IconPath: "type",
                     Detail: "Matches either of its types."),
-                new PadOption($"Rarity: {_filter.Rarity switch
+                new PadOption($"Редкость: {_filter.Rarity switch
                 {
-                    BankRarity.Legendary => "Legendary",
-                    BankRarity.Mythical => "Mythical",
-                    BankRarity.LegendaryOrMythical => "Legendary or mythical",
+                    BankRarity.Legendary => "Легендарные",
+                    BankRarity.Mythical => "Мифические",
+                    BankRarity.LegendaryOrMythical => "Легендарные или мифические",
                     _ => "ALL",
-                }}", IconPath: "rarity", Detail: "Legendary, mythical, or both."),
-                new PadOption($"Eggs: {OnOff(_filter.EggOnly)}", IconPath: "egg"),
-                new PadOption($"Gender: {GenderName(_filter.Gender)}", IconPath: "gender"),
-                new PadOption($"Held item: {HeldItemLabel()}", IconPath: "item", Detail: "Anything holding an item, or one item in particular."),
-                new PadOption($"Default names only: {OnOff(_filter.DefaultNamedOnly)}", IconPath: "rename",
-                    Detail: "Hides nicknamed Pokémon."),
-                new PadOption($"Lowest level: {_filter.LevelMin?.ToString() ?? "ANY"}", IconPath: "level", Detail: "Hides anything below this level."),
-                new PadOption($"Highest level: {_filter.LevelMax?.ToString() ?? "ANY"}", IconPath: "level", Detail: "Hides anything above this level."),
-                new PadOption("Reset all filters", IconPath: "restore", Detail: "Also clears the search text."),
-                new PadOption("Done", IconPath: "confirm"));
+                }}", IconPath: "rarity", Detail: "Легендарные, мифические или обе группы."),
+                new PadOption($"Яйца: {OnOff(_filter.EggOnly)}", IconPath: "egg"),
+                new PadOption($"Пол: {GenderName(_filter.Gender)}", IconPath: "gender"),
+                new PadOption($"Предмет: {HeldItemLabel()}", IconPath: "item", Detail: "Anything holding an item, or one item in particular."),
+                new PadOption($"Только стандартные имена: {OnOff(_filter.DefaultNamedOnly)}", IconPath: "rename",
+                    Detail: "Скрыть покемонов с изменённым именем."),
+                new PadOption($"Минимальный уровень: {_filter.LevelMin?.ToString() ?? "ANY"}", IconPath: "level", Detail: "Скрыть покемонов ниже этого уровня."),
+                new PadOption($"Максимальный уровень: {_filter.LevelMax?.ToString() ?? "ANY"}", IconPath: "level", Detail: "Скрыть покемонов выше этого уровня."),
+                new PadOption("Сбросить все фильтры", IconPath: "restore", Detail: "Также очищает поисковый запрос."),
+                new PadOption("Готово", IconPath: "confirm"));
 
             switch (choice)
             {
-                case null or "Done":
+                case null or "Готово":
                     RefreshView();
                     return;
-                case "Reset all filters":
+                case "Сбросить все фильтры":
                     _text.Text = "";
                     _filter = BankFilter.None;
                     break;
-                case var _ when choice.StartsWith("Shiny only:", StringComparison.Ordinal):
+                case var _ when choice.StartsWith("Только шайни:", StringComparison.Ordinal):
                     _filter = _filter with { ShinyOnly = !_filter.ShinyOnly };
                     break;
-                case var _ when choice.StartsWith("Eggs:", StringComparison.Ordinal):
+                case var _ when choice.StartsWith("Яйца:", StringComparison.Ordinal):
                     _filter = _filter with { EggOnly = !_filter.EggOnly };
                     break;
-                case var _ when choice.StartsWith("Default names only:", StringComparison.Ordinal):
+                case var _ when choice.StartsWith("Только стандартные имена:", StringComparison.Ordinal):
                     _filter = _filter with { DefaultNamedOnly = !_filter.DefaultNamedOnly };
                     break;
-                case var _ when choice.StartsWith("Generation:", StringComparison.Ordinal):
+                case var _ when choice.StartsWith("Поколение:", StringComparison.Ordinal):
                     if (!await PickGenerationAsync()) continue;
                     break;
-                case var _ when choice.StartsWith("Source game:", StringComparison.Ordinal):
+                case var _ when choice.StartsWith("Игра-источник:", StringComparison.Ordinal):
                     if (!await PickSourceAsync()) continue;
                     break;
-                case var _ when choice.StartsWith("Type:", StringComparison.Ordinal):
+                case var _ when choice.StartsWith("Тип:", StringComparison.Ordinal):
                     if (!await PickTypeAsync()) continue;
                     break;
-                case var _ when choice.StartsWith("Held item:", StringComparison.Ordinal):
+                case var _ when choice.StartsWith("Предмет:", StringComparison.Ordinal):
                     if (!await PickHeldItemAsync(reopen: false)) continue;
                     break;
-                case var _ when choice.StartsWith("Gender:", StringComparison.Ordinal):
+                case var _ when choice.StartsWith("Пол:", StringComparison.Ordinal):
                     if (!await PickGenderAsync()) continue;
                     break;
-                case var _ when choice.StartsWith("Rarity:", StringComparison.Ordinal):
+                case var _ when choice.StartsWith("Редкость:", StringComparison.Ordinal):
                     if (!await PickRarityAsync()) continue;
                     break;
-                case var _ when choice.StartsWith("Lowest level:", StringComparison.Ordinal):
+                case var _ when choice.StartsWith("Минимальный уровень:", StringComparison.Ordinal):
                     if (!await PickLevelAsync(lowest: true)) continue;
                     break;
-                case var _ when choice.StartsWith("Highest level:", StringComparison.Ordinal):
+                case var _ when choice.StartsWith("Максимальный уровень:", StringComparison.Ordinal):
                     if (!await PickLevelAsync(lowest: false)) continue;
                     break;
             }
@@ -336,17 +336,17 @@ public sealed class BankSearchPage : IPadPagingHandler
         }
     }
 
-    private static string OnOff(bool value) => value ? "ON" : "OFF";
+    private static string OnOff(bool value) => value ? "ВКЛ" : "ВЫКЛ";
 
     /// <summary>Returns false when the picker was dismissed (leave the filter alone).</summary>
     private async Task<bool> PickGenerationAsync()
     {
         var generations = _all.Select(e => e.Info.Generation).Distinct().Order().ToList();
-        var options = new List<PadOption> { new("All generations") };
+        var options = new List<PadOption> { new("Все поколения") };
         options.AddRange(generations.Select(gen => new PadOption($"GEN {Roman(gen)}")));
-        var choice = await PadMenu.ShowAsync(_host, "Generation", "Which era's storage format?", options.ToArray());
+        var choice = await PadMenu.ShowAsync(_host, "Поколение", "Which era's storage format?", options.ToArray());
         if (choice is null) return false;
-        _filter = _filter with { Generation = choice == "All generations" ? null : RomanToNumber(choice) };
+        _filter = _filter with { Generation = choice == "Все поколения" ? null : RomanToNumber(choice) };
         return true;
     }
 
@@ -363,44 +363,44 @@ public sealed class BankSearchPage : IPadPagingHandler
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .Order(StringComparer.OrdinalIgnoreCase)
             .ToList();
-        var options = new List<PadOption> { new("All sources") };
+        var options = new List<PadOption> { new("Все источники") };
         options.AddRange(sources.Select(source => new PadOption(source)));
-        var choice = await PadMenu.ShowAsync(_host, "Source game", "Which game did they come from?", options.ToArray());
+        var choice = await PadMenu.ShowAsync(_host, "Игра-источник", "Which game did they come from?", options.ToArray());
         if (choice is null) return false;
         _filter = _filter with
         {
-            SourceName = choice == "All sources" ? null : sources.First(s => s == choice),
+            SourceName = choice == "Все источники" ? null : sources.First(s => s == choice),
         };
         return true;
     }
 
     private async Task<bool> PickTypeAsync()
     {
-        var options = new List<PadOption> { new("All types") };
+        var options = new List<PadOption> { new("Все типы") };
         for (var type = ParkType.Normal; type <= ParkType.Max; type++)
             options.Add(new PadOption(TypeNames[type]));
-        var choice = await PadMenu.ShowAsync(_host, "Type", "Either of a mon's types may match.", options.ToArray());
+        var choice = await PadMenu.ShowAsync(_host, "Тип", "Either of a mon's types may match.", options.ToArray());
         if (choice is null) return false;
         _filter = _filter with
         {
-            TypeId = choice == "All types" ? null : Array.IndexOf(TypeNames, choice),
+            TypeId = choice == "Все типы" ? null : Array.IndexOf(TypeNames, choice),
         };
         return true;
     }
 
     private async Task<bool> PickRarityAsync()
     {
-        var choice = await PadMenu.ShowAsync(_host, "Rarity", null,
-            new PadOption("All rarities"), new PadOption("Legendary"), new PadOption("Mythical"),
-            new PadOption("Legendary or mythical"));
+        var choice = await PadMenu.ShowAsync(_host, "Редкость", null,
+            new PadOption("Любая редкость"), new PadOption("Легендарные"), new PadOption("Мифические"),
+            new PadOption("Легендарные или мифические"));
         if (choice is null) return false;
         _filter = _filter with
         {
             Rarity = choice switch
             {
-                "Legendary" => BankRarity.Legendary,
-                "Mythical" => BankRarity.Mythical,
-                "Legendary or mythical" => BankRarity.LegendaryOrMythical,
+                "Легендарные" => BankRarity.Legendary,
+                "Мифические" => BankRarity.Mythical,
+                "Легендарные или мифические" => BankRarity.LegendaryOrMythical,
                 _ => BankRarity.Any,
             },
         };
@@ -409,8 +409,8 @@ public sealed class BankSearchPage : IPadPagingHandler
 
     private string HeldItemLabel() =>
         _filter.HeldItemId is { } id ? HeldItemSearch.NameOf(_data.ItemNames, id)
-        : _filter.HoldsItemOnly ? "Any item"
-        : "All";
+        : _filter.HoldsItemOnly ? "Любой предмет"
+        : "Все";
 
     /// <summary>
     /// The held-item finder: "Any item" (everything holding something) or one exact item,
@@ -424,8 +424,8 @@ public sealed class BankSearchPage : IPadPagingHandler
         var directory = Path.Combine(FileSystem.AppDataDirectory, "items");
         var items = new List<PickItem>
         {
-            new(0, "All (no item filter)"),
-            new(-1, "Any held item", IconPath: null, Detail: $"{holders} Pokémon"),
+            new(0, "Все (без фильтра предметов)"),
+            new(-1, "Любой предмет", IconPath: null, Detail: $"{holders} Pokémon"),
         };
         foreach (var (id, count) in tally)
         {
@@ -434,7 +434,7 @@ public sealed class BankSearchPage : IPadPagingHandler
             items.Add(new PickItem(id, name, File.Exists(cached) ? cached : null, $"{count} Pokémon"));
         }
         var current = _filter.HeldItemId ?? (_filter.HoldsItemOnly ? -1 : 0);
-        var pick = await PickerMenu.ShowAsync(_host, "Held item", items, current);
+        var pick = await PickerMenu.ShowAsync(_host, "Предмет", items, current);
         if (pick is null) return false;
         _filter = pick.Id switch
         {
@@ -454,29 +454,29 @@ public sealed class BankSearchPage : IPadPagingHandler
     private static string GenderName(int? gender) => gender switch
     {
         0 => "MALE",
-        1 => "Female",
-        2 => "Genderless",
+        1 => "Самка",
+        2 => "Бесполый",
         _ => "ANY",
     };
 
     private async Task<bool> PickGenderAsync()
     {
-        var choice = await PadMenu.ShowAsync(_host, "Gender", "Read from each stored Pokémon.",
-            new PadOption("Any gender"), new PadOption("Male"), new PadOption("Female"), new PadOption("Genderless"));
+        var choice = await PadMenu.ShowAsync(_host, "Пол", "Read from each stored Pokémon.",
+            new PadOption("Любой пол"), new PadOption("Самец"), new PadOption("Самка"), new PadOption("Бесполый"));
         if (choice is null) return false;
         _filter = _filter with
         {
-            Gender = choice switch { "Male" => 0, "Female" => 1, "Genderless" => 2, _ => null },
+            Gender = choice switch { "Самец" => 0, "Самка" => 1, "Бесполый" => 2, _ => null },
         };
         return true;
     }
 
     private async Task<bool> PickLevelAsync(bool lowest)
     {
-        var options = new List<PadOption> { new(lowest ? "Any lowest level" : "Any highest level") };
+        var options = new List<PadOption> { new(lowest ? "Любой минимальный уровень" : "Любой максимальный уровень") };
         options.AddRange(Enumerable.Range(1, MaxLevel).Select(level => new PadOption($"Lv.{level}")));
-        var choice = await PadMenu.ShowAsync(_host, lowest ? "Lowest level" : "Highest level",
-            lowest ? "Hide anything below this level." : "Hide anything above this level.", options.ToArray());
+        var choice = await PadMenu.ShowAsync(_host, lowest ? "Минимальный уровень" : "Максимальный уровень",
+            lowest ? "Скрыть покемонов ниже этого уровня." : "Скрыть покемонов выше этого уровня.", options.ToArray());
         if (choice is null) return false;
         var level = choice.StartsWith("Lv.", StringComparison.Ordinal) ? int.Parse(choice[3..]) : (int?)null;
         if (lowest) _filter = _filter with { LevelMin = level };
@@ -486,7 +486,7 @@ public sealed class BankSearchPage : IPadPagingHandler
 
     private async Task ShowSortMenuAsync()
     {
-        var picked = await PickSortAsync(_host, "Sort the results", null);
+        var picked = await PickSortAsync(_host, "Сортировать результаты", null);
         if (picked is null) return;
         (_sort, _reverse, _) = picked.Value;
         _page = 0;
@@ -498,17 +498,17 @@ public sealed class BankSearchPage : IPadPagingHandler
     /// for its natural direction and for the reversed one.</summary>
     private static readonly (BankSortOrder Order, string Label, string Forward, string Reversed, string Icon)[] SortKeys =
     [
-        (BankSortOrder.DexNumber, "Dex number", "lowest first", "highest first", "pokedex"),
+        (BankSortOrder.DexNumber, "Номер покедекса", "lowest first", "highest first", "pokedex"),
         (BankSortOrder.SpeciesName, "Species name", "A-Z", "Z-A", "alpha"),
-        (BankSortOrder.Nickname, "Nickname", "A-Z", "Z-A", "rename"),
-        (BankSortOrder.LevelDesc, "Level", "strongest first", "weakest first", "level"),
-        (BankSortOrder.ShinyFirst, "Shiny", "shinies first", "shinies last", "shiny"),
-        (BankSortOrder.Type, "Type", "Normal → Fairy", "Fairy → Normal", "type"),
-        (BankSortOrder.Rarity, "Legendary / mythical", "rare first", "rare last", "rarity"),
-        (BankSortOrder.Generation, "Generation", "oldest era first", "newest era first", "generation"),
-        (BankSortOrder.SourceGame, "Origin game", "A-Z", "Z-A", "game"),
-        (BankSortOrder.NewestAdded, "Date deposited", "newest first", "oldest first", "calendar"),
-        (BankSortOrder.Gender, "Gender", "♂ ♀ genderless", "genderless ♀ ♂", "gender"),
+        (BankSortOrder.Nickname, "Имя покемона", "A-Z", "Z-A", "rename"),
+        (BankSortOrder.LevelDesc, "Уровень", "strongest first", "weakest first", "level"),
+        (BankSortOrder.ShinyFirst, "Шайни", "shinies first", "shinies last", "shiny"),
+        (BankSortOrder.Type, "Тип", "Normal → Fairy", "Fairy → Normal", "type"),
+        (BankSortOrder.Rarity, "Легендарные / мифические", "rare first", "rare last", "rarity"),
+        (BankSortOrder.Generation, "Поколение", "oldest era first", "newest era first", "generation"),
+        (BankSortOrder.SourceGame, "Игра происхождения", "A-Z", "Z-A", "game"),
+        (BankSortOrder.NewestAdded, "Дата помещения", "newest first", "oldest first", "calendar"),
+        (BankSortOrder.Gender, "Пол", "♂ ♀ genderless", "genderless ♀ ♂", "gender"),
         (BankSortOrder.Ball, "Poké Ball", "by ball number", "reversed", "bank"),
     ];
 
@@ -524,7 +524,7 @@ public sealed class BankSearchPage : IPadPagingHandler
             SortKeys.Select(k => new PadOption(k.Label, IconPath: k.Icon)).ToArray());
         if (key is null) return null;
         var picked = SortKeys.First(k => k.Label == key);
-        var direction = await PadMenu.ShowAsync(host, picked.Label, "Which way round?",
+        var direction = await PadMenu.ShowAsync(host, picked.Label, "В каком порядке?",
             new PadOption(picked.Forward, IconPath: "sort"), new PadOption(picked.Reversed, IconPath: "reverse"));
         if (direction is null) return null;
         var reverse = direction == picked.Reversed;
@@ -534,17 +534,17 @@ public sealed class BankSearchPage : IPadPagingHandler
     private static string SortLabel(BankSortOrder sort) => sort switch
     {
         BankSortOrder.SpeciesName => "A-Z",
-        BankSortOrder.LevelDesc => "Level",
-        BankSortOrder.ShinyFirst => "Shiny",
+        BankSortOrder.LevelDesc => "Уровень",
+        BankSortOrder.ShinyFirst => "Шайни",
         BankSortOrder.NewestAdded => "Date",
-        BankSortOrder.OldestAdded => "Oldest",
+        BankSortOrder.OldestAdded => "Старые",
         BankSortOrder.Generation => "Gen",
-        BankSortOrder.Nickname => "Nickname",
-        BankSortOrder.Type => "Type",
+        BankSortOrder.Nickname => "Имя покемона",
+        BankSortOrder.Type => "Тип",
         BankSortOrder.SourceGame => "Game",
-        BankSortOrder.Rarity => "Rarity",
-        BankSortOrder.Gender => "Gender",
-        BankSortOrder.Ball => "Ball",
+        BankSortOrder.Rarity => "Редкость",
+        BankSortOrder.Gender => "Пол",
+        BankSortOrder.Ball => "Покебол",
         _ => "Dex #",
     };
 
@@ -554,7 +554,7 @@ public sealed class BankSearchPage : IPadPagingHandler
     {
         if (Count == 0)
         {
-            _cursorInfo.Text = _all.Count == 0 ? "THE BANK IS EMPTY" : "NO POKéMON MATCH";
+            _cursorInfo.Text = _all.Count == 0 ? "БАНК ПУСТ" : "НЕТ ПОДХОДЯЩИХ ПОКЕМОНОВ";
             return;
         }
         var entry = EntryAt(_page * PageSize + _cursor);
