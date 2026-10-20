@@ -26,25 +26,25 @@ public static class PotentialEditor
 
             var options = new List<PadOption>();
             if (p.SupportsTera)
-                options.Add(new PadOption($"Тера-тип · {p.TeraTypeName}{(p.TeraLocked ? " (fixed)" : "")}",
+                options.Add(new PadOption($"Тера-тип · {RussianGameText.TypeName(p.TeraType)}{(p.TeraLocked ? " (задан формой)" : "")}",
                     Detail: "Тип покемона после терасталлизации."));
             if (p.SupportsHyperTrain)
                 options.Add(new PadOption($"Гипертренировка · {p.HyperTrained.Count(t => t)}/6",
                     Detail: "Тренировка крышками: характеристика считается имеющей идеальный IV."));
             if (p.SupportsAwakening)
                 options.Add(new PadOption($"Пробуждение (AV) · {p.Awakening.Sum()}/1200",
-                    Detail: "Let's Go stat boosts from candies, up to 200 per stat."));
+                    Detail: "Усиление характеристик конфетами в Let's Go: до 200 для каждой."));
             if (p.SupportsGanbaru)
                 options.Add(new PadOption($"Уровни усилий (EL) · {p.Ganbaru.Sum()}/{p.GanbaruMaximums.Sum()}",
-                    Detail: "Legends: Arceus stat boosts from Grit items."));
+                    Detail: "Усиление характеристик предметами усилий в Legends: Arceus."));
             if (p.SupportsAbilitySlot)
-                options.Add(new PadOption($"Слот способности · {p.AbilitySlots[p.AbilitySlot].Name}",
-                    Detail: "Which of its abilities it has, as a Capsule or Patch would set."));
+                options.Add(new PadOption($"Слот способности · {RussianAbilities.SlotName(p.AbilitySlots[p.AbilitySlot])}",
+                    Detail: "Выбор обычной или скрытой способности, как при использовании капсулы или патча способностей."));
 
             if (options.Count == 0)
             {
                 await EditorMenu.ShowAsync(host, "Потенциал",
-                    "This format has no Tera type, Hyper Training, or ability slot data.", "OK");
+                    "В этом формате нет тера-типа, гипертренировки или выбора слота способности.", "OK");
                 return dirty;
             }
 
@@ -93,12 +93,12 @@ public static class PotentialEditor
         var title = awakening ? "Пробуждение (AV)" : "Уровни усилий (EL)";
         var options = StatNames.Select((name, i) => new PadOption($"{name} · {values[i]}/{maximums[i]}"))
             .Append(new PadOption("Максимум всем", IconPath: "fill"))
-            .Append(new PadOption("Clear all", IconPath: "clear"))
+            .Append(new PadOption("Сбросить всё", IconPath: "clear"))
             .ToArray();
         var choice = await EditorMenu.ShowAsync(host, title, null, options);
         if (choice is null) return false;
         if (choice == "Максимум всем") values = maximums;
-        else if (choice == "Clear all") values = new int[6];
+        else if (choice == "Сбросить всё") values = new int[6];
         else
         {
             var index = Array.FindIndex(StatNames, name => choice.StartsWith(name, StringComparison.Ordinal));
@@ -123,10 +123,10 @@ public static class PotentialEditor
             for (var i = 0; i < StatNames.Length; i++)
             {
                 var trained = p.HyperTrained[i];
-                options.Add(new PadOption($"{StatNames[i]} · {(trained ? "trained" : "-")}"));
+                options.Add(new PadOption($"{StatNames[i]} · {(trained ? "обучено" : "—")}"));
             }
             options.Add(new PadOption("Обучить всему", IconPath: "train"));
-            options.Add(new PadOption("Clear all", IconPath: "clear"));
+            options.Add(new PadOption("Сбросить всё", IconPath: "clear"));
 
             var choice = await EditorMenu.ShowAsync(host, "Гипертренировка", null, options.ToArray());
             if (choice is null) return dirty;
@@ -136,7 +136,7 @@ public static class PotentialEditor
                 session.ApplyPotentialEdit(box, slot, new PotentialEdit(HyperTrained: [true, true, true, true, true, true]));
                 dirty = true;
             }
-            else if (choice.StartsWith("Clear all", StringComparison.Ordinal))
+            else if (choice.StartsWith("Сбросить всё", StringComparison.Ordinal))
             {
                 session.ApplyPotentialEdit(box, slot, new PotentialEdit(HyperTrained: [false, false, false, false, false, false]));
                 dirty = true;
@@ -158,7 +158,7 @@ public static class PotentialEditor
 
     private static async Task<int?> PickChoiceAsync(Grid host, string title, IReadOnlyList<NamedChoice> choices, int current)
     {
-        var items = choices.Select(c => new PickItem(c.Id, c.Name)).ToList();
+        var items = choices.Select(c => new PickItem(c.Id, RussianAbilities.SlotName(c)) { Keywords = c.Name }).ToList();
         var picked = await PickerMenu.ShowAsync(host, title, items, current);
         return picked?.Id;
     }

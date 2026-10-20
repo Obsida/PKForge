@@ -234,10 +234,11 @@ public static class InfoPickers
         var items = choices.Select(c =>
         {
             var own = ownTypes.Contains(c.Id);
-            return new PickItem(c.Id, c.Name, Detail: TeraDetail(c.Id, own))
+            return new PickItem(c.Id, RussianGameText.TypeName(c.Id), Detail: TeraDetail(c.Id, own))
             {
                 TypeId = c.Id,
-                Tag = own ? "Own type" : c.Id == current ? "Now" : null,
+                Tag = own ? "Свой тип" : c.Id == current ? "Текущий" : null,
+                Keywords = c.Name,
                 TagColor = own ? UiTokens.Green : UiTokens.Blueprint,
             };
         }).ToList();
@@ -246,10 +247,10 @@ public static class InfoPickers
 
     /// <summary>What the Tera type does for this Pokémon, in one line.</summary>
     public static string TeraDetail(int type, bool matchesOwnType) => type == TypeFacts.Stellar
-        ? "One boost per move type: 1.2×, or 2× on its own types"
+        ? "Одно усиление для каждого типа приёма: в 1,2 раза, для собственных типов — в 2 раза"
         : matchesOwnType
-            ? $"Matches its own type: {TypeFacts.Name(type)} STAB rises to 2×"
-            : $"{TypeFacts.Name(type)} moves gain 1.5× STAB; keeps its own STAB";
+            ? $"Свой тип ({RussianGameText.TypeName(type)}): бонус приёмов этого типа повышается до 2×"
+            : $"Тип «{RussianGameText.TypeName(type)}» получает бонус 1,5×; бонус исходных типов сохраняется";
 
     /// <summary>
     /// Hidden Power type chooser (types Fighting-Dark). Each row previews the IVs the
@@ -260,10 +261,11 @@ public static class InfoPickers
         var items = Enumerable.Range(1, 16).Select(type =>
         {
             var ivs = ivsFor(type);
-            return new PickItem(type, TypeFacts.Name(type), Detail: ivs is null ? "Not reachable from these IVs" : $"IVs {string.Join("/", ivs)}")
+            return new PickItem(type, RussianGameText.TypeName(type), Detail: ivs is null ? "Недоступен при этих IV" : $"IV {string.Join("/", ivs)}")
             {
                 TypeId = type,
-                Tag = type == current ? "NOW" : null,
+                Tag = type == current ? "Текущий" : null,
+                Keywords = TypeFacts.Name(type),
                 Muted = ivs is null,
             };
         }).ToList();

@@ -202,6 +202,7 @@ internal static class DesktopSmoke
         await Task.Delay(500);
         var host = (Grid)typeof(BoxBrowserPage).GetField("_hostGrid", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(page)!;
 
+        await CheckLocalizationAsync(window, host, router, data);
         await CheckEditorInteractionAsync(window, navigation, router, page, host, vm, session);
 
         var features = (Task<GenerationRequest?>)typeof(GenerateWizard).GetMethod("ShowFeaturesFormAsync", BindingFlags.Static | BindingFlags.NonPublic)!
@@ -304,6 +305,41 @@ internal static class DesktopSmoke
 
     private static IEnumerable<IPadHandler> PadHandlers(GamepadRouter router) =>
         (IEnumerable<IPadHandler>)typeof(GamepadRouter).GetField("_stack", BindingFlags.NonPublic | BindingFlags.Instance)!.GetValue(router)!;
+
+    private static async Task CheckLocalizationAsync(Microsoft.Maui.Controls.Window window, Grid host, GamepadRouter router, IGameDataService data)
+    {
+        using var preview = IPlatformApplication.Current!.Services.GetRequiredService<ISaveEngine>().OpenBlankSession(9);
+        var abilities = InfoPickers.AbilityItems(data, preview, 823, 0); // Corviknight: Mirror Armor, ID 240.
+        if (!abilities.Any(a => a.Id == 240 && a.Name == "Зеркальная броня" && a.Detail!.Contains("снижение")))
+            throw new InvalidOperationException("New ability translation is missing in the actual picker rows");
+        var abilityTask = PickerMenu.ShowAsync(host, "Способность", abilities);
+        var picker = PadHandlers(router).OfType<PickerMenu>().Single();
+        var search = Descendants(host.Children.Last() as Grid ?? throw new InvalidOperationException()).OfType<Entry>().Single();
+        var rows = typeof(PickerMenu).GetField("_filtered", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        foreach (var query in new[] { "Mirror Armor", "Зеркальная" })
+        {
+            search.Text = query;
+            var filtered = (List<PickItem>)rows.GetValue(picker)!;
+            if (filtered.Count != 1 || filtered[0].Id != 240) throw new InvalidOperationException($"Ability search failed: {query}");
+        }
+        await Task.Delay(250);
+        await SnapshotAsync(window, "ability-translation");
+        router.Dispatch(PadButton.A);
+        if ((await abilityTask)?.Id != 240) throw new InvalidOperationException("Translated ability selection changed its ID");
+
+        var natureTask = NaturePicker.ShowAsync(host, data.NatureNames, 3, null);
+        picker = PadHandlers(router).OfType<PickerMenu>().Single();
+        search = Descendants((Grid)host.Children.Last()).OfType<Entry>().Single();
+        search.Text = "Adamant";
+        var natures = (List<PickItem>)rows.GetValue(picker)!;
+        if (natures.Count != 1 || natures[0].Id != 3 || natures[0].Name != "Непреклонный" || !natures[0].Detail!.Contains("Любит острый"))
+            throw new InvalidOperationException("Nature translation/search lost its effect or canonical ID");
+        await Task.Delay(250);
+        await SnapshotAsync(window, "nature-translation");
+        router.Dispatch(PadButton.A);
+        if ((await natureTask)?.Id != 3) throw new InvalidOperationException("Translated nature selection changed its ID");
+        Log($"Localization: {RussianAbilities.Entries.Count} abilities and {data.NatureNames.Count} natures; Russian/English search and selected IDs verified");
+    }
 
     private static async Task UntilAsync(Func<bool> ready)
     {

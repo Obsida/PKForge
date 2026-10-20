@@ -10,7 +10,8 @@ public sealed class RussianGameDataService(IGameDataService source) : IGameDataS
     public IReadOnlyList<string> ItemNames => source.ItemNames;
     public IReadOnlyList<string> AbilityNames { get; } = source.AbilityNames
         .Select((name, id) => RussianAbilities.Name(id, name)).ToArray();
-    public IReadOnlyList<string> NatureNames => source.NatureNames;
+    public IReadOnlyList<string> NatureNames { get; } = source.NatureNames
+        .Select((name, id) => RussianGameText.NatureName(id, name)).ToArray();
     public IReadOnlyList<string> BallNames => source.BallNames;
     public IReadOnlyList<SpeciesFormFlags> FormFlags => source.FormFlags;
 }

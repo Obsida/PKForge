@@ -44,7 +44,7 @@ public sealed class EvolutionCard : IPadHandler
         var plan = await Task.Run(() => service.Plan(session, box, slot, hax));
         if (plan.Options.Count == 0)
         {
-            await PadMenu.ShowAsync(host, "Эволюция", plan.Unavailable ?? "It can't evolve.", "OK");
+            await PadMenu.ShowAsync(host, "Эволюция", plan.Unavailable ?? "Этот покемон не может эволюционировать.", "OK");
             return null;
         }
         var card = new EvolutionCard(host, plan);
@@ -63,11 +63,11 @@ public sealed class EvolutionCard : IPadHandler
         var choices = new List<EvolutionMoveChoice>();
         foreach (var offer in option.Moves)
         {
-            var why = offer.EvolutionMove ? "an evolution move" : $"learned at Lv.{plan.Level}";
+            var why = offer.EvolutionMove ? "приём эволюции" : $"изучается на уровне {plan.Level}";
             if (known.Count < 4)
             {
                 var pick = await PadMenu.ShowAsync(host, $"Изучить {offer.Name}?",
-                    $"{option.SpeciesName} can learn {offer.Name} ({why}).",
+                    $"{option.SpeciesName} может выучить {offer.Name} ({why}).",
                     new PadOption($"Изучить {offer.Name}", IconPath: "moves"), new PadOption("Не изучать", IconPath: "close"));
                 if (pick is null) return null;
                 if (pick != "Не изучать")
@@ -80,7 +80,7 @@ public sealed class EvolutionCard : IPadHandler
             var options = known.Select(m => new PadOption($"Забыть {m}", IconPath: "delete")).ToList();
             options.Add(new PadOption($"Не изучать {offer.Name}", IconPath: "close"));
             var forget = await PadMenu.ShowAsync(host, $"Изучить {offer.Name}?",
-                $"{option.SpeciesName} wants to learn {offer.Name} ({why}), but already knows four moves. Forget one?",
+                $"{option.SpeciesName} может выучить {offer.Name} ({why}), но уже знает четыре приёма. Какой забыть?",
                 options.ToArray());
             if (forget is null) return null;
             var slot = known.FindIndex(m => forget == $"Забыть {m}");
@@ -156,7 +156,7 @@ public sealed class EvolutionCard : IPadHandler
         var buttons = new HorizontalStackLayout { Spacing = 8, HorizontalOptions = LayoutOptions.End, Children = { cancel, _evolve } };
 
         var content = new VerticalStackLayout { Spacing = 8 };
-        content.Children.Add(Kit.HeaderBar(HaXMode.IsOn ? "Evolution · hax" : "Эволюция"));
+        content.Children.Add(Kit.HeaderBar(HaXMode.IsOn ? "Эволюция · HaX" : "Эволюция"));
         if (plan.Options.Count > 1) content.Children.Add(new ScrollView { Orientation = ScrollOrientation.Horizontal, Content = chipRow });
         content.Children.Add(_stage);
         content.Children.Add(names);
@@ -197,9 +197,9 @@ public sealed class EvolutionCard : IPadHandler
         {
             _ when CanMeet(option) => ($"Not met yet: {option.BlockedReason} Meet & evolve takes care of it.", UiTokens.RedOrange),
             { Available: false } => (option.BlockedReason ?? "Not possible right now.", UiTokens.GiftRed),
-            { IsTrade: true } => ("No second console needed: PKForge performs the link trade for you.", UiTokens.Ink1),
-            { ConditionMet: false } => ("HaX: the game's requirement is not met; evolving anyway.", UiTokens.RedOrange),
-            _ => ("The requirement is met.", UiTokens.Green),
+            { IsTrade: true } => ("Вторая консоль не нужна: PKForge выполняет обмен для эволюции.", UiTokens.Ink1),
+            { ConditionMet: false } => ("HaX: условие игры не выполнено, но эволюция разрешена.", UiTokens.RedOrange),
+            _ => ("Условие эволюции выполнено.", UiTokens.Green),
         };
         var canGo = option.Available || CanMeet(option);
         _evolve.Text = CanMeet(option) ? "Получение и эволюция" : "Эволюционировать";
@@ -209,14 +209,15 @@ public sealed class EvolutionCard : IPadHandler
         _changes.Children.Clear();
         _changes.Children.Add(StatGrid(option));
         var lines = new List<(string Caption, string Text, Color Tone)>();
-        if (CanMeet(option)) lines.Add(("FIRST", option.MeetCondition!, UiTokens.RedOrange));
+        if (CanMeet(option)) lines.Add(("СНАЧАЛА", option.MeetCondition!, UiTokens.RedOrange));
         if (option.AbilityBefore != "—")
-            lines.Add(("СПОСОБНОСТЬ", option.AbilityBefore == option.AbilityAfter ? option.AbilityAfter : $"{option.AbilityBefore} → {option.AbilityAfter}", UiTokens.Ink0));
-        lines.Add(("ИМЯ", option.NewNickname is { } nick ? $"Becomes {nick}" : $"Keeps the nickname {_plan.Nickname}", UiTokens.Ink0));
-        if (option.ConsumedItem is { } item) lines.Add(("ПРЕДМЕТ", $"{item} is used up", UiTokens.RedOrange));
-        if (option.HandlerNote is { } handler) lines.Add(("Trade", handler, UiTokens.Ink1));
-        if (option.Moves.Count > 0) lines.Add(("Приёмы", $"Can learn {string.Join(", ", option.Moves.Select(m => m.Name))} (you choose next)", UiTokens.IndigoInk));
-        lines.Add(("DEX", $"{option.SpeciesName} is registered as caught", UiTokens.Ink1));
+            lines.Add(("СПОСОБНОСТЬ", option.AbilityBefore == option.AbilityAfter ? RussianAbilities.TranslateName(option.AbilityAfter)
+                : $"{RussianAbilities.TranslateName(option.AbilityBefore)} → {RussianAbilities.TranslateName(option.AbilityAfter)}", UiTokens.Ink0));
+        lines.Add(("ИМЯ", option.NewNickname is { } nick ? $"Новое имя: {nick}" : $"Сохраняет имя {_plan.Nickname}", UiTokens.Ink0));
+        if (option.ConsumedItem is { } item) lines.Add(("ПРЕДМЕТ", $"Будет израсходован: {item}", UiTokens.RedOrange));
+        if (option.HandlerNote is { } handler) lines.Add(("Обмен", handler, UiTokens.Ink1));
+        if (option.Moves.Count > 0) lines.Add(("Приёмы", $"Может выучить: {string.Join(", ", option.Moves.Select(m => m.Name))}. Выбор — на следующем шаге.", UiTokens.IndigoInk));
+        lines.Add(("ПОКЕДЕКС", $"{option.SpeciesName} будет отмечен как пойманный", UiTokens.Ink1));
         foreach (var (caption, text, tone) in lines) _changes.Children.Add(Line(caption, text, tone));
 
         _stage.InvalidateSurface();

@@ -126,7 +126,7 @@ public sealed class PokedexPicker : IPadHandler
         var hints = Kit.WindowHints(
             ("A", "Выбрать", () => OnPadButton(PadButton.A)),
             ("B", "Отмена", () => Close(null)),
-            ("LR", "Gen", () => OnPadButton(PadButton.R)),
+            ("LR", "Поколение", () => OnPadButton(PadButton.R)),
             ("X", "Типы", () => _ = ShowTypeFilterMenuAsync()),
             ("+", "Фильтры", () => _ = ShowFilterAxisMenuAsync()),
             ("Y", "Очистить", ClearFilters));
@@ -289,7 +289,7 @@ public sealed class PokedexPicker : IPadHandler
     /// <summary>A live capsule showing the current selection of one filter axis.</summary>
     private Border FilterCapsule(string caption, Action open, ref Label valueLabel)
     {
-        valueLabel = new Label { Text = $"{caption}: Any", TextColor = Colors.White, FontSize = UiTokens.TextSmall, FontAttributes = FontAttributes.Bold };
+        valueLabel = new Label { Text = $"{caption}: Любой", TextColor = Colors.White, FontSize = UiTokens.TextSmall, FontAttributes = FontAttributes.Bold };
         var capsule = new Border
         {
             BackgroundColor = UiTokens.MenuBlue,
@@ -353,8 +353,8 @@ public sealed class PokedexPicker : IPadHandler
             "600+ BST" => total >= 600,
             "Физические атакующие" => e.Stats.Atk >= 100 && e.Stats.Atk >= e.Stats.SpA + 15,
             "Специальные атакующие" => e.Stats.SpA >= 100 && e.Stats.SpA >= e.Stats.Atk + 15,
-            "Fast" => e.Stats.Spe >= 100,
-            "Sturdy" => e.Stats.Hp + e.Stats.Def + e.Stats.SpD >= 280,
+            "Быстрые" => e.Stats.Spe >= 100,
+            "Выносливые" => e.Stats.Hp + e.Stats.Def + e.Stats.SpD >= 280,
             _ => true,
         };
     }
@@ -440,7 +440,7 @@ public sealed class PokedexPicker : IPadHandler
             .Select(t => (_typeFilters.Contains(t) ? "✓ " : "") + TypeNames[t])
             .Append("Сбросить все фильтры")
             .ToArray();
-        var choice = await PadMenu.ShowAsync(_host, "ФИЛЬТР ПО ТИПУ (переключение)", "A Pokémon must match every checked type.", options);
+        var choice = await PadMenu.ShowAsync(_host, "ФИЛЬТР ПО ТИПУ (переключение)", "Покемон должен соответствовать всем отмеченным типам.", options);
         if (choice is null) return;
         if (choice == "Сбросить все фильтры") { ClearFilters(); return; }
         var name = choice.StartsWith("✓ ", StringComparison.Ordinal) ? choice[2..] : choice;
@@ -452,10 +452,10 @@ public sealed class PokedexPicker : IPadHandler
     private async Task ShowFilterAxisMenuAsync()
     {
         var choice = await PadMenu.ShowAsync(_host, "Фильтры",
-            "Categories, power, and themes combine with the type gems and generation chips.",
-            new PadOption($"Категория: {_category}", IconPath: "type", Detail: "Legendary, starter, fossil, baby and other groups."),
-            new PadOption($"Сила: {_power}", IconPath: "battle", Detail: "Base stat total or battle style, such as fast."),
-            new PadOption($"Тема: {_theme}", IconPath: "filter", Detail: "Fun groups like dragons, birds or dinosaurs."),
+            "Категория, сила и тема сочетаются с фильтрами по типу и поколению.",
+            new PadOption($"Категория: {_category}", IconPath: "type", Detail: "Легендарные, стартовые, ископаемые, малыши и другие группы."),
+            new PadOption($"Сила: {_power}", IconPath: "battle", Detail: "Сумма базовых характеристик или стиль боя: например, быстрые покемоны."),
+            new PadOption($"Тема: {_theme}", IconPath: "filter", Detail: "Тематические группы: драконы, птицы, динозавры и другие."),
             new PadOption("Сбросить все фильтры", IconPath: "clear", Detail: "Также сбрасывает выбор типа и поколения."));
         switch (choice)
         {
@@ -469,7 +469,7 @@ public sealed class PokedexPicker : IPadHandler
     private async Task ShowCategoryMenuAsync()
     {
         var choice = await PadMenu.ShowAsync(_host, "Категория",
-            "Rarity and special families. Combines with types, generation, power, and theme.",
+            "Редкость и особые семейства. Сочетается с фильтрами по типу, поколению, силе и теме.",
             "Любой", "Легендарные", "Мифические", "Ультрачудовища", "Парадоксы", "Псевдолегендарные",
             "Стартовые", "Ископаемые", "Малыши", "Региональная форма", "Способные к мегаэволюции",
             "Способные к гигантамаксу", "Есть другие формы");
@@ -483,7 +483,7 @@ public sealed class PokedexPicker : IPadHandler
     {
         var choice = await PadMenu.ShowAsync(_host, "Сила", null,
             "Любой", "400+ BST", "500+ BST", "600+ BST", "Физические атакующие",
-            "Специальные атакующие", "Fast", "Sturdy");
+            "Специальные атакующие", "Быстрые", "Выносливые");
         if (choice is null) return;
         _power = choice;
         RefreshCapsules();
@@ -492,7 +492,7 @@ public sealed class PokedexPicker : IPadHandler
 
     private async Task ShowThemeMenuAsync()
     {
-        var choice = await PadMenu.ShowAsync(_host, "Тема", "The fun filters. Subjective by design.",
+        var choice = await PadMenu.ShowAsync(_host, "Тема", "Тематические группы покемонов. Состав групп выбран условно.",
             "Любой", "Драконы", "Водные обитатели", "Кошачьи", "Псовые", "Птицы", "Динозавры");
         if (choice is null) return;
         _theme = choice;
