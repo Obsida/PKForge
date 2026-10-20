@@ -635,11 +635,15 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         // Box-level bulk tools run on the stock engine only: romhack sessions refuse
         // sort/batch ops, so their entries are hidden instead of failing mid-flow.
         var boxTools = _sessionsFor()?.SupportsBoxTools == true;
+        var selectedSlot = Math.Max(0, _viewModel.SelectedSlot);
+        var selectedMon = _sessionsFor()?.ReadEntity(_viewModel.BoxIndex, selectedSlot);
         var options = new List<PadOption>
         {
             new("Множественный выбор (кнопка −)", IconPath: "select", Detail: "Отметить несколько покемонов для общих действий."),
             new("Управление боксами…", IconPath: "box", Detail: "Перестановка, копирование, защита и очистка боксов."),
         };
+        if (selectedMon is { IsEmpty: false } && _viewModel.CarrySource is null)
+            options.Insert(0, new("Удалить покемона", IconPath: "delete", Detail: $"Удалить {selectedMon.Nickname} из сохранения. Создаётся точка восстановления."));
         options.AddRange(Menu(
             Allowed(SaveAction.CreateMon, new("Импорт файлов .pk", IconPath: "import", Detail: "Pick Pokémon files to fill this box's empty slots.")),
             Allowed(SaveAction.CreateMon, new("Импорт команды Showdown", IconPath: "script", Detail: "Paste Showdown sets, see their legality, then place them in empty slots.")),
@@ -672,6 +676,9 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         var choice = await PadMenu.ShowAsync(_hostGrid, "Инструменты хранилища", Note(null), options.ToArray());
         switch (choice)
         {
+            case "Удалить покемона":
+                if (selectedMon is { IsEmpty: false }) await ReleaseSlotAsync(selectedSlot, selectedMon.Nickname);
+                return;
             case "Множественный выбор (кнопка −)":
                 EnterSelectMode();
                 return;
@@ -1187,7 +1194,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                 Allowed(SaveAction.Duplicate, new("Копировать в другую игру…", IconPath: "copy", Detail: "Copies join another linked game; the originals stay here.")),
                 Allowed(SaveAction.Duplicate, new("Дублировать", IconPath: "copy", Detail: "Clone the marked Pokémon into the first free box slots.")),
                 new PadOption("Экспорт файлов .pk", IconPath: "export", Detail: "Share each marked Pokémon as its own file."),
-                new PadOption("Выпустить", IconPath: "release")));
+                new PadOption("Удалить выбранных", IconPath: "delete", Detail: "Удалить отмеченных покемонов из сохранения. Создаётся точка восстановления.")));
             options.AddRange(BulkOptions());
         }
         options.Add(new("Отметить покемонов с предметом…", IconPath: "item", Detail: "Find Pokémon holding an item, then mark them or go to one."));
@@ -1259,7 +1266,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                 _viewModel.Status = $"Экспортировано покемонов: {paths.Count}.";
                 break;
             }
-            case "Выпустить":
+            case "Удалить выбранных":
                 await ReleaseSelectionAsync();
                 break;
             case "Управление боксами…":
@@ -1431,9 +1438,9 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                 return;
             }
         }
-        var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Выпустить выбранных?",
-            $"Выпустить отмеченных покемонов ({_viewModel.MarkedCount})? Текущее состояние сохранится в точке восстановления.",
-            "Выпустить всех");
+        var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Удалить выбранных покемонов?",
+            $"Удалить из сохранения отмеченных покемонов ({_viewModel.MarkedCount})? Текущее состояние сохранится в точке восстановления.",
+            "Удалить выбранных");
         if (!confirmed) return;
         await _viewModel.BulkReleaseAsync();
     }
@@ -3013,15 +3020,13 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
 
         private async Task AddItemAsync()
         {
-            await FlushPendingAsync();
+            if (!await FlushPendingAsync()) return;
             var pouchName = _bag[_pouchIndex].Name;
             var gameItems = _itemNames; // the open game's own table
-            var legalIds = _session.GetPouchLegalItems(pouchName)
-                .Where(id => id < gameItems.Count && gameItems[id].Length > 0)
-                .ToList();
+            var legalIds = BagItemChoices.AvailableToAdd(_session.GetBag(), _session.GetPouchLegalItems(pouchName), gameItems);
             if (legalIds.Count == 0)
             {
-                Report($"No addable items in {pouchName} - tap the pouch name to switch");
+                Report("В этом кармане нет новых предметов для добавления. Количество имеющихся можно изменить в рюкзаке.");
                 return;
             }
 
@@ -3035,7 +3040,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                 var cached = System.IO.Path.Combine(itemDirectory, ItemArt.Slug(gameItems[id]) + ".png");
                 return new PickItem(id, gameItems[id], File.Exists(cached) ? cached : placeholder);
             }).ToList();
-            Report($"Adding to {pouchName} - {legal.Count} items");
+            Report($"Доступно новых предметов: {legal.Count}");
             _ = Task.Run(async () =>
             {
                 foreach (var id in legalIds)
@@ -3044,7 +3049,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             PickItem? picked;
             try
             {
-                picked = await PickerMenu.ShowAsync(_host, $"Add - {pouchName}", legal);
+                picked = await PickerMenu.ShowAsync(_host, $"Добавить — {pouchName}", legal);
             }
             catch (Exception ex)
             {
@@ -3824,7 +3829,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             new PadOption("Показать .pk QR", IconPath: "qr", Detail: "The whole Pokémon as a QR code that PKForge can scan into the Bank."),
             new PadOption("RNG / IV", IconPath: "dice", Detail: "See its PID and IVs, and change its nature without losing shininess."),
             new PadOption("Защита от выпуска", IconPath: "padlock", Detail: "Защищённого покемона нельзя выпустить."),
-            new PadOption("Выпустить", IconPath: "release"),
+            new PadOption("Удалить покемона", IconPath: "delete", Detail: "Удалить из сохранения. Создаётся точка восстановления."),
             new PadOption("Выпустить на волю", IconPath: "release", Detail: "It leaves the save and lives on in the wild lands around the Poképark. It may come back to visit.")));
         var choice = await PadMenu.ShowAsync(_hostGrid, nickname,
             Note(verdict is { Valid: false } ? verdict.Problem : null), options.ToArray());
@@ -3940,7 +3945,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                 _viewModel.Status = locked ? "Покемон защищён от выпуска" : "Защита покемона снята";
                 return;
             }
-            case "Выпустить":
+            case "Удалить покемона":
                 await ReleaseSlotAsync(slot, nickname);
                 return;
             case "Выпустить на волю":
@@ -4305,7 +4310,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             var rng = session.GetRngInfo(_viewModel.BoxIndex, slot);
             if (!Protection.CanRelease(docId, _viewModel.BoxIndex, slot, rng.Pid))
             {
-                _viewModel.Status = $"{nickname} is locked - unlock it first";
+                _viewModel.Status = $"{nickname} защищён от удаления — сначала снимите защиту от выпуска.";
                 return;
             }
         }
@@ -4313,7 +4318,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         Task<bool> Release() => _viewModel.RunMutationAsync(session =>
         {
             session.ReleaseSlot(box, slot);
-            return new GenerationOutcome(true, toWilds ? $"{nickname} went to live in the Wilds." : $"{nickname} выпущен. До встречи!");
+            return new GenerationOutcome(true, toWilds ? $"{nickname} went to live in the Wilds." : $"{nickname} удалён из сохранения.");
         }, slot, action: SaveAction.Release);
         if (toWilds && session is not null && WildFriendOf(session, box, slot) is { } friend)
         {
@@ -4327,9 +4332,9 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             _canvas.InvalidateSurface();
             return;
         }
-        var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Выпустить?",
-            $"Выпустить {nickname} на волю? Текущее состояние сохранится в точке восстановления.",
-            "Выпустить");
+        var confirmed = await PadMenu.ConfirmAsync(_hostGrid, toWilds ? "Выпустить на волю?" : "Удалить покемона?",
+            $"{(toWilds ? "Выпустить на волю" : "Удалить из сохранения")} {nickname}? Текущее состояние сохранится в точке восстановления.",
+            toWilds ? "Выпустить" : "Удалить");
         if (!confirmed) return;
         await Release();
         _canvas.InvalidateSurface();

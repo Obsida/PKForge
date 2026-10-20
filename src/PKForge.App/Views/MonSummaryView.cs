@@ -751,7 +751,8 @@ public sealed class MonSummaryView : ContentView
         if (s.IsShiny && f?.Shiny is ShinyKind.Square or ShinyKind.Star)
             blocks.Add(Row("Шайни", f.Shiny == ShinyKind.Square ? "Квадратные искры" : "Звёздные искры"));
         if (s.Characteristic is not null) blocks.Add(Row("Черта", s.Characteristic));
-        if (s.AbilityName is not null) blocks.Add(Row("Способность", s.AbilityName, s.AbilityEffect));
+        if (s.AbilityName is not null) blocks.Add(Row("Способность", s.AbilityName,
+            s.Ability is { } ability ? RussianAbilities.Effect(ability, s.AbilityEffect) : s.AbilityEffect));
         if (blocks.Count == character) blocks.Add(Text("У покемонов поколений 1 и 2 нет характера и способности."));
 
         blocks.Add(Divider("Предметы и уход"));

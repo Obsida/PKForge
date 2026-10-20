@@ -8,6 +8,8 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="../../src/PKForge.App/Services/RussianAbilities.cs" Link="App/RussianAbilities.cs" />
+    <Compile Include="../../src/PKForge.App/Services/RussianGameDataService.cs" Link="App/RussianGameDataService.cs" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />

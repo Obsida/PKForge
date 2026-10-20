@@ -41,7 +41,11 @@ internal static class DesktopSmoke
             var home = navigation.CurrentPage;
             var router = IPlatformApplication.Current!.Services.GetRequiredService<GamepadRouter>();
             Log($"Starting {mode}");
-            if (mode == "events")
+            if (mode == "storage")
+            {
+                await CheckStorageAsync(window, navigation, router);
+            }
+            else if (mode == "events")
             {
                 var task = (Task)typeof(HomePage).GetMethod("ShowEventsMenuAsync", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(home, null)!;
                 await Task.Delay(2000);
@@ -175,6 +179,148 @@ internal static class DesktopSmoke
         }
         catch (Exception error) { Log($"FAIL {error}"); }
         finally { Application.Current!.Quit(); }
+    }
+
+    private static async Task CheckStorageAsync(Microsoft.Maui.Controls.Window window, NavigationPage navigation, GamepadRouter router)
+    {
+        var services = IPlatformApplication.Current!.Services;
+        var path = Path.Combine(Environment.GetEnvironmentVariable("PKFORGE_SMOKE_OUTPUT")!, "main");
+        File.Copy(Environment.GetEnvironmentVariable("PKFORGE_SMOKE_SAVE")!, path, true);
+        var sessions = services.GetRequiredService<ISaveSessionService>();
+        Log("Opening copied save");
+        await sessions.OpenAsync(new PickedDocument(path, "main"));
+        Log("Copied save opened");
+        var session = sessions.CurrentSession!;
+        var data = services.GetRequiredService<IGameDataService>();
+        var vm = services.GetRequiredService<BoxBrowserViewModel>();
+        vm.RefreshFromCurrentSession();
+        Log("Storage model refreshed");
+        var page = services.GetRequiredService<BoxBrowserPage>();
+        Log("Storage page constructed");
+        await navigation.PushAsync(page);
+        Log("Storage page pushed");
+        await Task.Delay(500);
+        var host = (Grid)typeof(BoxBrowserPage).GetField("_hostGrid", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(page)!;
+
+        var features = (Task<GenerationRequest?>)typeof(GenerateWizard).GetMethod("ShowFeaturesFormAsync", BindingFlags.Static | BindingFlags.NonPublic)!
+            .Invoke(null, [host, data, session, new PickItem(350, "Milotic"), 0])!;
+        Log("Creation form opened");
+        window.MinimumWidth = 400;
+        window.MinimumHeight = 400;
+        foreach (var size in new[] { (1280, 800), (960, 640), (520, 640), (1280, 800) })
+        {
+            window.Width = size.Item1;
+            window.Height = size.Item2;
+            await Task.Delay(650);
+            var overlay = (Grid)host.Children.Last();
+            var panel = overlay.Children.OfType<Border>().Single();
+            var create = Descendants(panel).OfType<Button>().Single(b => b.Text == "Создать");
+            var cancel = Descendants(panel).OfType<Button>().Single(b => b.Text == "Отмена");
+            foreach (var button in new[] { create, cancel })
+            {
+                var bounds = BoundsIn(button, host);
+                if (bounds.Left < 0 || bounds.Top < 0 || bounds.Right > host.Width + 1 || bounds.Bottom > host.Height + 1 || bounds.Width < 40)
+                    throw new InvalidOperationException($"Action button clipped at {size}: {bounds}, host={host.Bounds}");
+            }
+            var scroll = Descendants(panel).OfType<ScrollView>().Single();
+            Log($"Measured form at {host.Width}x{host.Height}; scroll content={scroll.ContentSize}, viewport={scroll.Bounds}");
+            var fields = Descendants(scroll).OfType<Label>().Where(l => l.Text is "Способность" or "Приём 4").ToArray();
+            if (fields.Length != 2 || fields.Any(l => BoundsIn(l, host).Right > host.Width))
+                throw new InvalidOperationException("Generation fields clipped horizontally");
+            // WinUI may not signal ScrollFinished for a no-op scroll. Verify the
+            // resulting offset instead of awaiting that event indefinitely.
+            var bottom = Math.Max(0, scroll.ContentSize.Height - scroll.Height);
+            _ = scroll.ScrollToAsync(0, bottom, false);
+            await Task.Delay(100);
+            if (scroll.ScrollY < bottom - 2) throw new InvalidOperationException("Cannot reach the end of the creation form");
+            Log($"Creation form fits {host.Width}x{host.Height}; actions visible, final move reachable; scroll={scroll.ScrollY}");
+            await SnapshotAsync(window, $"create-{size.Item1}");
+        }
+        router.Dispatch(PadButton.B);
+        if (await features is not null) throw new InvalidOperationException("Cancel generated a Pokémon");
+
+        var abilityChoices = InfoPickers.AbilityItems(data, session, 350, 0);
+        if (!abilityChoices.Any(a => a.Id == 63 && a.Name == "Чудесная чешуя" && a.Detail!.Contains("Защиту")))
+            throw new InvalidOperationException("Milotic ability name/description not translated");
+        Log($"Russian ability names/effects: {RussianAbilities.Entries.Count} entries; Milotic verified");
+
+        // Exercise the actual add picker after changing the bag, then again after removing the item.
+        var pouch = session.GetBag().First();
+        var item = BagItemChoices.AvailableToAdd(session.GetBag(), session.GetPouchLegalItems(pouch.Name), session.GetItemNames()).First();
+        session.SetItemCount(pouch.Name, item, 1);
+        var bagType = typeof(BoxBrowserPage).GetNestedType("BagEditor", BindingFlags.NonPublic)!;
+        var bagTask = (Task)bagType.GetMethod("ShowAsync", BindingFlags.Public | BindingFlags.Static)!.Invoke(null, [host, session, vm, data])!;
+        var bag = PadHandlers(router).Single(h => h.GetType() == bagType);
+        async Task CheckItemPicker(bool shouldContain)
+        {
+            var add = (Task)bagType.GetMethod("AddItemAsync", BindingFlags.NonPublic | BindingFlags.Instance)!.Invoke(bag, null)!;
+            await Task.Delay(300);
+            var picker = PadHandlers(router).OfType<PickerMenu>().Single();
+            var choices = (IReadOnlyList<PickItem>)typeof(PickerMenu).GetField("_all", BindingFlags.NonPublic | BindingFlags.Instance)!.GetValue(picker)!;
+            if (choices.Any(c => c.Id == item) != shouldContain) throw new InvalidOperationException("Owned item filtering is stale");
+            router.Dispatch(PadButton.B);
+            await add;
+        }
+        await CheckItemPicker(false);
+        session.SetItemCount(pouch.Name, item, 0);
+        await CheckItemPicker(true);
+        router.Dispatch(PadButton.B);
+        await bagTask;
+        Log("Real add picker hides an owned item and restores it after removal");
+
+        // Put an existing mon in a box on the copied save, so the party is never emptied.
+        var source = session.Snapshot.Slots.First(s => s.Species > 0);
+        var target = session.Snapshot.Slots.First(s => s.Box >= 0 && s.Species is null);
+        var exported = session.ExportSlot(source.Box, source.Slot);
+        if (!await vm.RunMutationAsync(s => new GenerationOutcome(s.ImportSlot(target.Box, target.Slot, exported.Data, exported.Format), "Diagnostic copy"), source.Slot, refreshSlot: false))
+            throw new InvalidOperationException(vm.Status);
+        vm.RefreshFromCurrentSession();
+        vm.JumpTo(target.Box, target.Slot);
+        var before = File.ReadAllBytes(path);
+        var backupService = services.GetRequiredService<IBackupService>();
+        var backups = (await backupService.ListAsync()).Count;
+        var deleteMethod = typeof(BoxBrowserPage).GetMethod("ReleaseSlotAsync", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        var nickname = session.ReadEntity(target.Box, target.Slot).Nickname;
+        var deletion = (Task)deleteMethod.Invoke(page, [target.Slot, nickname, false])!;
+        if (!File.ReadAllBytes(path).SequenceEqual(before)) throw new InvalidOperationException("Delete wrote before confirmation");
+        router.Dispatch(PadButton.B);
+        await deletion;
+        if (session.ReadEntity(target.Box, target.Slot).IsEmpty || !File.ReadAllBytes(path).SequenceEqual(before))
+            throw new InvalidOperationException("Cancel deleted the Pokémon");
+        deletion = (Task)deleteMethod.Invoke(page, [target.Slot, nickname, false])!;
+        await Task.Delay(300);
+        await SnapshotAsync(window, "delete-confirmation");
+        router.Dispatch(PadButton.A);
+        await deletion;
+        if (!session.ReadEntity(target.Box, target.Slot).IsEmpty || (await backupService.ListAsync()).Count != backups + 1)
+            throw new InvalidOperationException($"Delete/restore point failed: {vm.Status}");
+        await sessions.OpenAsync(new PickedDocument(path, "main"));
+        if (!sessions.CurrentSession!.ReadEntity(target.Box, target.Slot).IsEmpty)
+            throw new InvalidOperationException("Deleted Pokémon returned after reopening");
+        Log("Delete cancellation preserves bytes; confirmed deletion survives reopen and creates a restore point");
+    }
+
+    private static IEnumerable<IPadHandler> PadHandlers(GamepadRouter router) =>
+        (IEnumerable<IPadHandler>)typeof(GamepadRouter).GetField("_stack", BindingFlags.NonPublic | BindingFlags.Instance)!.GetValue(router)!;
+
+    private static IEnumerable<VisualElement> Descendants(IVisualTreeElement element)
+    {
+        foreach (var child in element.GetVisualChildren())
+        {
+            if (child is VisualElement visual) yield return visual;
+            foreach (var nested in Descendants(child)) yield return nested;
+        }
+    }
+
+    private static Rect BoundsIn(VisualElement element, VisualElement host)
+    {
+        double x = 0, y = 0;
+        for (Element? parent = element; parent is VisualElement visual && parent != host; parent = parent.Parent)
+        {
+            x += visual.X;
+            y += visual.Y;
+        }
+        return new Rect(x, y, element.Width, element.Height);
     }
 
     private static async Task SnapshotAsync(Microsoft.Maui.Controls.Window window, string name)

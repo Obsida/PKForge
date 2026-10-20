@@ -1,5 +1,5 @@
 param(
-    [ValidateSet('events', 'park', 'theme', 'stats', 'gifts', 'music')]
+    [ValidateSet('events', 'park', 'theme', 'stats', 'gifts', 'music', 'storage')]
     [string[]]$Mode = @('events', 'park', 'theme', 'stats', 'gifts', 'music'),
     [string]$SavePath,
     [switch]$SkipBuild
@@ -9,7 +9,7 @@ $repo = Split-Path $PSScriptRoot -Parent
 $dotnet = Join-Path $repo '.tools\dotnet\dotnet.exe'
 if (!(Test-Path -LiteralPath $dotnet)) { $dotnet = (Get-Command dotnet).Source }
 if (!$SavePath) { $SavePath = Join-Path $repo 'save\main' }
-if (($Mode -contains 'stats' -or $Mode -contains 'gifts') -and !(Test-Path -LiteralPath $SavePath)) {
+if (($Mode -contains 'stats' -or $Mode -contains 'gifts' -or $Mode -contains 'storage') -and !(Test-Path -LiteralPath $SavePath)) {
     throw 'Supply -SavePath with a Gen 6 save. Tests edit a copy only.'
 }
 if (!$SkipBuild) {
@@ -42,7 +42,7 @@ try {
         $env:PKFORGE_SMOKE = $scenario
         $env:PKFORGE_SMOKE_OUTPUT = Join-Path $run $scenario
         $process = Start-Process -FilePath $app -WorkingDirectory $repo -WindowStyle Hidden -PassThru
-        if (!$process.WaitForExit(45000)) {
+        if (!$process.WaitForExit(60000)) {
             Stop-Process -Id $process.Id -ErrorAction SilentlyContinue
             throw "Timed out: $scenario"
         }

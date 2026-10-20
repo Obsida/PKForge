@@ -35,7 +35,7 @@ public static class MauiProgram
                 fonts.AddFont("NotoSans.ttf", "PixelUI");
             });
         builder.Services.AddSingleton<ISaveEngine, SaveEngine>();
-        builder.Services.AddSingleton<IGameDataService, GameDataService>();
+        builder.Services.AddSingleton<IGameDataService>(_ => new RussianGameDataService(new GameDataService()));
         builder.Services.AddSingleton<TrainerProfileStore>();
         builder.Services.AddSingleton<IGenerationOwnershipSettings>(sp => sp.GetRequiredService<TrainerProfileStore>());
         builder.Services.AddSingleton<ILegalizerService, LegalizerService>();

@@ -1,3 +1,4 @@
+using PKForge.App.Services;
 using PKForge.App.Theme;
 using PKForge.Domain;
 
@@ -144,10 +145,11 @@ public static class InfoPickers
         {
             var row = InfoKit.HeaderRow(
                 new Label { Text = NameOf(data.AbilityNames, ability.Id), FontSize = UiTokens.TextSmall, FontAttributes = FontAttributes.Bold, TextColor = UiTokens.Ink0 },
-                InfoKit.Tag(ability.Slot == "Hidden" ? "Hidden" : $"Ячейка {ability.Slot}",
+                InfoKit.Tag(ability.Slot == "Hidden" ? "Скрытая" : $"Ячейка {ability.Slot}",
                     ability.Slot == "Hidden" ? Color.FromArgb("#B8860B") : UiTokens.Blueprint));
             children.Add(row);
-            if (ability.Effect.Length > 0) children.Add(InfoKit.DetailLine(ability.Effect, maxLines: 2));
+            if (RussianAbilities.Effect(ability.Id, ability.Effect) is { Length: > 0 } effect)
+                children.Add(InfoKit.DetailLine(effect, maxLines: 3));
         }
         if (card.Gender is { } gender)
             children.Add(InfoKit.HeaderRow(
@@ -168,20 +170,21 @@ public static class InfoPickers
             ? Info?.GetAbilityChoices(session, species, form) ?? session.GetAbilityChoices(species, form)
                 .Select((id, i) => new AbilityChoice(id, i == 2 ? "Hidden" : $"{i + 1}", DexFacts.Ability(id) ?? "")).ToList()
             : [];
-        var items = own.Select(a => new PickItem(a.Id, NameOf(data.AbilityNames, a.Id), Detail: Blank(a.Effect))
+        var items = own.Select(a => new PickItem(a.Id, NameOf(data.AbilityNames, a.Id), Detail: Blank(RussianAbilities.Effect(a.Id, a.Effect)))
         {
-            Tag = a.Slot == "Hidden" ? "Hidden" : $"Ячейка {a.Slot}",
+            Tag = a.Slot == "Hidden" ? "Скрытая" : $"Ячейка {a.Slot}",
             TagColor = a.Slot == "Hidden" ? Color.FromArgb("#B8860B") : UiTokens.Blueprint,
-            Keywords = a.Slot,
+            Keywords = $"{a.Slot} {RussianAbilities.EnglishName(a.Id)}",
         }).ToList();
         if (!Services.HaXMode.IsOn) return items;
 
         var seen = own.Select(a => a.Id).ToHashSet();
         var rest = Enumerable.Range(0, data.AbilityNames.Count)
             .Where(id => !seen.Contains(id) && (id == 0 || data.AbilityNames[id].Length > 0))
-            .Select(id => new PickItem(id, id == 0 ? "(нет)" : data.AbilityNames[id], Detail: Blank(DexFacts.Ability(id)))
+            .Select(id => new PickItem(id, id == 0 ? "(нет)" : data.AbilityNames[id], Detail: Blank(RussianAbilities.Effect(id, DexFacts.Ability(id))))
             {
                 Muted = own.Count > 0,
+                Keywords = RussianAbilities.EnglishName(id),
             })
             .OrderBy(i => i.Name, StringComparer.OrdinalIgnoreCase);
         items.AddRange(rest);

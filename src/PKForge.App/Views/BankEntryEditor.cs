@@ -594,7 +594,10 @@ public static class BankEntryEditor
             var choices = (Services.HaXMode.IsOn
                     ? Enumerable.Range(0, _data.AbilityNames.Count).ToList()
                     : _session.GetAbilityChoices(_detail.Species, _detail.Form))
-                .Select(id => new PickItem(id, NameOf(_data.AbilityNames, id))).ToList();
+                .Select(id => new PickItem(id, NameOf(_data.AbilityNames, id), Detail: RussianAbilities.Effect(id, DexFacts.Ability(id)))
+                {
+                    Keywords = RussianAbilities.EnglishName(id),
+                }).ToList();
             var pick = await PickerMenu.ShowAsync(_host, "Способность", choices, _detail.Ability);
             if (pick is not null)
             {

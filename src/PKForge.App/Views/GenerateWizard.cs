@@ -37,8 +37,8 @@ public static class GenerateWizard
         }
         if (formOptions.Count > 1)
         {
-            var chosen = await PadMenu.ShowAsync(host, $"Form of {species.Name}",
-                "This species has multiple forms in this game.", [.. formOptions]);
+            var chosen = await PadMenu.ShowAsync(host, $"Форма {species.Name}",
+                "У этого вида есть несколько форм в текущей игре.", [.. formOptions]);
             if (chosen is null) return null;
             var index = formOptions.FindIndex(o => o.Label == chosen);
             form = Math.Max(0, index);
@@ -91,24 +91,43 @@ public static class GenerateWizard
         int? nature = null, ability = null, ball = null;
         var moves = new int?[4];
         var shiny = false;
+        var textSize = Math.Clamp(EditorText, 14, 18);
+
+        Label ValueLabel() => new()
+        {
+            FontFamily = DsChrome.PixelFont, FontSize = textSize, TextColor = EditorValue,
+            VerticalTextAlignment = TextAlignment.Center, LineBreakMode = LineBreakMode.TailTruncation,
+        };
+        Label Caption(string text) => new()
+        {
+            Text = text, FontFamily = DsChrome.PixelFont, FontSize = textSize, TextColor = EditorLabel,
+            VerticalTextAlignment = TextAlignment.Center, LineBreakMode = LineBreakMode.WordWrap,
+        };
+        Border Band(View view, bool dark) => new()
+        {
+            Content = view, BackgroundColor = RowBand(dark), StrokeThickness = 0,
+            Padding = new Thickness(12, 4), MinimumHeightRequest = 44,
+        };
 
         var level = new EditorEntry
         {
-            Placeholder = "auto",
+            Placeholder = "авто",
             Keyboard = Keyboard.Numeric,
-            FontSize = EditorText,
+            FontSize = textSize,
             FontFamily = DsChrome.PixelFont,
             TextColor = EditorValue,
             PlaceholderColor = EditorPaint.ExpInk.ToMauiColor(),
             BackgroundColor = Colors.Transparent,
-            HeightRequest = EditorRowHeight,
+            HeightRequest = 36,
             VerticalTextAlignment = TextAlignment.Center,
         };
 
         Grid overlay = null!;
         PadOverlay pad = null!;
+        EventHandler? resize = null;
         void Close(GenerationRequest? request)
         {
+            if (resize is not null) host.SizeChanged -= resize;
             host.Remove(overlay);
             pad?.Dispose();
             result.TrySetResult(request);
@@ -121,28 +140,34 @@ public static class GenerateWizard
         View Chooser(string caption, bool dark, Func<List<PickItem>> items, Func<int?> get, Action<int?> set,
             Func<int?, Task<PickItem?>>? open = null, Func<int?, View?>? leading = null)
         {
-            var value = EditorValueLabel();
-            value.Text = "auto";
+            var value = ValueLabel();
+            value.Text = "авто";
             // The picked value's art (ball icon, move type) goes before its name.
-            var content = new HorizontalStackLayout { Spacing = Design(14), Children = { value } };
+            var content = new Grid
+            {
+                ColumnSpacing = 8, ColumnDefinitions = [new(GridLength.Auto), new(GridLength.Star)],
+            };
+            content.Add(value, 1, 0);
             View? art = null;
             void Refresh()
             {
                 var current = get();
-                value.Text = current is { } id ? items().FirstOrDefault(x => x.Id == id)?.Name ?? "auto" : "auto";
+                value.Text = current is { } id ? items().FirstOrDefault(x => x.Id == id)?.Name ?? "авто" : "авто";
                 if (art is not null) content.Children.Remove(art);
                 art = leading?.Invoke(current);
-                if (art is not null) content.Children.Insert(0, art);
+                if (art is not null) content.Add(art, 0, 0);
             }
             var grid = new Grid
             {
-                ColumnSpacing = Design(16),
-                ColumnDefinitions = [new(new GridLength(Design(214))), new(GridLength.Star), new(GridLength.Auto)],
+                ColumnSpacing = 8,
+                ColumnDefinitions = [new(new GridLength(0.42, GridUnitType.Star)), new(new GridLength(0.58, GridUnitType.Star)), new(GridLength.Auto)],
             };
-            grid.Add(EditorCaption(caption), 0, 0);
+            grid.Add(Caption(caption), 0, 0);
             grid.Add(content, 1, 0);
-            grid.Add(EditorChevron(), 2, 0);
-            var row = EditorBand(grid, dark);
+            var chevron = ValueLabel();
+            chevron.Text = "›";
+            grid.Add(chevron, 2, 0);
+            var row = Band(grid, dark);
             var tap = new TapGestureRecognizer();
             tap.Tapped += async (_, _) =>
             {
@@ -173,7 +198,7 @@ public static class GenerateWizard
         List<PickItem> MoveItems() => moveChoices ??= InfoPickers.MoveRows(data, session);
 
         // Level and shiny share a band; the star toggles shiny.
-        var star = EditorValueLabel();
+        var star = ValueLabel();
         void RefreshStar()
         {
             star.Text = shiny ? "★" : "☆";
@@ -181,12 +206,12 @@ public static class GenerateWizard
             card.SetShiny(shiny);
         }
         RefreshStar();
-        var shinyHalf = EditorBand(new HorizontalStackLayout { Spacing = Design(20), Children = { EditorCaption("Шайни", Design(128)), star } }, dark: true);
+        var shinyHalf = Band(new HorizontalStackLayout { Spacing = 8, Children = { Caption("Шайни"), star } }, dark: true);
         var shinyTap = new TapGestureRecognizer();
         shinyTap.Tapped += (_, _) => { shiny = !shiny; RefreshStar(); };
         shinyHalf.GestureRecognizers.Add(shinyTap);
-        var levelHalf = EditorBand(new HorizontalStackLayout { Spacing = Design(20), Children = { EditorCaption("Уровень", Design(128)), level } }, dark: true);
-        level.WidthRequest = Design(160);
+        var levelHalf = Band(new HorizontalStackLayout { Spacing = 8, Children = { Caption("Уровень"), level } }, dark: true);
+        level.WidthRequest = 64;
         var levelShiny = new Grid { ColumnDefinitions = [new(GridLength.Star), new(GridLength.Star)], Children = { levelHalf, shinyHalf } };
         Grid.SetColumn(shinyHalf, 1);
 
@@ -214,26 +239,28 @@ public static class GenerateWizard
                 pickedMoves.Count > 0 ? pickedMoves : null, form, Services.HaXMode.IsOn));
         }
 
-        var generate = EditorTool("Generate", primary: true);
+        var generate = EditorTool("Создать", primary: true);
         generate.Clicked += (_, _) => Generate();
         var cancel = EditorTool("Отмена");
         cancel.Clicked += (_, _) => Close(null);
         var buttons = new Grid
         {
-            ColumnSpacing = Design(20),
-            Margin = new Thickness(Design(28), Design(16), Design(28), Design(8)),
+            ColumnSpacing = 12,
+            Margin = new Thickness(0, 12, 0, 0),
             ColumnDefinitions = [new(GridLength.Star), new(GridLength.Star)],
             Children = { cancel, generate },
         };
         Grid.SetColumn(generate, 1);
+        generate.FontSize = cancel.FontSize = textSize;
+        generate.HeightRequest = cancel.HeightRequest = 44;
 
         var note = new Label
         {
-            Text = "Everything left on \"auto\" is chosen by the legalizer, so the Pokémon comes out legal.",
+            Text = "Параметры со значением «авто» подбираются автоматически с учётом правил игры.",
             FontFamily = DsChrome.PixelFont,
-            FontSize = EditorText * 0.8,
+            FontSize = textSize * 0.85,
             TextColor = EditorPaint.ExpInk.ToMauiColor(),
-            Margin = new Thickness(Design(34), Design(8)),
+            Margin = new Thickness(12, 8),
             LineBreakMode = LineBreakMode.WordWrap,
         };
         var rows = new VerticalStackLayout
@@ -242,17 +269,15 @@ public static class GenerateWizard
             {
                 EditorSection("Возможности"), note, levelShiny, natureRow, abilityRow, ballRow,
                 EditorSection("Приёмы"), moveRows[0], moveRows[1], moveRows[2], moveRows[3],
-                buttons,
             },
         };
 
         var body = new Grid
         {
-            ColumnSpacing = Design(24),
-            ColumnDefinitions = [new(new GridLength(Design(560))), new(GridLength.Star)],
-            Children = { card, new ScrollView { Content = rows } },
+            ColumnSpacing = 16,
+            RowSpacing = 12,
+            Children = { card, rows },
         };
-        Grid.SetColumn(body.Children[1] as View, 1);
         var backdrop = new SKCanvasView { InputTransparent = true };
         backdrop.PaintSurface += (_, args) =>
         {
@@ -262,14 +287,41 @@ public static class GenerateWizard
         };
         var content = new Grid
         {
-            WidthRequest = Design(1720),
-            HeightRequest = Design(900),
-            Padding = new Thickness(Design(24)),
-            Children = { backdrop, body },
+            Padding = new Thickness(12),
+            RowDefinitions = [new(GridLength.Star), new(GridLength.Auto)],
+            Children = { backdrop, new ScrollView { Content = body, Orientation = ScrollOrientation.Vertical }, buttons },
         };
-        backdrop.Margin = new Thickness(-Design(24));
+        Grid.SetRowSpan(backdrop, 2);
+        Grid.SetRow(buttons, 1);
+        backdrop.Margin = new Thickness(-12);
 
-        var window = Kit.OverlayWindow(host, content, preferredMaxWidth: Design(1780));
+        var window = Kit.OverlayWindow(host, content, preferredMaxWidth: Design(1780), scroll: false);
+        // Use the current window size, including after a resize. A single vertical
+        // scroller contains the preview and fields; the action buttons stay visible.
+        resize = (_, _) =>
+        {
+            var width = Math.Max(1, Math.Min(Design(1780), (host.Width > 0 ? host.Width : 640) - 24));
+            var height = Math.Max(1, Math.Min(Design(900), (host.Height > 0 ? host.Height : 360) - 16));
+            window.WidthRequest = window.MaximumWidthRequest = width;
+            window.HeightRequest = window.MaximumHeightRequest = height;
+            content.WidthRequest = Math.Max(1, width - 28);
+            content.HeightRequest = Math.Max(1, height - 28);
+            var bodyWidth = Math.Max(1, content.WidthRequest - 24);
+            var stacked = bodyWidth < 720;
+            body.ColumnDefinitions = stacked
+                ? [new(GridLength.Star)]
+                : [new(new GridLength(0.32, GridUnitType.Star)), new(new GridLength(0.68, GridUnitType.Star))];
+            body.RowDefinitions = stacked ? [new(GridLength.Auto), new(GridLength.Auto)] : [new(GridLength.Auto)];
+            Grid.SetRow(rows, stacked ? 1 : 0);
+            Grid.SetColumn(rows, stacked ? 0 : 1);
+            var cardWidth = stacked ? Math.Min(300, bodyWidth) : (bodyWidth - 16) * 0.32;
+            card.WidthRequest = cardWidth;
+            card.HeightRequest = cardWidth * 900 / 560;
+            card.HorizontalOptions = LayoutOptions.Center;
+            card.VerticalOptions = LayoutOptions.Start;
+        };
+        host.SizeChanged += resize;
+        resize(host, EventArgs.Empty);
         overlay = Kit.AttachOverlay(host, window, () => Close(null));
         pad = new PadOverlay(cancel: () => Close(null), confirm: () => Generate());
         return result.Task;
@@ -409,7 +461,7 @@ public static class GenerateWizard
             {
                 if (y > height - 40) break;
                 var name = (uint)choice.Id < (uint)_data.AbilityNames.Count ? _data.AbilityNames[choice.Id] : $"#{choice.Id}";
-                var slot = choice.Slot == "Hidden" ? "Hidden" : $"Ячейка {choice.Slot}";
+                var slot = choice.Slot == "Hidden" ? "Скрытая" : $"Ячейка {choice.Slot}";
                 SummaryInk.Draw(c, SummaryInk.Fit(name, 30, 330), 40, SummaryInk.Center(y, 30), 30, valueInk);
                 SummaryInk.Draw(c, slot, DesignWidth - 40, SummaryInk.Center(y, 26), 26, choice.Slot == "Hidden" ? Pksm.ShinyGold : EditorPaint.ExpInk, align: SKTextAlign.Right);
                 y += 44;
