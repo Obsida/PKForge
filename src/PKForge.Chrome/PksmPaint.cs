@@ -365,6 +365,9 @@ public static class PksmPaint
     /// </summary>
     public static IReadOnlyList<SKRect> HintBarHitRects(SKRect bar, IReadOnlyList<(string Key, string Label)> prompts, SKFont font)
     {
+        prompts = prompts.Select(p => (InputHints.Label(p.Key), p.Label)).ToArray();
+        using var fitted = HintFont(bar, prompts, font);
+        font = fitted;
         var total = 0f;
         foreach (var (key, label) in prompts)
             total += Math.Max(font.Size * 1.3f, font.MeasureText(key) + font.Size * 0.9f) + 8 + font.MeasureText(label) + font.Size * 1.4f;
@@ -383,6 +386,9 @@ public static class PksmPaint
 
     public static void HintBar(SKCanvas c, SKRect bar, IReadOnlyList<(string Key, string Label)> prompts, SKFont font)
     {
+        prompts = prompts.Select(p => (InputHints.Label(p.Key), p.Label)).ToArray();
+        using var fitted = HintFont(bar, prompts, font);
+        font = fitted;
         Panel(c, SKRect.Inflate(bar, -3, -3));
         var total = 0f;
         foreach (var (key, label) in prompts)
@@ -393,10 +399,19 @@ public static class PksmPaint
         {
             var kw = Math.Max(font.Size * 1.3f, font.MeasureText(key) + font.Size * 0.9f);
             var pill = new SKRect(x, bar.MidY - font.Size * 0.62f, x + kw, bar.MidY + font.Size * 0.62f);
-            c.DrawRoundRect(pill, pill.Height / 2, pill.Height / 2, disc);
+            var radius = InputHints.UseKeyboard ? 3 : pill.Height / 2;
+            c.DrawRoundRect(pill, radius, radius, disc);
             CenterText(c, key, pill.MidX - 1, bar.MidY, font, Pksm.LogoVoid, SKColors.Transparent, SKTextAlign.Center);
             CenterText(c, label, pill.Right + 8 - 2, bar.MidY, font, Pksm.Ink, SKColors.Transparent);
             x += kw + 8 + font.MeasureText(label) + font.Size * 1.4f;
         }
+    }
+
+    private static SKFont HintFont(SKRect bar, IReadOnlyList<(string Key, string Label)> prompts, SKFont font)
+    {
+        var width = prompts.Sum(p => Math.Max(font.Size * 1.3f, font.MeasureText(p.Key) + font.Size * 0.9f)
+            + 8 + font.MeasureText(p.Label) + font.Size * 1.4f);
+        var scale = Math.Min(1, Math.Max(1, bar.Width - 24) / Math.Max(1, width));
+        return new SKFont(font.Typeface, font.Size * scale) { Edging = font.Edging };
     }
 }

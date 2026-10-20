@@ -1,4 +1,5 @@
 using Microsoft.Maui.Controls.Shapes;
+using Microsoft.Maui.Layouts;
 using PKForge.App.Theme;
 using PKForge.Chrome;
 using SkiaSharp;
@@ -492,8 +493,9 @@ public static class Kit
     /// </summary>
     public static Border GlyphKey(string glyph, Action? onTap = null)
     {
+        glyph = InputHints.Label(glyph);
         View face;
-        if (KeyArt.TryGetValue(glyph, out var art) && KeyImage(art) is { } image)
+        if (!InputHints.UseKeyboard && KeyArt.TryGetValue(glyph, out var art) && KeyImage(art) is { } image)
         {
             var canvas = new SKCanvasView { InputTransparent = true };
             canvas.PaintSurface += (_, args) =>
@@ -516,7 +518,7 @@ public static class Kit
         var key = new Border
         {
             StrokeThickness = 0,
-            StrokeShape = new RoundRectangle { CornerRadius = 11 },
+            StrokeShape = new RoundRectangle { CornerRadius = InputHints.UseKeyboard ? 4 : 11 },
             BackgroundColor = drawn ? Colors.Transparent : UiTokens.BagCyanEdge,
             Padding = new Thickness(!drawn && glyph.Length > 1 ? 7 : 0, 0),
             MinimumWidthRequest = 22,
@@ -644,18 +646,19 @@ public static class Kit
         Content = new VerticalStackLayout { Spacing = 7, Children = { Divider(0), HintRow(hints) } },
     };
 
-    private static HorizontalStackLayout HintRow((string Glyph, string Label, Action? OnTap)[] hints)
+    private static View HintRow((string Glyph, string Label, Action? OnTap)[] hints)
     {
-        var row = new HorizontalStackLayout { Spacing = 22, HorizontalOptions = LayoutOptions.Center };
+        var row = new FlexLayout { Direction = FlexDirection.Row, Wrap = FlexWrap.Wrap, JustifyContent = FlexJustify.Center, AlignItems = FlexAlignItems.Center };
         foreach (var (glyph, label, onTap) in hints)
         {
             var item = new HorizontalStackLayout
             {
                 Spacing = 7,
+                Margin = new Thickness(9, 3),
                 Children =
                 {
                     GlyphKey(glyph),
-                    new Label { Text = Tidy(label), FontFamily = DsChrome.PixelFont, TextColor = UiTokens.Ink0, FontSize = UiTokens.TextTitle, VerticalTextAlignment = TextAlignment.Center },
+                    new Label { Text = Tidy(label), FontFamily = DsChrome.PixelFont, TextColor = UiTokens.Ink0, FontSize = InputHints.UseKeyboard ? UiTokens.TextSmall : UiTokens.TextTitle, VerticalTextAlignment = TextAlignment.Center },
                 },
             };
             if (onTap is not null)

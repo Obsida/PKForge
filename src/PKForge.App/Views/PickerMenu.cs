@@ -434,7 +434,7 @@ public sealed class PickerMenu : IPadHandler
     {
         var current = _index >= 0 && _index < _filtered.Count ? _filtered[_index] : null;
         if (current is not null)
-            _preview.Text = _livePreview is null ? $"A picks: {current.Name}" : $"A or tap again picks: {current.Name}";
+            _preview.Text = _livePreview is null ? $"{PKForge.Chrome.InputHints.Label("A")}: {current.Name}" : $"{PKForge.Chrome.InputHints.Label("A")} или повторный щелчок: {current.Name}";
         _livePreview?.OnHighlight(current);
     }
 

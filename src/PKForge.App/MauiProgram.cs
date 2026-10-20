@@ -16,6 +16,9 @@ public static class MauiProgram
     {
         // First thing: every crash from here on leaves a report the player can share.
         Services.AppLog.Install();
+#if WINDOWS
+        PKForge.Chrome.InputHints.UseKeyboard = true;
+#endif
         var builder = MauiApp.CreateBuilder();
         App.Trace("CreateMauiApp enter");
 #if ANDROID

@@ -74,13 +74,13 @@ public sealed class PokeparkPage : ContentPage, IPadHandler, IPadStickHandler
             ("B", "Назад", () => _ = Navigation.PopAsync()),
             ("A", "Познакомиться с покемонами", () => _ = DetailsAsync()),
             // L and R fly the camera from one place of the park to the next.
-            ("LR", "Places", () => FlyToPlace(1)),
+            ("LR", "Места", () => FlyToPlace(1)),
             // Up and Down zoom, for players without a touch screen.
-            ("↑↓", "Zoom", () => _scene.Viewport.Zoom(1)),
-            ("X", "Photo", () => _ = TakePhotoAsync()),
+            ("↑↓", "Масштаб", () => _scene.Viewport.Zoom(1)),
+            ("X", "Фото", () => _ = TakePhotoAsync()),
             ("+", "Параметры", () => _ = OptionsAsync()),
             // − lets the camera follow whatever is happening in the park.
-            ("−", "Spectate", ToggleSpectate)
+            ("−", "Наблюдать", ToggleSpectate)
         };
         var footer = DsChrome.Footer([.. hints]);
         footer.VerticalOptions = LayoutOptions.End;
@@ -1045,7 +1045,7 @@ public sealed class PokeparkPage : ContentPage, IPadHandler, IPadStickHandler
     private void FlyToPlace(int delta)
     {
         var place = _scene.FlyToRegion(delta);
-        _status.Text = $"{place.Name}  ·  L/R to visit the park's places, A to follow a Pokémon again";
+        _status.Text = $"{place.Name} · {PKForge.Chrome.InputHints.Label("LR")}: сменить место · {PKForge.Chrome.InputHints.Label("A")}: следовать за покемоном";
         if (_active) _canvas.InvalidateSurface();
     }
 
@@ -1308,7 +1308,7 @@ public sealed class PokeparkPage : ContentPage, IPadHandler, IPadStickHandler
     private void BeginThrow(ParkPokemon mon)
     {
         _throwFor = mon.Id;
-        _status.Text = $"Tap where to throw the ball for {mon.Name}  ·  A throws it ahead  ·  B keeps it";
+        _status.Text = $"Щёлкни, куда бросить мяч для {mon.Name} · {PKForge.Chrome.InputHints.Label("A")}: бросить вперёд · {PKForge.Chrome.InputHints.Label("B")}: отмена";
     }
 
     private void Throw(ParkPoint? target)
@@ -1385,7 +1385,7 @@ public sealed class PokeparkPage : ContentPage, IPadHandler, IPadStickHandler
             case "fetch": BeginThrow(mon); return;
             case "dig":
                 _digFor = mon.Id;
-                _status.Text = $"Tap where {mon.Name} should dig  ·  A digs right here  ·  B changes your mind";
+                _status.Text = $"Щёлкни, где {mon.Name} должен копать · {PKForge.Chrome.InputHints.Label("A")}: копать здесь · {PKForge.Chrome.InputHints.Label("B")}: отмена";
                 return;
         }
         var kind = game switch { "hide" => ParkGameKind.HideAndSeek, "race" => ParkGameKind.Race, "spar" => ParkGameKind.Spar, _ => ParkGameKind.Brush };
