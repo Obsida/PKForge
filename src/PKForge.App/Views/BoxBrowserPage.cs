@@ -4478,6 +4478,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             .Select(i => FocusBorder(StatLine(i, i % 2 == 0, EditTraining), StatNames[i], () => EditTraining(StatNames[i])))
             .ToArray();
         var maxIvs = FocusButton(EditorTool(_sessionsFor()?.GetTrainingCaps().IvMax == 15 ? "Max DV" : "Max IV"), "MAX IV");
+        if (InputHints.UseKeyboard) { maxIvs.HeightRequest = 40; maxIvs.FontSize = 18; maxIvs.CornerRadius = 8; }
         maxIvs.Clicked += (_, _) => MaximizeIvs();
         var ball = FocusBorder(NamedPicker("ПОКЕБОЛ", nameof(BoxBrowserViewModel.EditBall), data.BallNames, BallItems, shaded: true, leading: BallIcon()), "ПОКЕБОЛ", async () => await OpenNamedPickerAsync("ПОКЕБОЛ", nameof(BoxBrowserViewModel.EditBall), BallItems));
         // Gen 1 and 2 Pokémon do not record the ball they were caught in.

@@ -253,9 +253,23 @@ public sealed partial class BoxBrowserPage
         };
         View[] cells = [EditorCaption(StatNames[stat]), Cell(nameof(BoxBrowserViewModel.EditStats)), ivTag,
             Cell(nameof(BoxBrowserViewModel.EditIvs)), evTag, Cell(nameof(BoxBrowserViewModel.EditEvs)), EditorChevron()];
+        if (InputHints.UseKeyboard)
+        {
+            // A desktop window can be much narrower than the original 1920 px
+            // console layout. Keep all stat/IV/EV values inside the inspector.
+            grid.ColumnSpacing = 6;
+            grid.ColumnDefinitions = [new(GridLength.Star), new(GridLength.Auto), new(GridLength.Auto),
+                new(GridLength.Auto), new(GridLength.Auto), new(GridLength.Auto), new(GridLength.Auto)];
+            foreach (var cell in cells.OfType<Label>())
+            {
+                cell.WidthRequest = -1;
+                cell.FontSize = cell == ivTag || cell == evTag ? 14 : 20;
+            }
+        }
         for (var i = 0; i < cells.Length; i++) grid.Add(cells[i], i, 0);
 
         var row = EditorBand(grid, dark);
+        if (InputHints.UseKeyboard) row.HeightRequest = 44;
         var tap = new TapGestureRecognizer();
         tap.Tapped += async (_, _) => await edit(StatNames[stat]);
         row.GestureRecognizers.Add(tap);
