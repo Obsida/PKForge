@@ -20,32 +20,38 @@ public static class GenerateWizard
     /// <summary>Runs the flow and returns the request, or null if the user backed out.</summary>
     public static async Task<GenerationRequest?> RunAsync(Grid host, IGameDataService data, ISaveEngineSession session)
     {
-        // Step 1 - the Pokémon, picked in the floating Pokédex.
-        var species = await PokedexPicker.ShowAsync(host, data, session);
-        if (species is null) return null;
-
-        // Step 1b - the form, when this game's species has more than one (Rotom-Wash,
-        // Deoxys-Speed, regional forms...). Skipped silently for single-form species.
-        var forms = session.GetFormChoices(species.Id);
-        int form = 0;
-        var formOptions = new List<PadOption>();
-        for (var index = 0; index < forms.Count; index++)
+        PickItem? species = null;
+        while (true)
         {
-            if (index != 0 && forms[index].Length == 0) continue;
-            var label = index == 0 || forms[index].Length == 0 ? "Стандартный" : forms[index];
-            formOptions.Add(new PadOption(label, IconPath: await FormSpritePathAsync(species.Id, index)));
+            // Back from a form or features returns to the preceding step, keeping
+            // the previously selected species in view.
+            species = await PokedexPicker.ShowAsync(host, data, session, species?.Id);
+            if (species is null) return null;
+            var forms = session.GetFormChoices(species.Id);
+            var formOptions = new List<PadOption>();
+            var formIds = new List<int>();
+            for (var index = 0; index < forms.Count; index++)
+            {
+                if (index != 0 && forms[index].Length == 0) continue;
+                var label = index == 0 || forms[index].Length == 0 ? "Стандартный" : forms[index];
+                formOptions.Add(new PadOption(label, IconPath: await FormSpritePathAsync(species.Id, index)));
+                formIds.Add(index);
+            }
+            while (true)
+            {
+                var form = 0;
+                if (formOptions.Count > 1)
+                {
+                    var chosen = await PadMenu.ShowAsync(host, $"Форма {species.Name}",
+                        "У этого вида есть несколько форм в текущей игре.", [.. formOptions]);
+                    if (chosen is null) break;
+                    form = formIds[formOptions.FindIndex(o => o.Label == chosen)];
+                }
+                var request = await ShowFeaturesFormAsync(host, data, session, species, form);
+                if (request is not null) return request;
+                if (formOptions.Count <= 1) break;
+            }
         }
-        if (formOptions.Count > 1)
-        {
-            var chosen = await PadMenu.ShowAsync(host, $"Форма {species.Name}",
-                "У этого вида есть несколько форм в текущей игре.", [.. formOptions]);
-            if (chosen is null) return null;
-            var index = formOptions.FindIndex(o => o.Label == chosen);
-            form = Math.Max(0, index);
-        }
-
-        // Step 2 - the features.
-        return await ShowFeaturesFormAsync(host, data, session, species, form);
     }
 
     /// <summary>

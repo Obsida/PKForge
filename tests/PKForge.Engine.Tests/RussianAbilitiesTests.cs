@@ -6,6 +6,12 @@ namespace PKForge.Engine.Tests;
 public sealed class RussianAbilitiesTests
 {
     [Fact]
+    public void EveryAbilityFromGenerationsThreeThroughFiveHasATranslation()
+    {
+        Assert.All(Enumerable.Range(1, 164), id => Assert.True(RussianAbilities.Entries.ContainsKey(id), $"Missing ability {id}"));
+    }
+
+    [Fact]
     public void TranslationsMatchCanonicalIdsAndDoNotChangeEngineNames()
     {
         var original = new GameDataService();

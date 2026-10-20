@@ -3613,7 +3613,14 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             case PadButton.R: _viewModel.NextBox(); return true;
             case PadButton.A: return ConfirmCursor();
             case PadButton.B:
+                if (_viewModel.IsBusy) return true;
                 if (_viewModel.CarrySource is not null) { _viewModel.CancelCarry(); _canvas.InvalidateSurface(); return true; }
+                if (_viewModel.SelectedSlot >= 0)
+                {
+                    _viewModel.ClearSelection();
+                    _canvas.InvalidateSurface();
+                    return true;
+                }
                 _ = Navigation.PopAsync();
                 return true;
             case PadButton.X: _ = ShowToolsAsync(); return true;
@@ -4537,6 +4544,39 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         var save = FocusButton(EditorTool("Сохранить изменения", primary: true), "СОХРАНИТЬ");
         save.Margin = new Thickness(Design(28), Design(8), Design(28), Design(8));
         save.SetBinding(Button.CommandProperty, nameof(BoxBrowserViewModel.SaveEditCommand));
+        save.SetBinding(Button.TextProperty, nameof(BoxBrowserViewModel.SaveEditButtonText));
+        var saving = new ActivityIndicator { Color = UiTokens.Cyan, WidthRequest = 24, HeightRequest = 24 };
+        saving.SetBinding(ActivityIndicator.IsRunningProperty, nameof(BoxBrowserViewModel.IsSavingEdit));
+        saving.SetBinding(IsVisibleProperty, nameof(BoxBrowserViewModel.IsSavingEdit));
+        var saveStatus = new Label
+        {
+            FontFamily = DsChrome.PixelFont, FontSize = UiTokens.TextSmall, TextColor = UiTokens.Ink0,
+            LineBreakMode = LineBreakMode.WordWrap, VerticalTextAlignment = TextAlignment.Center,
+        };
+        saveStatus.SetBinding(Label.TextProperty, nameof(BoxBrowserViewModel.EditSaveStatus));
+        var saveFeedback = new Grid
+        {
+            Margin = new Thickness(Design(28), 0, Design(28), 8), ColumnSpacing = 8,
+            ColumnDefinitions = [new(GridLength.Auto), new(GridLength.Star)], Children = { saving, saveStatus },
+        };
+        Grid.SetColumn(saveStatus, 1);
+        var feedbackQueued = false;
+        void RevealSaveFeedback()
+        {
+            if (feedbackQueued) return;
+            feedbackQueued = true;
+            Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(50), () =>
+            {
+                feedbackQueued = false;
+                if (_editorScroll is { } editor)
+                    _ = editor.ScrollToAsync(saveStatus, ScrollToPosition.MakeVisible, false);
+            });
+        }
+        saveStatus.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(Label.Text) && !string.IsNullOrEmpty(saveStatus.Text)) RevealSaveFeedback();
+        };
+        save.Clicked += (_, _) => RevealSaveFeedback();
 
         var met = FocusButton(EditorTool("Встреча / происхождение"), "ВСТРЕЧА / ПРОИСХОЖДЕНИЕ");
         met.Clicked += async (_, _) => await RunSubEditorAsync(MetOriginEditor.ShowAsync, "Данные встречи обновлены");
@@ -4654,6 +4694,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         panel.Children.Add(legalityLine);
         panel.Children.Add(EditorSection("Инструменты"));
         panel.Children.Add(save);
+        panel.Children.Add(saveFeedback);
         panel.Children.Add(monActions);
         return panel;
     }
@@ -5466,60 +5507,63 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         // Every way in this sheet fabricates a Pokémon, so Hardcore mode refuses the
         // whole sheet - with the reason on screen instead of an empty menu.
         if (await DeniedAsync(SaveAction.CreateMon)) return;
-        var choice = await PadMenu.ShowAsync(_hostGrid, $"Добавить покемона · ячейка {slot + 1}", null,
-            new PadOption("Создать покемона", IconPath: "create", Detail: "Выбери вид и параметры. Покемон будет создан легальным для этой игры."),
-            new PadOption("Вставить набор Showdown", IconPath: "script", Detail: "Turn a Showdown set into a legal Pokémon in this slot."),
-            new PadOption("Импорт файла .pk", IconPath: "import", Detail: "Load a Pokémon file into this slot."),
-            new PadOption("From event database", IconPath: "events", Detail: "Put a Mystery Gift Pokémon in this slot."));
-        switch (choice)
+        while (true)
         {
-            case "Создать покемона":
-                await RunGenerateWizardAsync(slot);
-                return;
-            case "Вставить набор Showdown":
-                await RunShowdownPasteAsync(slot);
-                return;
-            case "Импорт файла .pk":
+            var choice = await PadMenu.ShowAsync(_hostGrid, $"Добавить покемона · ячейка {slot + 1}", null,
+                new PadOption("Создать покемона", IconPath: "create", Detail: "Выбери вид и параметры. Покемон будет создан легальным для этой игры."),
+                new PadOption("Вставить набор Showdown", IconPath: "script", Detail: "Turn a Showdown set into a legal Pokémon in this slot."),
+                new PadOption("Импорт файла .pk", IconPath: "import", Detail: "Load a Pokémon file into this slot."),
+                new PadOption("From event database", IconPath: "events", Detail: "Put a Mystery Gift Pokémon in this slot."));
+            switch (choice)
             {
-                var picker = IPlatformApplication.Current?.Services.GetService<IDocumentPicker>();
-                var access = IPlatformApplication.Current?.Services.GetService<ISaveFileAccess>();
-                if (picker is null || access is null) return;
-                var document = await picker.PickSaveAsync();
-                if (document is null) return;
-                var bytes = (await access.ReadAsync(document.DocumentId)).ToArray();
-                await _viewModel.RunMutationAsync(session =>
-                    session.ImportSlot(_viewModel.BoxIndex, slot, bytes, document.DisplayName) // extension names the format
-                        ? new GenerationOutcome(true, $"Импортировано: {document.DisplayName}.")
-                        : new GenerationOutcome(false, "Файл не распознан как покемон."), slot, action: SaveAction.CreateMon);
-                _canvas.InvalidateSurface();
-                return;
+                case "Создать покемона":
+                    if (await RunGenerateWizardAsync(slot)) return;
+                    break;
+                case "Вставить набор Showdown":
+                    if (await RunShowdownPasteAsync(slot)) return;
+                    break;
+                case "Импорт файла .pk":
+                {
+                    var picker = IPlatformApplication.Current?.Services.GetService<IDocumentPicker>();
+                    var access = IPlatformApplication.Current?.Services.GetService<ISaveFileAccess>();
+                    if (picker is null || access is null) return;
+                    var document = await picker.PickSaveAsync();
+                    if (document is null) continue;
+                    var bytes = (await access.ReadAsync(document.DocumentId)).ToArray();
+                    await _viewModel.RunMutationAsync(session =>
+                        session.ImportSlot(_viewModel.BoxIndex, slot, bytes, document.DisplayName) // extension names the format
+                            ? new GenerationOutcome(true, $"Импортировано: {document.DisplayName}.")
+                            : new GenerationOutcome(false, "Файл не распознан как покемон."), slot, action: SaveAction.CreateMon);
+                    _canvas.InvalidateSurface();
+                    return;
+                }
+                case "From event database":
+                {
+                    var session = _sessionsFor();
+                    if (session is null) return;
+                    await EventGallery.ShowAsync(_hostGrid, _viewModel, session, slot, () => _canvas.InvalidateSurface());
+                    return;
+                }
+                default:
+                    return;
             }
-            case "From event database":
-            {
-                var session = _sessionsFor();
-                if (session is null) return;
-                await EventGallery.ShowAsync(_hostGrid, _viewModel, session, slot, () => _canvas.InvalidateSurface());
-                return;
-            }
-            default:
-                return;
         }
     }
 
     /// <summary>Step-by-step creation: species → features → offline legalizer → into the slot.</summary>
-    private async Task RunGenerateWizardAsync(int slot)
+    private async Task<bool> RunGenerateWizardAsync(int slot)
     {
-        if (Denied(SaveAction.CreateMon)) return;
+        if (Denied(SaveAction.CreateMon)) return false;
         var services = IPlatformApplication.Current!.Services;
         var data = services.GetRequiredService<IGameDataService>();
         var session = services.GetRequiredService<ISaveSessionService>().CurrentSession;
-        if (session is null) return;
+        if (session is null) return false;
 
         var request = await GenerateWizard.RunAsync(_hostGrid, data, session);
-        if (request is null) return;
+        if (request is null) return false;
 
         var overlay = LoadingOverlay.Show(_hostGrid, "СОЗДАНИЕ ПОКЕМОНА…",
-            "The offline legalizer is finding a real, legal way for this Pokémon to exist.");
+            "Подбирается легальный вариант покемона для текущей игры.");
         try
         {
             await _viewModel.RunLegalizerAsync((legalizer, s) => legalizer.Generate(s, _viewModel.BoxIndex, slot, request), slot);
@@ -5529,15 +5573,16 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         {
             overlay.Close();
         }
+        return true;
     }
 
     /// <summary>Paste a competitive set; the legalizer turns it into a legal mon in the slot.</summary>
-    private async Task RunShowdownPasteAsync(int slot)
+    private async Task<bool> RunShowdownPasteAsync(int slot)
     {
-        if (Denied(SaveAction.CreateMon)) return;
+        if (Denied(SaveAction.CreateMon)) return false;
         var text = await TextPopup.ShowAsync(_hostGrid, "Вставить набор Showdown",
             "Вставь набор в формате экспорта Pokémon Showdown.");
-        if (string.IsNullOrWhiteSpace(text)) return;
+        if (string.IsNullOrWhiteSpace(text)) return false;
 
         var overlay = LoadingOverlay.Show(_hostGrid, "Чтение набора…",
             "The offline legalizer is building a legal Pokémon from your set.");
@@ -5550,5 +5595,6 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         {
             overlay.Close();
         }
+        return true;
     }
 }

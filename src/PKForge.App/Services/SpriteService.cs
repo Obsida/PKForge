@@ -518,6 +518,7 @@ public sealed class SpriteService : ISpriteService
             {
                 await using var stream = await FileSystem.OpenAppPackageFileAsync(ShowdownCatalog.IconSheetPath).ConfigureAwait(false);
                 bitmap = SKBitmap.Decode(stream);
+                bitmap?.SetImmutable();
             }
             catch (Exception error) when (error is IOException or FileNotFoundException) { }
             Action[] waiting;

@@ -202,6 +202,8 @@ internal static class DesktopSmoke
         await Task.Delay(500);
         var host = (Grid)typeof(BoxBrowserPage).GetField("_hostGrid", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(page)!;
 
+        await CheckEditorInteractionAsync(window, navigation, router, page, host, vm, session);
+
         var features = (Task<GenerationRequest?>)typeof(GenerateWizard).GetMethod("ShowFeaturesFormAsync", BindingFlags.Static | BindingFlags.NonPublic)!
             .Invoke(null, [host, data, session, new PickItem(350, "Milotic"), 0])!;
         Log("Creation form opened");
@@ -302,6 +304,92 @@ internal static class DesktopSmoke
 
     private static IEnumerable<IPadHandler> PadHandlers(GamepadRouter router) =>
         (IEnumerable<IPadHandler>)typeof(GamepadRouter).GetField("_stack", BindingFlags.NonPublic | BindingFlags.Instance)!.GetValue(router)!;
+
+    private static async Task UntilAsync(Func<bool> ready)
+    {
+        var deadline = Environment.TickCount64 + 10000;
+        while (!ready())
+        {
+            if (Environment.TickCount64 > deadline) throw new TimeoutException("UI step did not become ready");
+            await Task.Delay(25);
+        }
+    }
+
+    private static async Task CheckEditorInteractionAsync(Microsoft.Maui.Controls.Window window, NavigationPage navigation,
+        GamepadRouter router, BoxBrowserPage page, Grid host, BoxBrowserViewModel vm, ISaveEngineSession session)
+    {
+        var mon = session.Snapshot.Slots.First(s => s.Species > 0);
+        vm.JumpTo(mon.Box, mon.Slot);
+        vm.EditFriendship = ((session.ReadEntity(mon.Box, mon.Slot).Friendship + 1) % 256).ToString();
+        var saveButton = Descendants(host).OfType<Button>().Single(b => b.Text == "Сохранить изменения");
+        saveButton.SendClicked();
+        var saving = vm.SaveEditCommand.ExecutionTask ?? throw new InvalidOperationException("Save button did not execute its command");
+        if (!vm.IsSavingEdit || vm.EditSaveStatus.Length == 0 || saveButton.Text != "Сохранение…")
+            throw new InvalidOperationException("Save has no immediate progress feedback");
+        await saving;
+        if (vm.IsSavingEdit || !vm.EditSaveStatus.StartsWith("Сохранено.") || saveButton.Text != "Сохранить изменения")
+            throw new InvalidOperationException($"Save feedback did not finish: {vm.EditSaveStatus}");
+        if (!Descendants(host).OfType<Label>().Any(l => l.Text == vm.EditSaveStatus))
+            throw new InvalidOperationException("Save result is not visible beside the button");
+        await vm.SaveEditCommand.ExecuteAsync(null);
+        if (!vm.EditSaveStatus.StartsWith("Изменений нет.")) throw new InvalidOperationException("No-op save lacks feedback");
+        var editor = (ScrollView)typeof(BoxBrowserPage).GetField("_editorScroll", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(page)!;
+        await Task.Delay(250);
+        var feedback = Descendants(host).OfType<Label>().Single(l => l.Text == vm.EditSaveStatus);
+        if (BoundsIn(feedback, editor).Bottom - editor.ScrollY > editor.Height + 1)
+            throw new InvalidOperationException("Save result scrolled below the visible editor");
+        await SnapshotAsync(window, "save-feedback");
+        router.Dispatch(PadButton.B);
+        if (navigation.CurrentPage != page || vm.SelectedSlot >= 0)
+            throw new InvalidOperationException("Esc left storage instead of returning from the selected Pokémon");
+        Log("Save button reports progress, success and no-op; Esc returns from selection to the box");
+
+        var target = session.Snapshot.Slots.First(s => s.Box >= 0 && s.Species is null);
+        vm.JumpTo(target.Box, target.Slot);
+        var add = (Task)typeof(BoxBrowserPage).GetMethod("OfferAddPokemonAsync", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .Invoke(page, [target.Slot])!;
+        router.Dispatch(PadButton.A);
+        await UntilAsync(() => PadHandlers(router).LastOrDefault() is PokedexPicker);
+        var picker = PadHandlers(router).OfType<PokedexPicker>().Single();
+        var grid = (DexGridView)typeof(PokedexPicker).GetField("_grid", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(picker)!;
+        await UntilAsync(() => grid.Count > 100 && grid.CanvasSize.Height > 0);
+        await Task.Delay(250);
+        var scroller = (TouchScroller)typeof(DexGridView).GetField("_scroller", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(grid)!;
+        var touch = typeof(DexGridView).GetMethod("OnTouch", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.DeclaredOnly)!;
+        void Touch(SKTouchAction action, SKPoint point, int wheel = 0) => touch.Invoke(grid,
+            [grid, new SKTouchEventArgs(1, action, SKMouseButton.Left, SKTouchDeviceType.Mouse, point, action != SKTouchAction.Released, wheel)]);
+        Touch(SKTouchAction.WheelChanged, new SKPoint(100, 100), -360);
+        var thumb = scroller.Thumb();
+        var down = new SKPoint(thumb.MidX, thumb.MidY);
+        var bottom = new SKPoint(thumb.MidX, grid.CanvasSize.Height * 0.8f);
+        Touch(SKTouchAction.Pressed, down);
+        Touch(SKTouchAction.Moved, bottom);
+        Touch(SKTouchAction.Released, bottom);
+        var offsetField = typeof(DexGridView).GetField("_scroll", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        var offset = (float)offsetField.GetValue(grid)!;
+        if (offset < 100) throw new InvalidOperationException("Dragging the scrollbar did not scroll");
+        // Hover events are the real Windows sequence after releasing the scrollbar.
+        Touch(SKTouchAction.Moved, new SKPoint(thumb.MidX, bottom.Y + 20));
+        Touch(SKTouchAction.Moved, new SKPoint(100, bottom.Y - 40));
+        Touch(SKTouchAction.Released, new SKPoint(100, bottom.Y - 40));
+        await Task.Delay(350);
+        if (Math.Abs((float)offsetField.GetValue(grid)! - offset) > 1)
+            throw new InvalidOperationException("Scrollbar release/hover reset the list");
+        await SnapshotAsync(window, "dex-scrolled");
+        Log($"Dex scrollbar remains at {offset:0} after release and hover; mouse wheel works");
+
+        grid.SetCursor(0); // Bulbasaur: no form submenu, so Back returns straight to species.
+        router.Dispatch(PadButton.A);
+        await UntilAsync(() => PadHandlers(router).LastOrDefault() is PadOverlay);
+        router.Dispatch(PadButton.B);
+        await UntilAsync(() => PadHandlers(router).LastOrDefault() is PokedexPicker);
+        router.Dispatch(PadButton.B);
+        await UntilAsync(() => PadHandlers(router).LastOrDefault() is PadMenu);
+        router.Dispatch(PadButton.B);
+        await add;
+        if (navigation.CurrentPage != page) throw new InvalidOperationException("Wizard Esc exited to the main menu");
+        Log("Esc walks features → species → add menu → box, preserving the storage page");
+    }
 
     private static IEnumerable<VisualElement> Descendants(IVisualTreeElement element)
     {

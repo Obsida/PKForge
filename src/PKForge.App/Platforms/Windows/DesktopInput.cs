@@ -14,6 +14,9 @@ internal static class DesktopInput
         var router = IPlatformApplication.Current?.Services.GetRequiredService<GamepadRouter>();
         root.AddHandler(UIElement.KeyDownEvent, new KeyEventHandler((_, e) =>
         {
+            // Holding Esc must close one level, even if the next overlay opens
+            // before Windows delivers the following repeated key-down event.
+            if (e.Key == VirtualKey.Escape && e.KeyStatus.WasKeyDown) { e.Handled = true; return; }
             var editing = FocusManager.GetFocusedElement(root.XamlRoot) is TextBox or PasswordBox or AutoSuggestBox;
             if (editing && e.Key != VirtualKey.Escape) return;
             if (Map(e.Key) is { } button) e.Handled = router?.Dispatch(button) == true;
