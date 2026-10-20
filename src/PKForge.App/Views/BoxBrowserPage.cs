@@ -525,8 +525,10 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         _editorFocusIndex = 0;
         SetEditorFooter();
         UpdateEditorFocusVisuals();
-        _viewModel.Status = $"Editor focus - {EditorFocusTargets[_editorFocusIndex].Caption} · A use · B box";
+        _viewModel.Status = EditorFocusStatus();
     }
+
+    private string EditorFocusStatus() => $"Редактор: {EditorFocusTargets[_editorFocusIndex].Caption} · {InputHints.Label("A")}: изменить · {InputHints.Label("B")}: к боксам";
 
     private void ExitEditorFocusMode()
     {
@@ -548,7 +550,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             _editorFocusIndex = (_editorFocusIndex + delta + EditorFocusTargets.Length) % EditorFocusTargets.Length;
         }
         UpdateEditorFocusVisuals();
-        _viewModel.Status = $"Editor focus - {EditorFocusTargets[_editorFocusIndex].Caption} · A use · B box";
+        _viewModel.Status = EditorFocusStatus();
     }
 
     private void MoveEditorFocusHorizontal(int delta)
@@ -558,7 +560,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         {
             _editorFocusIndex = delta < 0 ? neighbors.Left : neighbors.Right;
             UpdateEditorFocusVisuals();
-            _viewModel.Status = $"Editor focus - {EditorFocusTargets[_editorFocusIndex].Caption} · A use · B box";
+            _viewModel.Status = EditorFocusStatus();
             return;
         }
 
@@ -777,7 +779,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         // Multi-select marks survive the trip: the box manager can add whole boxes to them.
         if (_selectHeld) { _selectHeld = false; _viewModel.CommitRectangle(); }
         _viewModel.CancelCarry();
-        _viewModel.Status = "Box manager - A hold · L/R browse · Y mark box · X actions";
+        _viewModel.Status = $"Боксы · {InputHints.Label("A")}: взять · {InputHints.Label("LR")}: листать · Y: отметить · X: действия";
         _sidePanel.IsVisible = false;
         _storageContent.ColumnDefinitions[1].Width = new GridLength(0);
         _storageContent.ColumnSpacing = 0;
@@ -848,7 +850,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             _heldBox = target;
             _viewModel.BoxIndex = target;
             _viewModel.RefreshAllSlots();
-            _viewModel.Status = $"Holding box {_heldBox + 1:00} - L/R swap · A drop";
+            _viewModel.Status = $"Взят бокс {_heldBox + 1:00} · {InputHints.Label("LR")}: поменять местами · {InputHints.Label("A")}: поставить";
             _canvas.InvalidateSurface();
             _boxBar.InvalidateSurface();
             _boxNeighbors.InvalidateSurface();
@@ -1193,7 +1195,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         options.Add(new("Назад к перемещению", IconPath: "confirm", Detail: "Завершить множественный выбор."));
 
         var choice = await PadMenu.ShowAsync(_hostGrid, $"Множественный выбор · отмечено: {count}",
-            Note("Marks stay while you change box with L/R."), options.ToArray());
+            Note($"Отметки сохраняются при смене бокса клавишами {InputHints.Label("LR")}."), options.ToArray());
         if (await TryRunBulkAsync(choice))
         {
             _boxBar.InvalidateSurface();
@@ -3561,8 +3563,8 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                     _boxHeld = !_boxHeld;
                     _heldBox = _viewModel.BoxIndex;
                     _viewModel.Status = _boxHeld
-                        ? $"Holding box {_heldBox + 1:00} - L/R swap · A drop"
-                        : "Box manager - A hold · L/R browse · Y mark box · X actions";
+                        ? $"Взят бокс {_heldBox + 1:00} · {InputHints.Label("LR")}: поменять местами · {InputHints.Label("A")}: поставить"
+                        : $"Боксы · {InputHints.Label("A")}: взять · {InputHints.Label("LR")}: листать · Y: отметить · X: действия";
                     SetBoxManageFooter();
                     UpdateBoxManagePulse();
                     _boxBar.InvalidateSurface();
@@ -4475,6 +4477,8 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         var statLines = Enumerable.Range(0, 6)
             .Select(i => FocusBorder(StatLine(i, i % 2 == 0, EditTraining), StatNames[i], () => EditTraining(StatNames[i])))
             .ToArray();
+        var maxIvs = FocusButton(EditorTool(_sessionsFor()?.GetTrainingCaps().IvMax == 15 ? "Max DV" : "Max IV"), "MAX IV");
+        maxIvs.Clicked += (_, _) => MaximizeIvs();
         var ball = FocusBorder(NamedPicker("ПОКЕБОЛ", nameof(BoxBrowserViewModel.EditBall), data.BallNames, BallItems, shaded: true, leading: BallIcon()), "ПОКЕБОЛ", async () => await OpenNamedPickerAsync("ПОКЕБОЛ", nameof(BoxBrowserViewModel.EditBall), BallItems));
         // Gen 1 and 2 Pokémon do not record the ball they were caught in.
         ball.IsVisible = (_sessionsFor()?.Generation ?? 3) >= 3;
@@ -4556,7 +4560,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             "Вид", "ИМЯ ПОКЕМОНА", "ПОЛ", "Шайни", "УРОВЕНЬ",
             "Характер", "СПОСОБНОСТЬ", "Предмет", "ДРУЖБА", "ПОКЕБОЛ", "OT",
             "ПРИЁМ 1", "ПРИЁМ 2", "ПРИЁМ 3", "ПРИЁМ 4",
-            .. StatNames,
+            "MAX IV", .. StatNames,
             "ЛЕГАЛЬНОСТЬ", "СОХРАНИТЬ",
         ];
         EditorFocusTargets = [.. EditorFocusTargets
@@ -4636,6 +4640,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                 EditorSection("Приёмы покемона"),
                 move1, move2, move3, move4,
                 EditorSection("Характеристики"),
+                maxIvs,
             },
         };
         foreach (var line in statLines) panel.Children.Add(line);
@@ -4991,6 +4996,17 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             TrainingPreview(vmProperty == nameof(BoxBrowserViewModel.EditIvs)));
         if (updated is not null)
             SetVmString(vmProperty, string.Join(' ', updated));
+    }
+
+    private void MaximizeIvs()
+    {
+        if (Denied(SaveAction.EditMon)) return;
+        if (_viewModel.OpenSaveIsReadOnly || _viewModel.Selected is not { IsEmpty: false } || _sessionsFor() is not { } session) return;
+        var max = session.GetTrainingCaps().IvMax;
+        SetVmString(nameof(BoxBrowserViewModel.EditIvs), string.Join(' ', Enumerable.Repeat(max, 6)));
+        var preview = NaturePicker.Service?.PreviewSlot(session, _viewModel.BoxIndex, _viewModel.SelectedSlot, PendingOverrides());
+        if (preview is not null) _viewModel.EditStats = string.Join(' ', preview.StatsFor(ParseInt(_viewModel.EditNature) ?? preview.CurrentNature));
+        _viewModel.Status = $"Все {(max == 15 ? "DV" : "IV")} = {max}. Нажми «Сохранить изменения», чтобы применить.";
     }
 
     private static int? ParseInt(string? text) => int.TryParse(text, out var v) ? v : null;
