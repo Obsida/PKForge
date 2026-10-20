@@ -23,6 +23,16 @@ public static class EventGallery
 {
     public static async Task ShowAsync(Grid host, BoxBrowserViewModel viewModel, ISaveEngineSession session, int? targetSlot, Action repaint)
     {
+        try { await ShowCoreAsync(host, viewModel, session, targetSlot, repaint); }
+        catch (Exception error)
+        {
+            AppLog.Error("events", "Opening the gift album failed", error);
+            await PadMenu.ShowAsync(host, "Не удалось открыть события", error.Message, "Закрыть");
+        }
+    }
+
+    private static async Task ShowCoreAsync(Grid host, BoxBrowserViewModel viewModel, ISaveEngineSession session, int? targetSlot, Action repaint)
+    {
         var services = IPlatformApplication.Current?.Services;
         var service = services?.GetService<IEventDatabaseService>();
         if (services is null || service is null) return;
@@ -1368,7 +1378,7 @@ public static class EventGallery
                 if (_variants.Count > 1 && y < strip.Bottom - 4)
                 {
                     var langs = string.Join(" ", _variants.Select(v => v.LanguageTag ?? "?"));
-                    Text(c, Fit(body, $"Copies: {langs}  (L/R)", strip.Width - 20), strip.Left + 10, y, SKTextAlign.Left, body, soft);
+                    Text(c, Fit(body, $"Копии: {langs}  ({InputHints.Label("LR")})", strip.Width - 20), strip.Left + 10, y, SKTextAlign.Left, body, soft);
                 }
             }
         }

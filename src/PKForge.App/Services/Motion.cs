@@ -12,7 +12,9 @@ public sealed class Spring(float value)
     public float Target { get; set; } = value;
     public float Velocity { get; private set; }
 
-    public bool Settled => MathF.Abs(Target - Value) < 0.001f && MathF.Abs(Velocity) < 0.001f;
+    // Subpixel precision is enough for drawing. A 0.001 threshold can be below
+    // float resolution at large scroll offsets and keep repainting forever.
+    public bool Settled => MathF.Abs(Target - Value) < 0.05f && MathF.Abs(Velocity) < 0.05f;
 
     /// <summary>Jumps straight to <paramref name="value"/> with no motion.</summary>
     public void Snap(float value)

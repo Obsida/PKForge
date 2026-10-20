@@ -16,7 +16,13 @@ public sealed class FrameInvalidator(SKCanvasView view)
         // If a repaint is already queued, drop this one: the pending paint will show
         // whatever finished in the meantime. Only the first request schedules work.
         if (Interlocked.Exchange(ref _pending, 1) == 1) return;
+#if WINDOWS
+        // SKXamlCanvas queues its paint on the dispatcher. Requeueing immediately
+        // from every paint can starve input/layout on Windows; pace it to 60 Hz.
+        view.Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(16), () =>
+#else
         MainThread.BeginInvokeOnMainThread(() =>
+#endif
         {
             Interlocked.Exchange(ref _pending, 0);
             view.InvalidateSurface();

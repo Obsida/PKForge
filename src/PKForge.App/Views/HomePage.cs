@@ -1263,6 +1263,16 @@ public sealed class HomePage : ContentPage, IPadHandler
     /// <summary>The events shelf: community collections here, wondercards inside the game.</summary>
     private async Task ShowEventsMenuAsync()
     {
+        try { await ShowEventsCoreAsync(); }
+        catch (Exception error)
+        {
+            AppLog.Error("events", "Opening the event database failed", error);
+            await PadMenu.ShowAsync(_hostGrid, "Не удалось открыть события", error.Message, "Закрыть");
+        }
+    }
+
+    private async Task ShowEventsCoreAsync()
+    {
         var choice = await PadMenu.ShowAsync(_hostGrid, "База событий", null,
             new PadOption($"Боксы сообщества ({Services.CommunityBoxService.RepoTitle})", IconPath: "community",
                 Detail: "Коллекции событийных покемонов для добавления в банк."),

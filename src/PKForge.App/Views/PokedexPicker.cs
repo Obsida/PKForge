@@ -2,7 +2,6 @@ using Microsoft.Maui.Controls.Shapes;
 using PKForge.App.Services;
 using PKForge.App.Theme;
 using PKForge.Domain;
-using SkiaSharp;
 
 namespace PKForge.App.Views;
 
@@ -47,141 +46,17 @@ public sealed class PokedexPicker : IPadHandler
     private Label _powerLabel = null!;
     private Label _themeLabel = null!;
 
-    public static async Task<PickItem?> ShowAsync(Grid host, IGameDataService data, ISaveEngineSession session)
+    public static async Task<PickItem?> ShowAsync(Grid host, IGameDataService data, ISaveEngineSession session, int? currentId = null)
     {
-        // Icon preparation and per-species engine metadata are intentionally
-        // decoupled from opening the picker. The first visit must show the UI
-        // immediately even when the bundled icon cache is cold.
-        _ = EnsureIconsAsync(data);
+        // The canvas draws the shared Showdown sheet directly. Preparing a
+        // second cache of 1000 individually normalized icons only wastes CPU/IO.
         var picker = new PokedexPicker(host);
-        _ = picker.InitializeAsync(data, session);
+        _ = picker.InitializeAsync(data, session, currentId);
         return await picker._result.Task;
-    }
-
-    /// <summary>Set once the cold-cache sweep has run in this process: later picker
-    /// opens must not even rescan the cache directory.</summary>
-    private static bool _iconSweepDone;
-
-    /// <summary>First run copies bundled mini sprites to cache without blocking the
-    /// picker. The sweep is deliberately paced (small chunks with pauses): a cold
-    /// install has ~1000 sprites to decode, pixel-scan, and re-encode, and running
-    /// that at full parallelism starves the UI thread and the offline legalizer -
-    /// the fan-screaming first Create flow. Gentle background work instead.</summary>
-    private static async Task EnsureIconsAsync(IGameDataService data)
-    {
-        if (_iconSweepDone) return;
-        var missing = new List<int>();
-        for (var id = 1; id < data.SpeciesNames.Count; id++)
-        {
-            if (data.SpeciesNames[id].Length > 0 && !File.Exists(IconCachePath(id)))
-                missing.Add(id);
-        }
-        if (missing.Count < 30)
-        {
-            _iconSweepDone = true; // negligible: let them fill lazily
-            return;
-        }
-
-        try
-        {
-            foreach (var chunk in missing.Chunk(8))
-            {
-                await Task.WhenAll(chunk.Select(NormalizeIconAsync)).ConfigureAwait(false);
-                await Task.Delay(60).ConfigureAwait(false); // let the UI and the fan breathe
-            }
-        }
-        catch { /* icon preparation is optional; the picker remains usable without it */ }
-        finally
-        {
-            _iconSweepDone = true;
-        }
-    }
-
-    private static async Task NormalizeIconAsync(int id)
-    {
-        try
-        {
-            var target = IconCachePath(id);
-            Stream asset;
-            try
-            {
-                asset = await FileSystem.OpenAppPackageFileAsync($"sprites/b_{id}.png");
-            }
-            catch (FileNotFoundException)
-            {
-                // Gen 9 has no pixel sprites; PKHeX shows official artwork.
-                asset = await FileSystem.OpenAppPackageFileAsync($"artwork/a_{id}.png");
-            }
-            await using (asset)
-            using (var buffer = new MemoryStream())
-            {
-                await asset.CopyToAsync(buffer).ConfigureAwait(false);
-                var bytes = buffer.ToArray();
-                await Task.Run(() => NormalizeIcon(bytes, target)).ConfigureAwait(false);
-            }
-        }
-        catch { /* no bundled sprite for this id */ }
     }
 
     private static string IconCachePath(int species) =>
         System.IO.Path.Combine(FileSystem.CacheDirectory, $"mini-v2-{species}.png");
-
-    /// <summary>
-    /// Crops transparent padding, scales every species to one visual footprint, then
-    /// anchors it to a shared baseline. Evolution families no longer jump in apparent size.
-    /// </summary>
-    private static void NormalizeIcon(byte[] sourceBytes, string target)
-    {
-        using var bitmap = SKBitmap.Decode(sourceBytes);
-        if (bitmap is null) return;
-
-        var left = bitmap.Width;
-        var top = bitmap.Height;
-        var right = -1;
-        var bottom = -1;
-        var pixels = bitmap.GetPixelSpan();
-        var bpp = bitmap.BytesPerPixel;
-        if (pixels.IsEmpty || bpp < 4)
-            return;
-        for (var y = 0; y < bitmap.Height; y++)
-        {
-            var rowStart = y * bitmap.RowBytes;
-            for (var x = 0; x < bitmap.Width; x++)
-            {
-                if (pixels[rowStart + x * bpp + 3] <= 8) continue;
-                left = Math.Min(left, x);
-                top = Math.Min(top, y);
-                right = Math.Max(right, x);
-                bottom = Math.Max(bottom, y);
-            }
-        }
-        if (right < left || bottom < top) return;
-
-        const int canvasWidth = 72;
-        const int canvasHeight = 58;
-        const float visualWidth = 54;
-        const float visualHeight = 44;
-        var sourceRect = new SKRect(left, top, right + 1, bottom + 1);
-        var scale = Math.Min(visualWidth / sourceRect.Width, visualHeight / sourceRect.Height);
-        var width = MathF.Max(1, MathF.Round(sourceRect.Width * scale));
-        var height = MathF.Max(1, MathF.Round(sourceRect.Height * scale));
-        var xOffset = MathF.Round((canvasWidth - width) / 2f);
-        var baseline = canvasHeight - 5f;
-        var destination = new SKRect(xOffset, baseline - height, xOffset + width, baseline);
-
-        using var normalized = new SKBitmap(canvasWidth, canvasHeight, SKColorType.Rgba8888, SKAlphaType.Premul);
-        using (var canvas = new SKCanvas(normalized))
-        {
-            canvas.Clear(SKColors.Transparent);
-            using var sourceImage = SKImage.FromBitmap(bitmap);
-            canvas.DrawImage(sourceImage, sourceRect, destination,
-                new SKSamplingOptions(SKFilterMode.Nearest, SKMipmapMode.None));
-        }
-        using var image = SKImage.FromBitmap(normalized);
-        using var encoded = image.Encode(SKEncodedImageFormat.Png, 100);
-        using var output = File.Create(target);
-        encoded.SaveTo(output);
-    }
 
     private static List<DexEntry> BuildEntries(IGameDataService data, ISaveEngineSession session)
     {
@@ -251,7 +126,7 @@ public sealed class PokedexPicker : IPadHandler
         var hints = Kit.WindowHints(
             ("A", "Выбрать", () => OnPadButton(PadButton.A)),
             ("B", "Отмена", () => Close(null)),
-            ("LR", "Gen", () => OnPadButton(PadButton.R)),
+            ("LR", "Поколение", () => OnPadButton(PadButton.R)),
             ("X", "Типы", () => _ = ShowTypeFilterMenuAsync()),
             ("+", "Фильтры", () => _ = ShowFilterAxisMenuAsync()),
             ("Y", "Очистить", ClearFilters));
@@ -274,15 +149,16 @@ public sealed class PokedexPicker : IPadHandler
         _router?.Push(this);
     }
 
-    private async Task InitializeAsync(IGameDataService data, ISaveEngineSession session)
+    private async Task InitializeAsync(IGameDataService data, ISaveEngineSession session, int? currentId)
     {
         try
         {
             var entries = await Task.Run(() => BuildEntries(data, session));
             await MainThread.InvokeOnMainThreadAsync(() =>
             {
+                if (_result.Task.IsCompleted) return;
                 _all.AddRange(entries);
-                Refilter();
+                Refilter(currentId);
             });
         }
         catch (Exception error)
@@ -413,7 +289,7 @@ public sealed class PokedexPicker : IPadHandler
     /// <summary>A live capsule showing the current selection of one filter axis.</summary>
     private Border FilterCapsule(string caption, Action open, ref Label valueLabel)
     {
-        valueLabel = new Label { Text = $"{caption}: Any", TextColor = Colors.White, FontSize = UiTokens.TextSmall, FontAttributes = FontAttributes.Bold };
+        valueLabel = new Label { Text = $"{caption}: Любой", TextColor = Colors.White, FontSize = UiTokens.TextSmall, FontAttributes = FontAttributes.Bold };
         var capsule = new Border
         {
             BackgroundColor = UiTokens.MenuBlue,
@@ -477,8 +353,8 @@ public sealed class PokedexPicker : IPadHandler
             "600+ BST" => total >= 600,
             "Физические атакующие" => e.Stats.Atk >= 100 && e.Stats.Atk >= e.Stats.SpA + 15,
             "Специальные атакующие" => e.Stats.SpA >= 100 && e.Stats.SpA >= e.Stats.Atk + 15,
-            "Fast" => e.Stats.Spe >= 100,
-            "Sturdy" => e.Stats.Hp + e.Stats.Def + e.Stats.SpD >= 280,
+            "Быстрые" => e.Stats.Spe >= 100,
+            "Выносливые" => e.Stats.Hp + e.Stats.Def + e.Stats.SpD >= 280,
             _ => true,
         };
     }
@@ -512,12 +388,12 @@ public sealed class PokedexPicker : IPadHandler
         }, TaskScheduler.Default);
     }
 
-    private void Refilter()
+    private void Refilter(int? currentId = null)
     {
         _filtered = ApplyFilters();
-        _index = 0;
+        _index = currentId is { } id ? Math.Max(0, _filtered.FindIndex(e => e.Id == id)) : 0;
         _grid.Show(_filtered.Select(e => e.Id).ToList(), _ => new DexGridView.Look(Seen: true, Caught: false));
-        Highlight(0);
+        Highlight(_index);
     }
 
     public bool OnPadButton(PadButton button)
@@ -564,7 +440,7 @@ public sealed class PokedexPicker : IPadHandler
             .Select(t => (_typeFilters.Contains(t) ? "✓ " : "") + TypeNames[t])
             .Append("Сбросить все фильтры")
             .ToArray();
-        var choice = await PadMenu.ShowAsync(_host, "ФИЛЬТР ПО ТИПУ (переключение)", "A Pokémon must match every checked type.", options);
+        var choice = await PadMenu.ShowAsync(_host, "ФИЛЬТР ПО ТИПУ (переключение)", "Покемон должен соответствовать всем отмеченным типам.", options);
         if (choice is null) return;
         if (choice == "Сбросить все фильтры") { ClearFilters(); return; }
         var name = choice.StartsWith("✓ ", StringComparison.Ordinal) ? choice[2..] : choice;
@@ -576,10 +452,10 @@ public sealed class PokedexPicker : IPadHandler
     private async Task ShowFilterAxisMenuAsync()
     {
         var choice = await PadMenu.ShowAsync(_host, "Фильтры",
-            "Categories, power, and themes combine with the type gems and generation chips.",
-            new PadOption($"Категория: {_category}", IconPath: "type", Detail: "Legendary, starter, fossil, baby and other groups."),
-            new PadOption($"Сила: {_power}", IconPath: "battle", Detail: "Base stat total or battle style, such as fast."),
-            new PadOption($"Тема: {_theme}", IconPath: "filter", Detail: "Fun groups like dragons, birds or dinosaurs."),
+            "Категория, сила и тема сочетаются с фильтрами по типу и поколению.",
+            new PadOption($"Категория: {_category}", IconPath: "type", Detail: "Легендарные, стартовые, ископаемые, малыши и другие группы."),
+            new PadOption($"Сила: {_power}", IconPath: "battle", Detail: "Сумма базовых характеристик или стиль боя: например, быстрые покемоны."),
+            new PadOption($"Тема: {_theme}", IconPath: "filter", Detail: "Тематические группы: драконы, птицы, динозавры и другие."),
             new PadOption("Сбросить все фильтры", IconPath: "clear", Detail: "Также сбрасывает выбор типа и поколения."));
         switch (choice)
         {
@@ -593,7 +469,7 @@ public sealed class PokedexPicker : IPadHandler
     private async Task ShowCategoryMenuAsync()
     {
         var choice = await PadMenu.ShowAsync(_host, "Категория",
-            "Rarity and special families. Combines with types, generation, power, and theme.",
+            "Редкость и особые семейства. Сочетается с фильтрами по типу, поколению, силе и теме.",
             "Любой", "Легендарные", "Мифические", "Ультрачудовища", "Парадоксы", "Псевдолегендарные",
             "Стартовые", "Ископаемые", "Малыши", "Региональная форма", "Способные к мегаэволюции",
             "Способные к гигантамаксу", "Есть другие формы");
@@ -607,7 +483,7 @@ public sealed class PokedexPicker : IPadHandler
     {
         var choice = await PadMenu.ShowAsync(_host, "Сила", null,
             "Любой", "400+ BST", "500+ BST", "600+ BST", "Физические атакующие",
-            "Специальные атакующие", "Fast", "Sturdy");
+            "Специальные атакующие", "Быстрые", "Выносливые");
         if (choice is null) return;
         _power = choice;
         RefreshCapsules();
@@ -616,7 +492,7 @@ public sealed class PokedexPicker : IPadHandler
 
     private async Task ShowThemeMenuAsync()
     {
-        var choice = await PadMenu.ShowAsync(_host, "Тема", "The fun filters. Subjective by design.",
+        var choice = await PadMenu.ShowAsync(_host, "Тема", "Тематические группы покемонов. Состав групп выбран условно.",
             "Любой", "Драконы", "Водные обитатели", "Кошачьи", "Псовые", "Птицы", "Динозавры");
         if (choice is null) return;
         _theme = choice;
@@ -626,6 +502,7 @@ public sealed class PokedexPicker : IPadHandler
 
     private void Close(PickItem? result)
     {
+        _searchDebounce?.Cancel();
         _claim?.Release();
         if (_state is not null) _state.PreviewSpecies = null;
         if (_router is not null) _router.Remove(this);

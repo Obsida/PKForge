@@ -159,7 +159,7 @@ public sealed class PickerMenu : IPadHandler
             VerticalTextAlignment = TextAlignment.Center,
             LineBreakMode = LineBreakMode.TailTruncation,
         };
-        var hintList = new List<(string, string, Action?)> { ("A", "PICK", livePreview is null ? null : PickHighlighted) };
+        var hintList = new List<(string, string, Action?)> { ("A", "Выбрать", livePreview is null ? null : PickHighlighted) };
         if (_hasTypes) hintList.Add(("X", "Тип", () => _ = ChooseTypeAsync()));
         if (filter is not null) hintList.Add(("Y", "Фильтр", ToggleFilter));
         hintList.Add(("B", "Отмена", () => Close(null)));
@@ -335,11 +335,11 @@ public sealed class PickerMenu : IPadHandler
         const string All = "Все типы";
         var types = _all.Where(x => x.TypeId is not null).Select(x => x.TypeId!.Value).Distinct().Order().ToList();
         var options = new List<PadOption> { new(All, IconPath: "all") };
-        options.AddRange(types.Select(t => new PadOption(TypeFacts.Name(t), Glyph: "●", Accent: InfoKit.TypeColor(t))));
-        var choice = await PadMenu.ShowAsync(_host, "Move type", null, [.. options]);
+        options.AddRange(types.Select(t => new PadOption(RussianGameText.TypeName(t), Glyph: "●", Accent: InfoKit.TypeColor(t))));
+        var choice = await PadMenu.ShowAsync(_host, "Тип приёма", null, [.. options]);
         if (choice is null) return;
         var keep = _index >= 0 && _index < _filtered.Count ? _filtered[_index].Id : (int?)null;
-        _typeFilter = choice == All ? null : types.FirstOrDefault(t => TypeFacts.Name(t) == choice, -1) is var found and >= 0 ? found : null;
+        _typeFilter = choice == All ? null : types.FirstOrDefault(t => RussianGameText.TypeName(t) == choice, -1) is var found and >= 0 ? found : null;
         PaintTypeChip();
         Refilter(keep);
     }
@@ -347,7 +347,7 @@ public sealed class PickerMenu : IPadHandler
     private void PaintTypeChip()
     {
         if (_typeChip is null || _typeLabel is null) return;
-        _typeLabel.Text = _typeFilter is { } t ? $"✓ {TypeFacts.Name(t)}" : "Тип: все";
+        _typeLabel.Text = _typeFilter is { } t ? $"✓ {RussianGameText.TypeName(t)}" : "Тип: все";
         Kit.SetTab(_typeChip, _typeFilter is not null, _typeFilter is { } type ? InfoKit.TypeColor(type) : null);
         _typeLabel.TextColor = _typeFilter is not null ? UiTokens.SelectInk : UiTokens.Ink0;
     }
@@ -434,7 +434,7 @@ public sealed class PickerMenu : IPadHandler
     {
         var current = _index >= 0 && _index < _filtered.Count ? _filtered[_index] : null;
         if (current is not null)
-            _preview.Text = _livePreview is null ? $"A picks: {current.Name}" : $"A or tap again picks: {current.Name}";
+            _preview.Text = _livePreview is null ? $"{PKForge.Chrome.InputHints.Label("A")}: {current.Name}" : $"{PKForge.Chrome.InputHints.Label("A")} или повторный щелчок: {current.Name}";
         _livePreview?.OnHighlight(current);
     }
 

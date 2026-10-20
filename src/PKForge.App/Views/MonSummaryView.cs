@@ -746,12 +746,13 @@ public sealed class MonSummaryView : ContentView
         if (s.NatureName is not null && s.Nature is { } nature)
             blocks.Add(Row("Характер", s.NatureName, NatureFacts.IsNeutral(nature) ? "Нейтральный характер: характеристики не повышаются и не понижаются." : NatureFacts.EffectLabel(nature)));
         if (f?.StatNature is { } mint)
-            blocks.Add(Row("Мята", f.StatNatureName ?? $"#{mint}", $"Stats follow it: {(NatureFacts.IsNeutral(mint) ? "neutral" : NatureFacts.EffectLabel(mint))}"));
+            blocks.Add(Row("Мята", f.StatNatureName ?? $"#{mint}", $"Характеристики после мяты: {RussianGameText.NatureEffect(mint)}"));
         if (f?.FormArgument is { } formArgument) blocks.Add(Row("Форма", s.FormName.Length > 0 ? s.FormName : s.SpeciesName, formArgument));
         if (s.IsShiny && f?.Shiny is ShinyKind.Square or ShinyKind.Star)
             blocks.Add(Row("Шайни", f.Shiny == ShinyKind.Square ? "Квадратные искры" : "Звёздные искры"));
         if (s.Characteristic is not null) blocks.Add(Row("Черта", s.Characteristic));
-        if (s.AbilityName is not null) blocks.Add(Row("Способность", s.AbilityName, s.AbilityEffect));
+        if (s.AbilityName is not null) blocks.Add(Row("Способность", s.AbilityName,
+            s.Ability is { } ability ? RussianAbilities.Effect(ability, s.AbilityEffect) : s.AbilityEffect));
         if (blocks.Count == character) blocks.Add(Text("У покемонов поколений 1 и 2 нет характера и способности."));
 
         blocks.Add(Divider("Предметы и уход"));

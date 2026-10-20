@@ -2,12 +2,40 @@
 using PKForge.Engine;
 using PKHeX.Core;
 using System.Reflection;
+using PKForge.Domain;
 using Xunit;
 
 namespace PKForge.Engine.Tests;
 
 public sealed class AddItemProbe
 {
+    [Theory]
+    [InlineData(1)]
+    [InlineData(3)]
+    [InlineData(4)]
+    [InlineData(7)]
+    public void AddingHidesAnItemUntilItIsRemoved(int generation)
+    {
+        using var session = new SaveEngine().OpenBlankSession(generation);
+        var pouch = session.GetBag().First();
+        var names = session.GetItemNames();
+        var legal = session.GetPouchLegalItems(pouch.Name);
+        var initial = BagItemChoices.AvailableToAdd(session.GetBag(), legal, names);
+        var item = initial.First();
+        session.SetItemCount(pouch.Name, item, 5);
+        Assert.DoesNotContain(item, BagItemChoices.AvailableToAdd(session.GetBag(), legal, names));
+        session.SetItemCount(pouch.Name, item, 0);
+        Assert.Contains(item, BagItemChoices.AvailableToAdd(session.GetBag(), legal, names));
+    }
+
+    [Fact]
+    public void AddPickerIgnoresInvalidIdsAndChecksEveryPouch()
+    {
+        BagPouch[] bag = [new("Items", [new(1, 5)]), new("Medicine", [new(2, 1), new(3, 0)])];
+        string[] names = ["None", "Owned", "Owned elsewhere", "Removed", " ", "New"];
+        Assert.Equal([3, 5], BagItemChoices.AvailableToAdd(bag, [-1, 0, 1, 2, 3, 4, 5, 5, 999], names));
+    }
+
     [Theory]
     [InlineData(1)]
     [InlineData(3)]

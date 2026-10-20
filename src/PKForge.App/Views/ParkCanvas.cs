@@ -20,7 +20,15 @@ public sealed class ParkCanvas
     public event Action<SKCanvas, int, int>? Paint;
     public event EventHandler<SKTouchEventArgs>? Touch;
 
-    public static bool UsesGpu => Preferences.Default.Get(RendererKey, "gpu") != "cpu";
+    // The pinned Skia ANGLE backend crashes in eglGetPlatformDisplayEXT on
+    // Windows before a managed exception can be caught. Never create it there,
+    // including when a GPU preference was saved by an earlier build.
+    public static bool UsesGpu =>
+#if WINDOWS
+        false;
+#else
+        Preferences.Default.Get(RendererKey, "gpu") != "cpu";
+#endif
 
     public ParkCanvas()
     {

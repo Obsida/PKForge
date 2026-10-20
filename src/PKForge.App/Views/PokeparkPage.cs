@@ -74,13 +74,13 @@ public sealed class PokeparkPage : ContentPage, IPadHandler, IPadStickHandler
             ("B", "Назад", () => _ = Navigation.PopAsync()),
             ("A", "Познакомиться с покемонами", () => _ = DetailsAsync()),
             // L and R fly the camera from one place of the park to the next.
-            ("LR", "Places", () => FlyToPlace(1)),
+            ("LR", "Места", () => FlyToPlace(1)),
             // Up and Down zoom, for players without a touch screen.
-            ("↑↓", "Zoom", () => _scene.Viewport.Zoom(1)),
-            ("X", "Photo", () => _ = TakePhotoAsync()),
+            ("↑↓", "Масштаб", () => _scene.Viewport.Zoom(1)),
+            ("X", "Фото", () => _ = TakePhotoAsync()),
             ("+", "Параметры", () => _ = OptionsAsync()),
             // − lets the camera follow whatever is happening in the park.
-            ("−", "Spectate", ToggleSpectate)
+            ("−", "Наблюдать", ToggleSpectate)
         };
         var footer = DsChrome.Footer([.. hints]);
         footer.VerticalOptions = LayoutOptions.End;
@@ -400,7 +400,7 @@ public sealed class PokeparkPage : ContentPage, IPadHandler, IPadStickHandler
                 foreach (var story in stories)
                     await PokeparkCardOverlay.ShowDialogueAsync(_host, "While you were away", story.Text);
                 foreach (var (mon, line) in parties)
-                    await PokeparkCardOverlay.ShowDialogueAsync(_host, mon.Name, line, () => _walking.GetPortrait(mon.Species, mon.Form, mon.Shiny, "Счастливый"));
+                    await PokeparkCardOverlay.ShowDialogueAsync(_host, mon.Name, line, () => _walking.GetPortrait(mon.Species, mon.Form, mon.Shiny, "Joyous"));
             }
             finally { _menuOpen = false; RefreshRecent(); }
         });
@@ -484,7 +484,7 @@ public sealed class PokeparkPage : ContentPage, IPadHandler, IPadStickHandler
             _sprites.Warm(mon.Species, mon.Form, mon.Shiny, AssetsLoaded);
             _walking.Warm(mon.Species, mon.Form, mon.Shiny, AssetsLoaded);
             // Portraits for the card and the lower screen, before anyone opens them.
-            foreach (var emotion in new[] { "Обычный", "Радостный", "Счастливый" }) _walking.GetPortrait(mon.Species, mon.Form, mon.Shiny, emotion);
+            foreach (var emotion in new[] { "Normal", "Happy", "Joyous" }) _walking.GetPortrait(mon.Species, mon.Form, mon.Shiny, emotion);
         }
         MarkWidgetDirty();
         _canvas.InvalidateSurface();
@@ -586,8 +586,11 @@ public sealed class PokeparkPage : ContentPage, IPadHandler, IPadStickHandler
                 _ => "Save + Bank"
             };
             var options = new List<string> { "Задачи на сегодня", "Photo album", "Пансион", "Как играть", "Дневник парка", "Время и погода", "Музыка", "Сокровища",
-                "Режим автозаполнения", "Пригласить покемонов", "Очистить парк", "Widget help", "Авторы", _scene.ShowCaptions ? "Подписи: вкл" : "Подписи: выкл",
-                ParkCanvas.UsesGpu ? "Drawing: GPU" : "Drawing: CPU" };
+                "Режим автозаполнения", "Пригласить покемонов", "Очистить парк", "Авторы", _scene.ShowCaptions ? "Подписи: вкл" : "Подписи: выкл" };
+#if ANDROID
+            options.Add("Widget help");
+            options.Add(ParkCanvas.UsesGpu ? "Drawing: GPU" : "Drawing: CPU");
+#endif
 #if DIAGNOSTIC
             // Frame times over the park, for measuring on a device.
             options.Add(_scene.ShowPerformance ? "Hide performance" : "Show performance");
@@ -748,14 +751,14 @@ public sealed class PokeparkPage : ContentPage, IPadHandler, IPadStickHandler
                 {
                     _scene.Life.TakeEgg();
                     var line = _daycare.TakeEgg(taken.Item1, taken.Item2, _treasures.Add);
-                    await PokeparkCardOverlay.ShowDialogueAsync(_host, "Blissey", line, () => _walking.GetPortrait(242, 0, false, "Счастливый"));
+                    await PokeparkCardOverlay.ShowDialogueAsync(_host, "Blissey", line, () => _walking.GetPortrait(242, 0, false, "Joyous"));
                 }
                 else if (choice.StartsWith("Pick up ", StringComparison.Ordinal) && guests.FirstOrDefault(g => choice == $"Pick up {Named(g)}") is { } leaving)
                 {
                     var line = await _daycare.PickUpAsync(leaving);
                     SetGuests();
                     if (_daycare.Egg is null && _scene.Life.Egg is not null) _scene.Life.TakeEgg();
-                    await PokeparkCardOverlay.ShowDialogueAsync(_host, "Blissey", line, () => _walking.GetPortrait(242, 0, false, "Радостный"));
+                    await PokeparkCardOverlay.ShowDialogueAsync(_host, "Blissey", line, () => _walking.GetPortrait(242, 0, false, "Happy"));
                 }
                 else if (choice == "Оставить покемона здесь")
                 {
@@ -766,7 +769,7 @@ public sealed class PokeparkPage : ContentPage, IPadHandler, IPadStickHandler
                     {
                         var line = _daycare.CheckIn(staying);
                         SetGuests();
-                        await PokeparkCardOverlay.ShowDialogueAsync(_host, "Blissey", line, () => _walking.GetPortrait(242, 0, false, "Радостный"));
+                        await PokeparkCardOverlay.ShowDialogueAsync(_host, "Blissey", line, () => _walking.GetPortrait(242, 0, false, "Happy"));
                     }
                 }
                 else if (choice.StartsWith("Write back to saves", StringComparison.Ordinal))
@@ -774,7 +777,7 @@ public sealed class PokeparkPage : ContentPage, IPadHandler, IPadStickHandler
                 else if (choice == "Как работает пансион")
                     await PokeparkCardOverlay.ShowDialogueAsync(_host, "Blissey's daycare",
                         "Leave up to four Pokémon with Blissey. Each one follows its own game's daycare: up to Sun and Moon they gain EXP for every hour they stay; the Nurseries of Sword and Shield, Brilliant Diamond and Shining Pearl, and Scarlet and Violet don't train but can give eggs; Let's Go and Legends have no daycare. Two guests who could breed in their game may leave an egg, which Blissey keeps until you come for it. With writing back on, the EXP goes to the real Pokémon on pick-up and the egg goes to your Bank. The save gets a restore point first, and nothing is written if the Pokémon was changed since you left it.",
-                        () => _walking.GetPortrait(242, 0, false, "Обычный"));
+                        () => _walking.GetPortrait(242, 0, false, "Normal"));
             }
         }
         finally { _menuOpen = false; }
@@ -1012,7 +1015,7 @@ public sealed class PokeparkPage : ContentPage, IPadHandler, IPadStickHandler
             if (reply.Accepted && action == "talk") Deed(ParkDeed.Talked, mon.Id);
             // The Pokémon acts it out above while its line shows below: its own line when it has
             // one (a refusal, a species habit), the usual dialogue otherwise.
-            var emotion = reply.Line is null ? action switch { "relax" => "Обычный", _ => "Радостный" } : reply.Emotion;
+            var emotion = reply.Line is null ? action switch { "relax" => "Normal", _ => "Happy" } : reply.Emotion;
             await PokeparkCardOverlay.ShowDialogueAsync(_host, mon.Name, reply.Line ?? dialogue.Text,
                 () => _walking.GetPortrait(mon.Species, mon.Form, mon.Shiny, emotion));
             SaveCare();
@@ -1030,9 +1033,9 @@ public sealed class PokeparkPage : ContentPage, IPadHandler, IPadStickHandler
         var taste = NatureFacts.FlavorNames[Math.Clamp(flavor, 0, 4)].ToLowerInvariant();
         var (line, emotion) = reply.Line is { } own ? (own, reply.Emotion) : reply.Taste switch
         {
-            > 0 => ($"{mon.Name} gobbles the {berry} Berry and does a little happy dance. {char.ToUpperInvariant(taste[0])}{taste[1..]} things are its favorite!", "Счастливый"),
+            > 0 => ($"{mon.Name} gobbles the {berry} Berry and does a little happy dance. {char.ToUpperInvariant(taste[0])}{taste[1..]} things are its favorite!", "Joyous"),
             < 0 => ($"{mon.Name} takes one bite of the {berry} Berry and makes a face. It stays polite about it, but {taste} flavors are not for it.", "Sigh"),
-            _ => ($"{mon.Name} munches the {berry} Berry happily, down to the last crumb.", "Радостный")
+            _ => ($"{mon.Name} munches the {berry} Berry happily, down to the last crumb.", "Happy")
         };
         await PokeparkCardOverlay.ShowDialogueAsync(_host, mon.Name, line,
             () => _walking.GetPortrait(mon.Species, mon.Form, mon.Shiny, emotion));
@@ -1042,7 +1045,7 @@ public sealed class PokeparkPage : ContentPage, IPadHandler, IPadStickHandler
     private void FlyToPlace(int delta)
     {
         var place = _scene.FlyToRegion(delta);
-        _status.Text = $"{place.Name}  ·  L/R to visit the park's places, A to follow a Pokémon again";
+        _status.Text = $"{place.Name} · {PKForge.Chrome.InputHints.Label("LR")}: сменить место · {PKForge.Chrome.InputHints.Label("A")}: следовать за покемоном";
         if (_active) _canvas.InvalidateSurface();
     }
 
@@ -1305,7 +1308,7 @@ public sealed class PokeparkPage : ContentPage, IPadHandler, IPadStickHandler
     private void BeginThrow(ParkPokemon mon)
     {
         _throwFor = mon.Id;
-        _status.Text = $"Tap where to throw the ball for {mon.Name}  ·  A throws it ahead  ·  B keeps it";
+        _status.Text = $"Щёлкни, куда бросить мяч для {mon.Name} · {PKForge.Chrome.InputHints.Label("A")}: бросить вперёд · {PKForge.Chrome.InputHints.Label("B")}: отмена";
     }
 
     private void Throw(ParkPoint? target)
@@ -1382,7 +1385,7 @@ public sealed class PokeparkPage : ContentPage, IPadHandler, IPadStickHandler
             case "fetch": BeginThrow(mon); return;
             case "dig":
                 _digFor = mon.Id;
-                _status.Text = $"Tap where {mon.Name} should dig  ·  A digs right here  ·  B changes your mind";
+                _status.Text = $"Щёлкни, где {mon.Name} должен копать · {PKForge.Chrome.InputHints.Label("A")}: копать здесь · {PKForge.Chrome.InputHints.Label("B")}: отмена";
                 return;
         }
         var kind = game switch { "hide" => ParkGameKind.HideAndSeek, "race" => ParkGameKind.Race, "spar" => ParkGameKind.Spar, _ => ParkGameKind.Brush };
@@ -1491,7 +1494,7 @@ public sealed class PokeparkPage : ContentPage, IPadHandler, IPadStickHandler
             try
             {
                 await PokeparkCardOverlay.ShowDialogueAsync(_host, host?.Name ?? "Покепарк", result,
-                    host is null ? null : () => _walking.GetPortrait(host.Species, host.Form, host.Shiny, "Счастливый"));
+                    host is null ? null : () => _walking.GetPortrait(host.Species, host.Form, host.Shiny, "Joyous"));
             }
             finally
             {

@@ -16,6 +16,9 @@ public static class MauiProgram
     {
         // First thing: every crash from here on leaves a report the player can share.
         Services.AppLog.Install();
+#if WINDOWS
+        PKForge.Chrome.InputHints.UseKeyboard = true;
+#endif
         var builder = MauiApp.CreateBuilder();
         App.Trace("CreateMauiApp enter");
 #if ANDROID
@@ -32,7 +35,7 @@ public static class MauiProgram
                 fonts.AddFont("NotoSans.ttf", "PixelUI");
             });
         builder.Services.AddSingleton<ISaveEngine, SaveEngine>();
-        builder.Services.AddSingleton<IGameDataService, GameDataService>();
+        builder.Services.AddSingleton<IGameDataService>(_ => new RussianGameDataService(new GameDataService()));
         builder.Services.AddSingleton<TrainerProfileStore>();
         builder.Services.AddSingleton<IGenerationOwnershipSettings>(sp => sp.GetRequiredService<TrainerProfileStore>());
         builder.Services.AddSingleton<ILegalizerService, LegalizerService>();

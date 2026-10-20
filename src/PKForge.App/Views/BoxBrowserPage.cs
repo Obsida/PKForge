@@ -525,8 +525,10 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         _editorFocusIndex = 0;
         SetEditorFooter();
         UpdateEditorFocusVisuals();
-        _viewModel.Status = $"Editor focus - {EditorFocusTargets[_editorFocusIndex].Caption} · A use · B box";
+        _viewModel.Status = EditorFocusStatus();
     }
+
+    private string EditorFocusStatus() => $"Редактор: {EditorFocusTargets[_editorFocusIndex].Caption} · {InputHints.Label("A")}: изменить · {InputHints.Label("B")}: к боксам";
 
     private void ExitEditorFocusMode()
     {
@@ -548,7 +550,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             _editorFocusIndex = (_editorFocusIndex + delta + EditorFocusTargets.Length) % EditorFocusTargets.Length;
         }
         UpdateEditorFocusVisuals();
-        _viewModel.Status = $"Editor focus - {EditorFocusTargets[_editorFocusIndex].Caption} · A use · B box";
+        _viewModel.Status = EditorFocusStatus();
     }
 
     private void MoveEditorFocusHorizontal(int delta)
@@ -558,7 +560,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         {
             _editorFocusIndex = delta < 0 ? neighbors.Left : neighbors.Right;
             UpdateEditorFocusVisuals();
-            _viewModel.Status = $"Editor focus - {EditorFocusTargets[_editorFocusIndex].Caption} · A use · B box";
+            _viewModel.Status = EditorFocusStatus();
             return;
         }
 
@@ -633,11 +635,15 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         // Box-level bulk tools run on the stock engine only: romhack sessions refuse
         // sort/batch ops, so their entries are hidden instead of failing mid-flow.
         var boxTools = _sessionsFor()?.SupportsBoxTools == true;
+        var selectedSlot = Math.Max(0, _viewModel.SelectedSlot);
+        var selectedMon = _sessionsFor()?.ReadEntity(_viewModel.BoxIndex, selectedSlot);
         var options = new List<PadOption>
         {
             new("Множественный выбор (кнопка −)", IconPath: "select", Detail: "Отметить несколько покемонов для общих действий."),
             new("Управление боксами…", IconPath: "box", Detail: "Перестановка, копирование, защита и очистка боксов."),
         };
+        if (selectedMon is { IsEmpty: false } && _viewModel.CarrySource is null)
+            options.Insert(0, new("Удалить покемона", IconPath: "delete", Detail: $"Удалить {selectedMon.Nickname} из сохранения. Создаётся точка восстановления."));
         options.AddRange(Menu(
             Allowed(SaveAction.CreateMon, new("Импорт файлов .pk", IconPath: "import", Detail: "Pick Pokémon files to fill this box's empty slots.")),
             Allowed(SaveAction.CreateMon, new("Импорт команды Showdown", IconPath: "script", Detail: "Paste Showdown sets, see their legality, then place them in empty slots.")),
@@ -670,6 +676,9 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         var choice = await PadMenu.ShowAsync(_hostGrid, "Инструменты хранилища", Note(null), options.ToArray());
         switch (choice)
         {
+            case "Удалить покемона":
+                if (selectedMon is { IsEmpty: false }) await ReleaseSlotAsync(selectedSlot, selectedMon.Nickname);
+                return;
             case "Множественный выбор (кнопка −)":
                 EnterSelectMode();
                 return;
@@ -777,7 +786,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         // Multi-select marks survive the trip: the box manager can add whole boxes to them.
         if (_selectHeld) { _selectHeld = false; _viewModel.CommitRectangle(); }
         _viewModel.CancelCarry();
-        _viewModel.Status = "Box manager - A hold · L/R browse · Y mark box · X actions";
+        _viewModel.Status = $"Боксы · {InputHints.Label("A")}: взять · {InputHints.Label("LR")}: листать · Y: отметить · X: действия";
         _sidePanel.IsVisible = false;
         _storageContent.ColumnDefinitions[1].Width = new GridLength(0);
         _storageContent.ColumnSpacing = 0;
@@ -848,7 +857,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             _heldBox = target;
             _viewModel.BoxIndex = target;
             _viewModel.RefreshAllSlots();
-            _viewModel.Status = $"Holding box {_heldBox + 1:00} - L/R swap · A drop";
+            _viewModel.Status = $"Взят бокс {_heldBox + 1:00} · {InputHints.Label("LR")}: поменять местами · {InputHints.Label("A")}: поставить";
             _canvas.InvalidateSurface();
             _boxBar.InvalidateSurface();
             _boxNeighbors.InvalidateSurface();
@@ -1185,7 +1194,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                 Allowed(SaveAction.Duplicate, new("Копировать в другую игру…", IconPath: "copy", Detail: "Copies join another linked game; the originals stay here.")),
                 Allowed(SaveAction.Duplicate, new("Дублировать", IconPath: "copy", Detail: "Clone the marked Pokémon into the first free box slots.")),
                 new PadOption("Экспорт файлов .pk", IconPath: "export", Detail: "Share each marked Pokémon as its own file."),
-                new PadOption("Выпустить", IconPath: "release")));
+                new PadOption("Удалить выбранных", IconPath: "delete", Detail: "Удалить отмеченных покемонов из сохранения. Создаётся точка восстановления.")));
             options.AddRange(BulkOptions());
         }
         options.Add(new("Отметить покемонов с предметом…", IconPath: "item", Detail: "Find Pokémon holding an item, then mark them or go to one."));
@@ -1193,7 +1202,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         options.Add(new("Назад к перемещению", IconPath: "confirm", Detail: "Завершить множественный выбор."));
 
         var choice = await PadMenu.ShowAsync(_hostGrid, $"Множественный выбор · отмечено: {count}",
-            Note("Marks stay while you change box with L/R."), options.ToArray());
+            Note($"Отметки сохраняются при смене бокса клавишами {InputHints.Label("LR")}."), options.ToArray());
         if (await TryRunBulkAsync(choice))
         {
             _boxBar.InvalidateSurface();
@@ -1257,7 +1266,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                 _viewModel.Status = $"Экспортировано покемонов: {paths.Count}.";
                 break;
             }
-            case "Выпустить":
+            case "Удалить выбранных":
                 await ReleaseSelectionAsync();
                 break;
             case "Управление боксами…":
@@ -1429,9 +1438,9 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                 return;
             }
         }
-        var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Выпустить выбранных?",
-            $"Выпустить отмеченных покемонов ({_viewModel.MarkedCount})? Текущее состояние сохранится в точке восстановления.",
-            "Выпустить всех");
+        var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Удалить выбранных покемонов?",
+            $"Удалить из сохранения отмеченных покемонов ({_viewModel.MarkedCount})? Текущее состояние сохранится в точке восстановления.",
+            "Удалить выбранных");
         if (!confirmed) return;
         await _viewModel.BulkReleaseAsync();
     }
@@ -3011,15 +3020,13 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
 
         private async Task AddItemAsync()
         {
-            await FlushPendingAsync();
+            if (!await FlushPendingAsync()) return;
             var pouchName = _bag[_pouchIndex].Name;
             var gameItems = _itemNames; // the open game's own table
-            var legalIds = _session.GetPouchLegalItems(pouchName)
-                .Where(id => id < gameItems.Count && gameItems[id].Length > 0)
-                .ToList();
+            var legalIds = BagItemChoices.AvailableToAdd(_session.GetBag(), _session.GetPouchLegalItems(pouchName), gameItems);
             if (legalIds.Count == 0)
             {
-                Report($"No addable items in {pouchName} - tap the pouch name to switch");
+                Report("В этом кармане нет новых предметов для добавления. Количество имеющихся можно изменить в рюкзаке.");
                 return;
             }
 
@@ -3033,7 +3040,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                 var cached = System.IO.Path.Combine(itemDirectory, ItemArt.Slug(gameItems[id]) + ".png");
                 return new PickItem(id, gameItems[id], File.Exists(cached) ? cached : placeholder);
             }).ToList();
-            Report($"Adding to {pouchName} - {legal.Count} items");
+            Report($"Доступно новых предметов: {legal.Count}");
             _ = Task.Run(async () =>
             {
                 foreach (var id in legalIds)
@@ -3042,7 +3049,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             PickItem? picked;
             try
             {
-                picked = await PickerMenu.ShowAsync(_host, $"Add - {pouchName}", legal);
+                picked = await PickerMenu.ShowAsync(_host, $"Добавить — {pouchName}", legal);
             }
             catch (Exception ex)
             {
@@ -3561,8 +3568,8 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                     _boxHeld = !_boxHeld;
                     _heldBox = _viewModel.BoxIndex;
                     _viewModel.Status = _boxHeld
-                        ? $"Holding box {_heldBox + 1:00} - L/R swap · A drop"
-                        : "Box manager - A hold · L/R browse · Y mark box · X actions";
+                        ? $"Взят бокс {_heldBox + 1:00} · {InputHints.Label("LR")}: поменять местами · {InputHints.Label("A")}: поставить"
+                        : $"Боксы · {InputHints.Label("A")}: взять · {InputHints.Label("LR")}: листать · Y: отметить · X: действия";
                     SetBoxManageFooter();
                     UpdateBoxManagePulse();
                     _boxBar.InvalidateSurface();
@@ -3606,7 +3613,14 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             case PadButton.R: _viewModel.NextBox(); return true;
             case PadButton.A: return ConfirmCursor();
             case PadButton.B:
+                if (_viewModel.IsBusy) return true;
                 if (_viewModel.CarrySource is not null) { _viewModel.CancelCarry(); _canvas.InvalidateSurface(); return true; }
+                if (_viewModel.SelectedSlot >= 0)
+                {
+                    _viewModel.ClearSelection();
+                    _canvas.InvalidateSurface();
+                    return true;
+                }
                 _ = Navigation.PopAsync();
                 return true;
             case PadButton.X: _ = ShowToolsAsync(); return true;
@@ -3822,7 +3836,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             new PadOption("Показать .pk QR", IconPath: "qr", Detail: "The whole Pokémon as a QR code that PKForge can scan into the Bank."),
             new PadOption("RNG / IV", IconPath: "dice", Detail: "See its PID and IVs, and change its nature without losing shininess."),
             new PadOption("Защита от выпуска", IconPath: "padlock", Detail: "Защищённого покемона нельзя выпустить."),
-            new PadOption("Выпустить", IconPath: "release"),
+            new PadOption("Удалить покемона", IconPath: "delete", Detail: "Удалить из сохранения. Создаётся точка восстановления."),
             new PadOption("Выпустить на волю", IconPath: "release", Detail: "It leaves the save and lives on in the wild lands around the Poképark. It may come back to visit.")));
         var choice = await PadMenu.ShowAsync(_hostGrid, nickname,
             Note(verdict is { Valid: false } ? verdict.Problem : null), options.ToArray());
@@ -3938,7 +3952,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                 _viewModel.Status = locked ? "Покемон защищён от выпуска" : "Защита покемона снята";
                 return;
             }
-            case "Выпустить":
+            case "Удалить покемона":
                 await ReleaseSlotAsync(slot, nickname);
                 return;
             case "Выпустить на волю":
@@ -4303,7 +4317,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             var rng = session.GetRngInfo(_viewModel.BoxIndex, slot);
             if (!Protection.CanRelease(docId, _viewModel.BoxIndex, slot, rng.Pid))
             {
-                _viewModel.Status = $"{nickname} is locked - unlock it first";
+                _viewModel.Status = $"{nickname} защищён от удаления — сначала снимите защиту от выпуска.";
                 return;
             }
         }
@@ -4311,7 +4325,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         Task<bool> Release() => _viewModel.RunMutationAsync(session =>
         {
             session.ReleaseSlot(box, slot);
-            return new GenerationOutcome(true, toWilds ? $"{nickname} went to live in the Wilds." : $"{nickname} выпущен. До встречи!");
+            return new GenerationOutcome(true, toWilds ? $"{nickname} went to live in the Wilds." : $"{nickname} удалён из сохранения.");
         }, slot, action: SaveAction.Release);
         if (toWilds && session is not null && WildFriendOf(session, box, slot) is { } friend)
         {
@@ -4325,9 +4339,9 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             _canvas.InvalidateSurface();
             return;
         }
-        var confirmed = await PadMenu.ConfirmAsync(_hostGrid, "Выпустить?",
-            $"Выпустить {nickname} на волю? Текущее состояние сохранится в точке восстановления.",
-            "Выпустить");
+        var confirmed = await PadMenu.ConfirmAsync(_hostGrid, toWilds ? "Выпустить на волю?" : "Удалить покемона?",
+            $"{(toWilds ? "Выпустить на волю" : "Удалить из сохранения")} {nickname}? Текущее состояние сохранится в точке восстановления.",
+            toWilds ? "Выпустить" : "Удалить");
         if (!confirmed) return;
         await Release();
         _canvas.InvalidateSurface();
@@ -4475,6 +4489,9 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         var statLines = Enumerable.Range(0, 6)
             .Select(i => FocusBorder(StatLine(i, i % 2 == 0, EditTraining), StatNames[i], () => EditTraining(StatNames[i])))
             .ToArray();
+        var maxIvs = FocusButton(EditorTool(_sessionsFor()?.GetTrainingCaps().IvMax == 15 ? "Max DV" : "Max IV"), "MAX IV");
+        if (InputHints.UseKeyboard) { maxIvs.HeightRequest = 40; maxIvs.FontSize = 18; maxIvs.CornerRadius = 8; }
+        maxIvs.Clicked += (_, _) => MaximizeIvs();
         var ball = FocusBorder(NamedPicker("ПОКЕБОЛ", nameof(BoxBrowserViewModel.EditBall), data.BallNames, BallItems, shaded: true, leading: BallIcon()), "ПОКЕБОЛ", async () => await OpenNamedPickerAsync("ПОКЕБОЛ", nameof(BoxBrowserViewModel.EditBall), BallItems));
         // Gen 1 and 2 Pokémon do not record the ball they were caught in.
         ball.IsVisible = (_sessionsFor()?.Generation ?? 3) >= 3;
@@ -4527,6 +4544,39 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         var save = FocusButton(EditorTool("Сохранить изменения", primary: true), "СОХРАНИТЬ");
         save.Margin = new Thickness(Design(28), Design(8), Design(28), Design(8));
         save.SetBinding(Button.CommandProperty, nameof(BoxBrowserViewModel.SaveEditCommand));
+        save.SetBinding(Button.TextProperty, nameof(BoxBrowserViewModel.SaveEditButtonText));
+        var saving = new ActivityIndicator { Color = UiTokens.Cyan, WidthRequest = 24, HeightRequest = 24 };
+        saving.SetBinding(ActivityIndicator.IsRunningProperty, nameof(BoxBrowserViewModel.IsSavingEdit));
+        saving.SetBinding(IsVisibleProperty, nameof(BoxBrowserViewModel.IsSavingEdit));
+        var saveStatus = new Label
+        {
+            FontFamily = DsChrome.PixelFont, FontSize = UiTokens.TextSmall, TextColor = UiTokens.Ink0,
+            LineBreakMode = LineBreakMode.WordWrap, VerticalTextAlignment = TextAlignment.Center,
+        };
+        saveStatus.SetBinding(Label.TextProperty, nameof(BoxBrowserViewModel.EditSaveStatus));
+        var saveFeedback = new Grid
+        {
+            Margin = new Thickness(Design(28), 0, Design(28), 8), ColumnSpacing = 8,
+            ColumnDefinitions = [new(GridLength.Auto), new(GridLength.Star)], Children = { saving, saveStatus },
+        };
+        Grid.SetColumn(saveStatus, 1);
+        var feedbackQueued = false;
+        void RevealSaveFeedback()
+        {
+            if (feedbackQueued) return;
+            feedbackQueued = true;
+            Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(50), () =>
+            {
+                feedbackQueued = false;
+                if (_editorScroll is { } editor)
+                    _ = editor.ScrollToAsync(saveStatus, ScrollToPosition.MakeVisible, false);
+            });
+        }
+        saveStatus.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(Label.Text) && !string.IsNullOrEmpty(saveStatus.Text)) RevealSaveFeedback();
+        };
+        save.Clicked += (_, _) => RevealSaveFeedback();
 
         var met = FocusButton(EditorTool("Встреча / происхождение"), "ВСТРЕЧА / ПРОИСХОЖДЕНИЕ");
         met.Clicked += async (_, _) => await RunSubEditorAsync(MetOriginEditor.ShowAsync, "Данные встречи обновлены");
@@ -4556,7 +4606,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             "Вид", "ИМЯ ПОКЕМОНА", "ПОЛ", "Шайни", "УРОВЕНЬ",
             "Характер", "СПОСОБНОСТЬ", "Предмет", "ДРУЖБА", "ПОКЕБОЛ", "OT",
             "ПРИЁМ 1", "ПРИЁМ 2", "ПРИЁМ 3", "ПРИЁМ 4",
-            .. StatNames,
+            "MAX IV", .. StatNames,
             "ЛЕГАЛЬНОСТЬ", "СОХРАНИТЬ",
         ];
         EditorFocusTargets = [.. EditorFocusTargets
@@ -4636,6 +4686,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
                 EditorSection("Приёмы покемона"),
                 move1, move2, move3, move4,
                 EditorSection("Характеристики"),
+                maxIvs,
             },
         };
         foreach (var line in statLines) panel.Children.Add(line);
@@ -4643,6 +4694,7 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         panel.Children.Add(legalityLine);
         panel.Children.Add(EditorSection("Инструменты"));
         panel.Children.Add(save);
+        panel.Children.Add(saveFeedback);
         panel.Children.Add(monActions);
         return panel;
     }
@@ -4991,6 +5043,17 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
             TrainingPreview(vmProperty == nameof(BoxBrowserViewModel.EditIvs)));
         if (updated is not null)
             SetVmString(vmProperty, string.Join(' ', updated));
+    }
+
+    private void MaximizeIvs()
+    {
+        if (Denied(SaveAction.EditMon)) return;
+        if (_viewModel.OpenSaveIsReadOnly || _viewModel.Selected is not { IsEmpty: false } || _sessionsFor() is not { } session) return;
+        var max = session.GetTrainingCaps().IvMax;
+        SetVmString(nameof(BoxBrowserViewModel.EditIvs), string.Join(' ', Enumerable.Repeat(max, 6)));
+        var preview = NaturePicker.Service?.PreviewSlot(session, _viewModel.BoxIndex, _viewModel.SelectedSlot, PendingOverrides());
+        if (preview is not null) _viewModel.EditStats = string.Join(' ', preview.StatsFor(ParseInt(_viewModel.EditNature) ?? preview.CurrentNature));
+        _viewModel.Status = $"Все {(max == 15 ? "DV" : "IV")} = {max}. Нажми «Сохранить изменения», чтобы применить.";
     }
 
     private static int? ParseInt(string? text) => int.TryParse(text, out var v) ? v : null;
@@ -5444,60 +5507,63 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         // Every way in this sheet fabricates a Pokémon, so Hardcore mode refuses the
         // whole sheet - with the reason on screen instead of an empty menu.
         if (await DeniedAsync(SaveAction.CreateMon)) return;
-        var choice = await PadMenu.ShowAsync(_hostGrid, $"Добавить покемона · ячейка {slot + 1}", null,
-            new PadOption("Создать покемона", IconPath: "create", Detail: "Выбери вид и параметры. Покемон будет создан легальным для этой игры."),
-            new PadOption("Вставить набор Showdown", IconPath: "script", Detail: "Turn a Showdown set into a legal Pokémon in this slot."),
-            new PadOption("Импорт файла .pk", IconPath: "import", Detail: "Load a Pokémon file into this slot."),
-            new PadOption("From event database", IconPath: "events", Detail: "Put a Mystery Gift Pokémon in this slot."));
-        switch (choice)
+        while (true)
         {
-            case "Создать покемона":
-                await RunGenerateWizardAsync(slot);
-                return;
-            case "Вставить набор Showdown":
-                await RunShowdownPasteAsync(slot);
-                return;
-            case "Импорт файла .pk":
+            var choice = await PadMenu.ShowAsync(_hostGrid, $"Добавить покемона · ячейка {slot + 1}", null,
+                new PadOption("Создать покемона", IconPath: "create", Detail: "Выбери вид и параметры. Покемон будет создан легальным для этой игры."),
+                new PadOption("Вставить набор Showdown", IconPath: "script", Detail: "Turn a Showdown set into a legal Pokémon in this slot."),
+                new PadOption("Импорт файла .pk", IconPath: "import", Detail: "Load a Pokémon file into this slot."),
+                new PadOption("From event database", IconPath: "events", Detail: "Put a Mystery Gift Pokémon in this slot."));
+            switch (choice)
             {
-                var picker = IPlatformApplication.Current?.Services.GetService<IDocumentPicker>();
-                var access = IPlatformApplication.Current?.Services.GetService<ISaveFileAccess>();
-                if (picker is null || access is null) return;
-                var document = await picker.PickSaveAsync();
-                if (document is null) return;
-                var bytes = (await access.ReadAsync(document.DocumentId)).ToArray();
-                await _viewModel.RunMutationAsync(session =>
-                    session.ImportSlot(_viewModel.BoxIndex, slot, bytes, document.DisplayName) // extension names the format
-                        ? new GenerationOutcome(true, $"Импортировано: {document.DisplayName}.")
-                        : new GenerationOutcome(false, "Файл не распознан как покемон."), slot, action: SaveAction.CreateMon);
-                _canvas.InvalidateSurface();
-                return;
+                case "Создать покемона":
+                    if (await RunGenerateWizardAsync(slot)) return;
+                    break;
+                case "Вставить набор Showdown":
+                    if (await RunShowdownPasteAsync(slot)) return;
+                    break;
+                case "Импорт файла .pk":
+                {
+                    var picker = IPlatformApplication.Current?.Services.GetService<IDocumentPicker>();
+                    var access = IPlatformApplication.Current?.Services.GetService<ISaveFileAccess>();
+                    if (picker is null || access is null) return;
+                    var document = await picker.PickSaveAsync();
+                    if (document is null) continue;
+                    var bytes = (await access.ReadAsync(document.DocumentId)).ToArray();
+                    await _viewModel.RunMutationAsync(session =>
+                        session.ImportSlot(_viewModel.BoxIndex, slot, bytes, document.DisplayName) // extension names the format
+                            ? new GenerationOutcome(true, $"Импортировано: {document.DisplayName}.")
+                            : new GenerationOutcome(false, "Файл не распознан как покемон."), slot, action: SaveAction.CreateMon);
+                    _canvas.InvalidateSurface();
+                    return;
+                }
+                case "From event database":
+                {
+                    var session = _sessionsFor();
+                    if (session is null) return;
+                    await EventGallery.ShowAsync(_hostGrid, _viewModel, session, slot, () => _canvas.InvalidateSurface());
+                    return;
+                }
+                default:
+                    return;
             }
-            case "From event database":
-            {
-                var session = _sessionsFor();
-                if (session is null) return;
-                await EventGallery.ShowAsync(_hostGrid, _viewModel, session, slot, () => _canvas.InvalidateSurface());
-                return;
-            }
-            default:
-                return;
         }
     }
 
     /// <summary>Step-by-step creation: species → features → offline legalizer → into the slot.</summary>
-    private async Task RunGenerateWizardAsync(int slot)
+    private async Task<bool> RunGenerateWizardAsync(int slot)
     {
-        if (Denied(SaveAction.CreateMon)) return;
+        if (Denied(SaveAction.CreateMon)) return false;
         var services = IPlatformApplication.Current!.Services;
         var data = services.GetRequiredService<IGameDataService>();
         var session = services.GetRequiredService<ISaveSessionService>().CurrentSession;
-        if (session is null) return;
+        if (session is null) return false;
 
         var request = await GenerateWizard.RunAsync(_hostGrid, data, session);
-        if (request is null) return;
+        if (request is null) return false;
 
         var overlay = LoadingOverlay.Show(_hostGrid, "СОЗДАНИЕ ПОКЕМОНА…",
-            "The offline legalizer is finding a real, legal way for this Pokémon to exist.");
+            "Подбирается легальный вариант покемона для текущей игры.");
         try
         {
             await _viewModel.RunLegalizerAsync((legalizer, s) => legalizer.Generate(s, _viewModel.BoxIndex, slot, request), slot);
@@ -5507,15 +5573,16 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         {
             overlay.Close();
         }
+        return true;
     }
 
     /// <summary>Paste a competitive set; the legalizer turns it into a legal mon in the slot.</summary>
-    private async Task RunShowdownPasteAsync(int slot)
+    private async Task<bool> RunShowdownPasteAsync(int slot)
     {
-        if (Denied(SaveAction.CreateMon)) return;
+        if (Denied(SaveAction.CreateMon)) return false;
         var text = await TextPopup.ShowAsync(_hostGrid, "Вставить набор Showdown",
             "Вставь набор в формате экспорта Pokémon Showdown.");
-        if (string.IsNullOrWhiteSpace(text)) return;
+        if (string.IsNullOrWhiteSpace(text)) return false;
 
         var overlay = LoadingOverlay.Show(_hostGrid, "Чтение набора…",
             "The offline legalizer is building a legal Pokémon from your set.");
@@ -5528,5 +5595,6 @@ public sealed partial class BoxBrowserPage : ContentPage, IPadPagingHandler, IPa
         {
             overlay.Close();
         }
+        return true;
     }
 }

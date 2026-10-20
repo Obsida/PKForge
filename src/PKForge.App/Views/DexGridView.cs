@@ -26,6 +26,9 @@ public sealed class DexGridView : SKCanvasView
     private const float CellWidth = 150, CellHeight = 150, HeaderHeight = 96, Inset = 40, IconScale = 3.4f;
 
     private readonly ISpriteService _sprites;
+    private readonly FrameInvalidator _frame;
+    private SKBitmap? _sheetBitmap;
+    private SKImage? _sheetImage;
     private IReadOnlyList<int> _ids = [];
     private Func<int, Look> _lookOf = _ => default;
     private Func<DexRegions.Region, string?> _sectionNote = _ => null;
@@ -49,12 +52,20 @@ public sealed class DexGridView : SKCanvasView
     public DexGridView(ISpriteService sprites)
     {
         _sprites = sprites;
+        _frame = new FrameInvalidator(this);
         EnableTouchEvents = true;
         PaintSurface += OnPaint;
         Touch += OnTouch;
         // Drag, flick with momentum, and a thumb you can grab, in canvas pixels.
         _scroller = new TouchScroller(Dispatcher, () => _scroll, ScrollTo, () => MaxScroll, () => CanvasSize.Height, Track,
             slop: 10 * _unit, grabWidth: 40 * _unit);
+        Unloaded += (_, _) =>
+        {
+            _scroller.Cancel();
+            _sheetImage?.Dispose();
+            _sheetImage = null;
+            _sheetBitmap = null;
+        };
     }
 
     /// <summary>The scrollbar's track along the right edge, in canvas pixels.</summary>
@@ -77,12 +88,13 @@ public sealed class DexGridView : SKCanvasView
         _identify = identify ?? (key => (key, 0));
         _cursor = Math.Clamp(_cursor, 0, Math.Max(0, ids.Count - 1));
         _laidOutWidth = -1;
+        _scroller.Cancel();
         _scroll = 0;
-        InvalidateSurface();
+        _frame.Request();
     }
 
     /// <summary>Repaints after the looks changed (a species cycled, a tick toggled).</summary>
-    public void Refresh() => InvalidateSurface();
+    public void Refresh() => _frame.Request();
 
     /// <summary>Moves the cursor by pad direction: left/right one species, up/down one row.</summary>
     public void Move(int dx, int dy)
@@ -127,12 +139,13 @@ public sealed class DexGridView : SKCanvasView
     public void SetCursor(int index, bool alignSection = false)
     {
         if (_ids.Count == 0) return;
+        _scroller.Stop();
         _cursor = Math.Clamp(index, 0, _ids.Count - 1);
         EnsureLayout();
         if (alignSection && _sections.FindLast(s => s.FirstIndex <= _cursor) is { Band.Height: > 0 } section) ScrollTo(section.Band.Top);
         else EnsureVisible();
         CursorChanged?.Invoke(_cursor);
-        InvalidateSurface();
+        _frame.Request();
     }
 
     // ── Layout ───────────────────────────────────────────────────────────────
@@ -178,7 +191,7 @@ public sealed class DexGridView : SKCanvasView
     private void ScrollTo(float y)
     {
         _scroll = Math.Clamp(y, 0, MaxScroll);
-        InvalidateSurface();
+        _frame.Request();
     }
 
     private void EnsureVisible()
@@ -216,7 +229,6 @@ public sealed class DexGridView : SKCanvasView
             EditorPaint.PaintSection(c, band, title, PixelFont.Face, _unit * 34f / 30f);
         }
 
-        void Redraw() => MainThread.BeginInvokeOnMainThread(InvalidateSurface);
         using var number = new SKFont(PixelFont.Face, 24 * _unit);
         using var numberInk = new SKPaint { Color = ColorTheme.Current.DexNumber, IsAntialias = true };
         using var silhouette = new SKPaint { ColorFilter = SKColorFilter.CreateBlendMode(ColorTheme.Current.Silhouette, SKBlendMode.SrcIn) };
@@ -240,13 +252,22 @@ public sealed class DexGridView : SKCanvasView
             var spriteLook = new SpriteLook(species, form, look.Shiny);
             SKImage? art = null;
             SKRect src = default, dest = default;
-            if (!_sprites.TryGetShowdownIcon(spriteLook, Redraw, out var sheet, out var source)) { }
+            var disposeArt = false;
+            if (!_sprites.TryGetShowdownIcon(spriteLook, _frame.Request, out var sheet, out var source)) { }
             else if (sheet is not null)
             {
                 var w = 40 * IconScale * _unit;
                 var h = 30 * IconScale * _unit;
                 dest = new SKRect(cell.MidX - w / 2, ground - h - lift, cell.MidX + w / 2, ground - lift);
-                art = SKImage.FromBitmap(sheet);
+                // All these cells share one sheet. Reuse its immutable image rather
+                // than snapshotting the entire sheet for every visible Pokémon.
+                if (!ReferenceEquals(sheet, _sheetBitmap))
+                {
+                    _sheetImage?.Dispose();
+                    _sheetBitmap = sheet;
+                    _sheetImage = SKImage.FromBitmap(sheet);
+                }
+                art = _sheetImage;
                 src = SKRect.Create(source.Left, source.Top, source.Width, source.Height);
             }
             else if (_sprites.GetSprite(spriteLook) is { } sprite)
@@ -256,9 +277,10 @@ public sealed class DexGridView : SKCanvasView
                 var fit = Math.Min(box / sprite.Width, box / sprite.Height);
                 dest = new SKRect(cell.MidX - sprite.Width * fit / 2, ground - sprite.Height * fit - lift, cell.MidX + sprite.Width * fit / 2, ground - lift);
                 art = SKImage.FromBitmap(sprite);
+                disposeArt = true;
                 src = SKRect.Create(0, 0, sprite.Width, sprite.Height);
             }
-            else _sprites.Warm(spriteLook, Redraw);
+            else _sprites.Warm(spriteLook, _frame.Request);
             if (art is not null)
             {
                 // Unseen: the Pokédex's silhouette. Dimmed: not picked while choosing.
@@ -270,7 +292,7 @@ public sealed class DexGridView : SKCanvasView
                     c.Restore();
                 }
                 else c.DrawImage(art, src, dest, sampling, null);
-                art.Dispose();
+                if (disposeArt) art.Dispose();
             }
             c.DrawText($"{species:000}", cell.MidX, ground + 24 * _unit, SKTextAlign.Center, number, numberInk);
 
@@ -331,8 +353,13 @@ public sealed class DexGridView : SKCanvasView
     {
         args.Handled = true;
         EnsureLayout();
+        if (args.ActionType == SKTouchAction.WheelChanged)
+        {
+            _scroller.ScrollBy(-args.WheelDelta * _unit);
+            return;
+        }
         if (_scroller.Handle(args.ActionType, args.Location) is { } tap) TapAt(tap);
-        else if (args.ActionType is SKTouchAction.Pressed or SKTouchAction.Released) InvalidateSurface();
+        else if (args.ActionType is SKTouchAction.Pressed or SKTouchAction.Released) _frame.Request();
     }
 
     private void TapAt(SKPoint location)
@@ -342,7 +369,7 @@ public sealed class DexGridView : SKCanvasView
         if (index < 0) return;
         _cursor = index;
         CursorChanged?.Invoke(index);
-        InvalidateSurface();
+        _frame.Request();
         Tapped?.Invoke(index);
     }
 }

@@ -436,7 +436,7 @@ public static class BankEntryEditor
             _rows["species"].Value = NameOf(_data.SpeciesNames, d.Species);
             _rows["level"].Value = d.Level.ToString();
             _rows["nature"].Value = _session.Generation <= 2 ? "none (Gen 1/2)"
-                : $"{NameOf(_data.NatureNames, d.Nature)}  {NatureFacts.EffectLabel(d.Nature)}";
+                : $"{NameOf(_data.NatureNames, d.Nature)}  {RussianGameText.NatureEffect(d.Nature)}";
             _rows["ability"].Value = NameOf(_data.AbilityNames, d.Ability);
             _rows["item"].Value = d.HeldItem == 0 ? "none" : NameOf(_data.ItemNames, d.HeldItem);
             _rows["ball"].Value = NameOf(_data.BallNames, d.Ball);
@@ -594,7 +594,10 @@ public static class BankEntryEditor
             var choices = (Services.HaXMode.IsOn
                     ? Enumerable.Range(0, _data.AbilityNames.Count).ToList()
                     : _session.GetAbilityChoices(_detail.Species, _detail.Form))
-                .Select(id => new PickItem(id, NameOf(_data.AbilityNames, id))).ToList();
+                .Select(id => new PickItem(id, NameOf(_data.AbilityNames, id), Detail: RussianAbilities.Effect(id, DexFacts.Ability(id)))
+                {
+                    Keywords = RussianAbilities.EnglishName(id),
+                }).ToList();
             var pick = await PickerMenu.ShowAsync(_host, "Способность", choices, _detail.Ability);
             if (pick is not null)
             {

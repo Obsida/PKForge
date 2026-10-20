@@ -8,7 +8,9 @@ public sealed class App : Application
     protected override void OnSleep()
     {
         Suspended?.Invoke();
+#if ANDROID
         Music?.PauseForBackground();
+#endif
         base.OnSleep();
     }
 
@@ -30,7 +32,9 @@ public sealed class App : Application
     protected override void OnResume()
     {
         base.OnResume();
+#if ANDROID
         Music?.ResumeFromBackground();
+#endif
         Resumed?.Invoke();
     }
 
@@ -68,6 +72,10 @@ public sealed class App : Application
     private static NavigationPage CreateRoot(IServiceProvider services)
     {
         Trace("resolving HomePage");
+#if WINDOWS && DIAGNOSTIC
+        if (Environment.GetEnvironmentVariable("PKFORGE_SMOKE") is { Length: > 0 })
+            services.GetRequiredService<ViewModels.SavePickerViewModel>().CompleteSetup();
+#endif
         var page = services.GetRequiredService<Views.HomePage>();
         Trace("HomePage resolved");
         return new NavigationPage(page)
@@ -110,6 +118,9 @@ public sealed class App : Application
             var window = new Window(CreateRoot(services)) { Title = "PKForge RU", Width = 1280, Height = 800, MinimumWidth = 960, MinimumHeight = 640 };
 #if WINDOWS
             window.Created += (_, _) => Platforms.Windows.DesktopInput.Attach(window);
+#if DIAGNOSTIC
+            window.Activated += (_, _) => Platforms.Windows.DesktopSmoke.Start(window);
+#endif
 #endif
             return window;
         }

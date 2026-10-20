@@ -27,6 +27,13 @@ public sealed class ThemePicker : IPadPagingHandler
     private int _cursor;
     private int _columns = 4;
     private float _density = 1;
+    private float _maxScroll;
+    private float _rowHeight = 120;
+    private SKRect _viewport;
+    private SKPoint? _press;
+    private float _pressScroll;
+    private bool _dragged;
+    private bool _revealCursor = true;
     private readonly List<(SKRect Rect, int Index)> _hits = [];
     private (SKRect Rect, PadButton Button)[] _hintHits = [];
 
@@ -56,6 +63,8 @@ public sealed class ThemePicker : IPadPagingHandler
             case PadButton.Right: Move(_cursor + 1); return true;
             case PadButton.Up: Move(_cursor >= _columns ? _cursor - _columns : _cursor); return true;
             case PadButton.Down: Move(Math.Min(_themes.Count - 1, _cursor + _columns)); return true;
+            case PadButton.L: Move(_cursor - PageSize); return true;
+            case PadButton.R: Move(_cursor + PageSize); return true;
             case PadButton.A: Close(_themes[_cursor]); return true;
             case PadButton.B: Close(null); return true;
             default: return true;
@@ -65,6 +74,16 @@ public sealed class ThemePicker : IPadPagingHandler
     private void Move(int index)
     {
         _cursor = Math.Clamp(index, 0, _themes.Count - 1);
+        _revealCursor = true;
+        _pacer.Kick();
+    }
+
+    private int PageSize => _columns * Math.Max(1, (int)(_viewport.Height / _rowHeight));
+
+    private void ScrollBy(float pixels)
+    {
+        _revealCursor = false;
+        _scroll.Target = Math.Clamp(_scroll.Target + pixels, 0, _maxScroll);
         _pacer.Kick();
     }
 
@@ -78,7 +97,34 @@ public sealed class ThemePicker : IPadPagingHandler
     private void Touch(object? sender, SKTouchEventArgs args)
     {
         args.Handled = true;
+        if (args.ActionType == SKTouchAction.WheelChanged)
+        {
+            ScrollBy(-args.WheelDelta / 120f * _rowHeight * 0.65f);
+            return;
+        }
+        if (args.ActionType == SKTouchAction.Pressed)
+        {
+            _press = _viewport.Contains(args.Location) ? args.Location : null;
+            _pressScroll = _scroll.Value;
+            _dragged = false;
+            return;
+        }
+        if (args.ActionType == SKTouchAction.Moved && _press is { } start)
+        {
+            var delta = args.Location.Y - start.Y;
+            if (Math.Abs(delta) > 6 * _density) _dragged = true;
+            if (_dragged)
+            {
+                _revealCursor = false;
+                _scroll.Snap(Math.Clamp(_pressScroll - delta, 0, _maxScroll));
+                _pacer.Kick();
+            }
+            return;
+        }
+        if (args.ActionType == SKTouchAction.Cancelled) { _press = null; return; }
         if (args.ActionType != SKTouchAction.Released) return;
+        _press = null;
+        if (_dragged) { _dragged = false; return; }
         // Touch locations arrive in canvas pixels, like the tile rects.
         var point = args.Location;
         foreach (var (rect, button) in _hintHits)
@@ -89,7 +135,7 @@ public sealed class ThemePicker : IPadPagingHandler
         }
         foreach (var (rect, index) in _hits)
         {
-            if (!rect.Contains(point)) continue;
+            if (!_viewport.Contains(point) || !rect.Contains(point)) continue;
             if (index == _cursor) Close(_themes[index]);
             else Move(index);
             return;
@@ -111,20 +157,26 @@ public sealed class ThemePicker : IPadPagingHandler
         PksmPaint.CenterText(canvas, "Цветовая тема", 16 * _density, 24 * _density, title, ColorTheme.Current.Bright, Pksm.LogoVoid);
 
         var hint = 40 * _density;
-        var area = new SKRect(0, 44 * _density, info.Width, info.Height - hint);
+        var area = _viewport = new SKRect(0, 44 * _density, info.Width, info.Height - hint);
         var gap = 12 * _density;
         var caption = 22 * _density;
         var tileW = (area.Width - gap * (_columns + 1)) / _columns;
         var tileH = tileW * TileAspect;
-        var rowH = tileH + caption + gap;
+        var rowH = _rowHeight = tileH + caption + gap;
         var rows = (_themes.Count + _columns - 1) / _columns;
 
-        // Scroll so the cursor's row stays in view.
+        // Only keyboard selection follows the cursor. Wheel/drag must be free to
+        // browse other rows without snapping back to the selected theme.
         var cursorTop = _cursor / _columns * rowH;
         var top = _scroll.Target;
-        if (cursorTop < top) top = cursorTop;
-        else if (cursorTop + rowH > top + area.Height) top = cursorTop + rowH - area.Height + gap;
-        _scroll.Target = Math.Clamp(top, 0, Math.Max(0, rows * rowH + gap - area.Height));
+        if (_revealCursor)
+        {
+            if (cursorTop < top) top = cursorTop;
+            else if (cursorTop + rowH > top + area.Height) top = cursorTop + rowH - area.Height + gap;
+            _revealCursor = false;
+        }
+        _maxScroll = Math.Max(0, rows * rowH + gap - area.Height);
+        _scroll.Target = Math.Clamp(top, 0, _maxScroll);
         var offset = area.Top + gap * 0.5f - _scroll.Value;
 
         canvas.Save();
@@ -144,12 +196,19 @@ public sealed class ThemePicker : IPadPagingHandler
                 IsAntialias = true,
             };
             canvas.DrawRoundRect(tile, tileH * 0.04f, tileH * 0.04f, border);
-            var name = theme.Id == _currentId ? $"{theme.Name} (in use)" : theme.Name;
+            var name = theme.Id == _currentId ? $"{theme.Name} (выбрана)" : theme.Name;
             PksmPaint.CenterText(canvas, name, tile.MidX, tile.Bottom + caption * 0.6f, small,
                 i == _cursor ? Pksm.ShinyGold : ColorTheme.Current.Bright, SKColors.Black, SKTextAlign.Center);
             _hits.Add((SKRect.Create(tile.Left, tile.Top, tile.Width, tile.Height + caption), i));
         }
         canvas.Restore();
+        if (_maxScroll > 0)
+        {
+            var thumbHeight = Math.Max(24 * _density, area.Height * area.Height / (area.Height + _maxScroll));
+            var y = area.Top + (area.Height - thumbHeight) * Math.Clamp(_scroll.Value / _maxScroll, 0, 1);
+            using var thumb = new SKPaint { Color = ColorTheme.Current.Bright.WithAlpha(160), IsAntialias = true };
+            canvas.DrawRoundRect(info.Width - 6 * _density, y, 3 * _density, thumbHeight, _density, _density, thumb);
+        }
 
         var hintBar = new SKRect(0, info.Height - hint, info.Width, info.Height);
         (string, string)[] prompts = [("A", "Выбрать"), ("B", "Отмена")];

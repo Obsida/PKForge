@@ -185,7 +185,7 @@ public sealed class DexEntryView : SKCanvasView
             {
                 if (y > height - 80) break;
                 var name = (uint)ability.Id < (uint)_abilityNames.Count ? _abilityNames[ability.Id] : $"#{ability.Id}";
-                Row(ability.Slot == "Hidden" ? "Hidden" : $"Ячейка {ability.Slot}", name, ability.Slot == "Hidden" ? Pksm.ShinyGold : null);
+                Row(ability.Slot == "Hidden" ? "Скрытая" : $"Ячейка {ability.Slot}", name, ability.Slot == "Hidden" ? Pksm.ShinyGold : null);
             }
             if (card.Gender is { } gender && y <= height - 80)
                 SummaryInk.Draw(c, SummaryInk.Fit(gender.Label, 30, right - left - 20), (left + right) / 2, SummaryInk.Center(y + 30, 30), 30, SubInk, align: SKTextAlign.Center);

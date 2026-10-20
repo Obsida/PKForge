@@ -45,6 +45,10 @@ public partial class BoxBrowserViewModel : ObservableObject, IBoxPager
     [ObservableProperty] private int _selectedSlot = -1;
     [ObservableProperty] private string _status = "НЕТ ХРАНИЛИЩА — ПОДКЛЮЧИ СОХРАНЕНИЕ";
     [ObservableProperty] private bool _isBusy;
+    [ObservableProperty] private bool _isSavingEdit;
+    [ObservableProperty] private string _editSaveStatus = "";
+    public string SaveEditButtonText => IsSavingEdit ? "Сохранение…" : "Сохранить изменения";
+    partial void OnIsSavingEditChanged(bool value) => OnPropertyChanged(nameof(SaveEditButtonText));
 
     // Structured connection facts for the blueprint chips (never merged into one status blob).
     [ObservableProperty] private string _connectedName = "";
@@ -130,6 +134,14 @@ public partial class BoxBrowserViewModel : ObservableObject, IBoxPager
         }
     }
 
+    public void ClearSelection()
+    {
+        SelectedSlot = -1;
+        Selected = null;
+        LegalityChecks = null;
+        LegalityText = LegalityBadge = EditSaveStatus = "";
+    }
+
     public void SelectSlot(int slot)
     {
         if (Save is null) return;
@@ -210,7 +222,7 @@ public partial class BoxBrowserViewModel : ObservableObject, IBoxPager
         // session field by field), so it carries the same Hardcore guard itself.
         if (HardcoreMode.Blocks(SaveAction.EditMon, out var hardcoreStatus))
         {
-            Status = hardcoreStatus;
+            EditSaveStatus = Status = hardcoreStatus;
             return;
         }
         var engineSession = _sessions.CurrentSession;
@@ -218,13 +230,15 @@ public partial class BoxBrowserViewModel : ObservableObject, IBoxPager
         var detail = Selected;
         if (engineSession is null || session is null || detail is null || detail.IsEmpty)
         {
-            Status = "Нет изменений для сохранения.";
+            EditSaveStatus = Status = "Нет изменений для сохранения.";
             return;
         }
 
         try
         {
             IsBusy = true;
+            IsSavingEdit = true;
+            EditSaveStatus = "Сохранение изменений…";
             var edit = new EntityEdit(
                 Species: ParseInt(EditSpecies),
                 Nickname: EditNickname.Length == 0 ? null : EditNickname,
@@ -245,13 +259,16 @@ public partial class BoxBrowserViewModel : ObservableObject, IBoxPager
                 Gender: ParseInt(EditGender));
 
             Status = "Применение изменений…";
-            engineSession.ApplyEdit(detail.Box, detail.Slot, edit);
-            var candidate = engineSession.Serialize();
+            var candidate = await Task.Run(() =>
+            {
+                engineSession.ApplyEdit(detail.Box, detail.Slot, edit);
+                return engineSession.Serialize();
+            });
 
-            Status = "Проверка, резервное копирование, запись…";
-            var receipt = await _writer.WriteScopedAsync(session.Document.DocumentId, session.Snapshot, candidate,
+            EditSaveStatus = Status = "Проверка, резервное копирование, запись…";
+            var receipt = await Task.Run(() => _writer.WriteScopedAsync(session.Document.DocumentId, session.Snapshot, candidate,
                 WriteScope.Only(new SlotRef(detail.Box, detail.Slot)),
-                $"Edit {EditorSubject(detail)} ({SlotLabel(detail.Box, detail.Slot)})");
+                $"Edit {EditorSubject(detail)} ({SlotLabel(detail.Box, detail.Slot)})").AsTask());
             if (receipt.Changed)
             {
                 _sessions.MarkWritten(session.Document.DocumentId, candidate);
@@ -268,18 +285,19 @@ public partial class BoxBrowserViewModel : ObservableObject, IBoxPager
             OnPropertyChanged(nameof(VisibleSlots));
             SelectSlot(detail.Slot);
 
-            Status = receipt.Changed
+            EditSaveStatus = Status = receipt.Changed
                 ? $"Сохранено. Точка восстановления {ShortBackupId(receipt)} · {receipt.WrittenSha256[..8]}…"
                 : "Изменений нет. Запись и резервная копия не требуются.";
         }
         catch (Exception error)
         {
             DiscardPartialEdits();
-            Status = $"Запись отменена: {error.Message}";
+            EditSaveStatus = Status = $"Не удалось сохранить: {error.Message}";
         }
         finally
         {
             IsBusy = false;
+            IsSavingEdit = false;
         }
     }
 
@@ -464,12 +482,12 @@ public partial class BoxBrowserViewModel : ObservableObject, IBoxPager
                 return false;
             }
 
-            var candidate = engineSession.Serialize();
+            var candidate = await Task.Run(engineSession.Serialize);
             SaveWriteReceipt receipt;
             try
             {
-                receipt = await _writer.WriteAsync(session.Document.DocumentId, session.Snapshot, candidate,
-                    changeDescription ?? outcome.Message);
+                receipt = await Task.Run(() => _writer.WriteAsync(session.Document.DocumentId, session.Snapshot, candidate,
+                    changeDescription ?? outcome.Message).AsTask());
             }
             catch (UnsafeSaveWriteException refused) when (refused.RequiresConfirmation && ConfirmHackRisk is { } confirm)
             {
@@ -477,8 +495,8 @@ public partial class BoxBrowserViewModel : ObservableObject, IBoxPager
                 // player takes the risk. The restore point is still made before writing.
                 if (!await confirm(refused.Message)) throw;
                 AcceptHackRisk();
-                receipt = await _writer.WriteAsync(session.Document.DocumentId, session.Snapshot, candidate,
-                    changeDescription ?? outcome.Message);
+                receipt = await Task.Run(() => _writer.WriteAsync(session.Document.DocumentId, session.Snapshot, candidate,
+                    changeDescription ?? outcome.Message).AsTask());
             }
             if (receipt.Changed)
             {

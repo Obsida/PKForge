@@ -428,6 +428,9 @@ public static class DsChrome
 
         var batt = new Border
         {
+#if WINDOWS
+            IsVisible = false,
+#endif
             WidthRequest = 22, HeightRequest = 12, StrokeThickness = 2, Stroke = UiTokens.InkSoft,
             StrokeShape = new RoundRectangle { CornerRadius = 2 }, HorizontalOptions = LayoutOptions.End, VerticalOptions = LayoutOptions.Center,
             Content = new BoxView { Color = UiTokens.Green, Margin = new Thickness(1, 1, 6, 1) },
