@@ -15,6 +15,15 @@ internal static class WindowsPickerOwner
 
 public sealed class WindowsDocumentPicker : IDocumentPicker
 {
+    internal static async Task<IReadOnlyList<PickedDocument>> PickMusicAsync()
+    {
+        var picker = new FileOpenPicker { SuggestedStartLocation = PickerLocationId.MusicLibrary };
+        foreach (var extension in new[] { ".mp3", ".wav", ".m4a", ".aac", ".flac", ".wma", ".ogg" })
+            picker.FileTypeFilter.Add(extension);
+        WindowsPickerOwner.Initialize(picker);
+        var files = await picker.PickMultipleFilesAsync();
+        return files.Select(file => new PickedDocument(file.Path, file.Name)).ToArray();
+    }
     private static FileOpenPicker Create()
     {
         var picker = new FileOpenPicker { SuggestedStartLocation = PickerLocationId.DocumentsLibrary };
