@@ -29,6 +29,8 @@
     <ApplicationManifest>Platforms/Windows/app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(DiagnosticBuild)' == 'true'">
+    <!-- MAUI's unpackaged Windows data path is based on the assembly name. -->
+    <AssemblyName Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">PKForge.Diagnostics</AssemblyName>
     <!-- Diagnostic builds install beside production and cannot overwrite its app-private data. -->
     <ApplicationId>org.pkforge.app.debug</ApplicationId>
     <ApplicationTitle>PKForge Diagnostics</ApplicationTitle>
